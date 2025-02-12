@@ -19,6 +19,7 @@ package org.holodeckb2b.common.testhelpers;
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
@@ -26,11 +27,13 @@ import java.util.UUID;
 import javax.xml.namespace.QName;
 
 import org.apache.axiom.om.OMElement;
+import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.common.pmode.Leg;
 import org.holodeckb2b.common.pmode.PMode;
 import org.holodeckb2b.common.pmode.Protocol;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.general.IProperty;
+import org.holodeckb2b.interfaces.messagemodel.IPayload.Containment;
 import org.holodeckb2b.interfaces.pmode.ILeg.Label;
 
 /**
@@ -110,6 +113,14 @@ public class HB2BTestUtils {
 		return pmode;
 	}
 
+	public static Payload createPayload() {
+		Payload payload = new Payload();
+		payload.setPayloadURI(UUID.randomUUID().toString());
+		payload.setContainment(Containment.ATTACHMENT);
+		payload.setMimeType("text/plain");
+		payload.setContentStream(new ByteArrayInputStream("Very simple test payload".getBytes()));
+		return payload;
+	}
 
     /**
      * Asserts the content of the given streams is equal.

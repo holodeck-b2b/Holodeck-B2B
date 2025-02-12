@@ -25,57 +25,75 @@ import org.apache.wss4j.dom.handler.RequestData;
 import org.apache.wss4j.dom.validate.Credential;
 import org.apache.wss4j.dom.validate.Validator;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.pmode.ISigningConfiguration;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
+import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
 import org.holodeckb2b.interfaces.security.trust.IValidationResult;
 import org.holodeckb2b.interfaces.security.trust.IValidationResult.Trust;
 
 /**
- * Is a WSS4J <code>Validator</code> that uses the <i>Certificate Manager</i>v to verify the trust in the certificate(s) 
- * used in a signature. The WSS4J signature processor extracts the certificate(s) from the WS-Security header and 
+ * Is a WSS4J <code>Validator</code> that uses the <i>Certificate Manager</i>v to verify the trust in the certificate(s)
+ * used in a signature. The WSS4J signature processor extracts the certificate(s) from the WS-Security header and
  * provides it/them to this validator.
- * <p>The validator stores there result reported by the <i>Certificate Manager</i> so it can be retrieved by the 
- * security header processor to create a complete result. 
- * 
+ * <p>The validator stores there result reported by the <i>Certificate Manager</i> so it can be retrieved by the
+ * security header processor to create a complete result.
+ *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 5.0.0
+ * @since 8.0.0 Uses the configuration based trust validation if the <i>Certificate Manager</i> supports it
  */
 public class SignatureTrustValidator implements Validator {
-	
+	/*
+	 * The <code>ISigningConfiguration</code> of the sender of the message which will be provided to the <i>Certificate
+	 * Manager</i> to perform the trust validation (only in case this is supported by the <i>Certificate Manager</i>).
+	 */
+	private ISigningConfiguration signatureConfig;
+	/*
+	 * Holds the result of the trust validation check as executed by the <i>Certificate Manager</i>.
+	 */
 	private IValidationResult	trustCheckResult = null;
-	
+
+	SignatureTrustValidator(ISigningConfiguration signatureConfig) {
+		this.signatureConfig = signatureConfig;
+	}
+
 	/**
 	 * Validates the certificate (path) used in the WS-Security signature using the installed <i>Certificate Manager</i>.
-	 * 
+	 *
      * @param credential 	the Credential to be validated, MUST contain at least one certificate
      * @param data 			the RequestData associated with signature verification
      * @throws WSSecurityException When the given credential cannot be validated. This happens when it isn't trusted by
      * 							   the Certificate Manager, when no certificates were present or some other processing
-     * 							   error occurs.  
+     * 							   error occurs.
 	 */
 	@Override
 	public Credential validate(Credential credential, RequestData data) throws WSSecurityException {
         X509Certificate[] certs = credential.getCertificates();
-        
+
         if (certs == null || certs.length == 0)
         	throw new WSSecurityException(ErrorCode.UNSUPPORTED_SECURITY_TOKEN);
-        
+
         // Use the installed Certificate Manager to perform the validation and store the result for future use
+        ICertificateManager certManager = HolodeckB2BCoreInterface.getCertificateManager();
         try {
-			trustCheckResult = HolodeckB2BCoreInterface.getCertificateManager().validateTrust(Arrays.asList(certs));			
+        	if (certManager.supportsConfigBasedValidation() && signatureConfig != null)
+        		trustCheckResult = certManager.validateMlsCertificate(Arrays.asList(certs), signatureConfig);
+        	else
+        		trustCheckResult = certManager.validateMlsCertificate(Arrays.asList(certs));
 		} catch (SecurityProcessingException e) {
 			throw new WSSecurityException(ErrorCode.FAILED_CHECK);
 		}
-        
-        // Check if the certificate (path) was trusted, if not throw exception to signal to WSS4J 
-        if (trustCheckResult.getTrust() == Trust.NOK) 
+
+        // Check if the certificate (path) was trusted, if not throw exception to signal to WSS4J
+        if (trustCheckResult.getTrust() == Trust.NOK)
         	throw new WSSecurityException(ErrorCode.FAILED_AUTHENTICATION);
 
         return credential;
 	}
 
 	/**
-	 * Gets the result of the trust validation check as executed by the <i>Certificate Manager</i>. 
-	 * 
+	 * Gets the result of the trust validation check as executed by the <i>Certificate Manager</i>.
+	 *
 	 * @return	The trust validation results
 	 */
 	public IValidationResult getValidationResult() {

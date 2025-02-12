@@ -16,10 +16,15 @@
  */
 package org.holodeckb2b.ebms3.handlers.outflow;
 
+import org.apache.axis2.Constants;
+import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handlers.AbstractConfigureHTTPTransport;
+import org.holodeckb2b.core.pmode.PModeUtils;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
+import org.holodeckb2b.interfaces.messagemodel.IPayload.Containment;
 import org.holodeckb2b.interfaces.messagemodel.IReceipt;
+import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
 
@@ -33,7 +38,11 @@ import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
 public class ConfigureHTTPTransportHandler extends AbstractConfigureHTTPTransport {
 
 	@Override
-	protected String getDestinationURL(IMessageUnitEntity msgToSend, ILeg leg, IMessageProcessingContext procCtx) {
+	protected String getDestinationURL(IMessageUnitEntity msgToSend, IMessageProcessingContext procCtx) {
+		ILeg leg = PModeUtils.getLeg(msgToSend);
+		if (leg == null)
+			return null;
+
         String destURL = null;
         try {
             // If the message to send is a Receipt or Error signal we first check if they have a specific URL defined,
@@ -53,4 +62,19 @@ public class ConfigureHTTPTransportHandler extends AbstractConfigureHTTPTranspor
 
         return destURL;
     }
+
+	@Override
+	protected void prepareHttp(IMessageUnitEntity msgToSend, IMessageProcessingContext procCtx) {
+		MessageContext messageContext = procCtx.getParentContext();
+        // Disable use of SOAP Action (=> will result in empty SOAPAction http header for SOAP 1.1)
+    	messageContext.setProperty(Constants.Configuration.DISABLE_SOAP_ACTION, "true");
+
+    	// If the primary message unit is not a User Message or does not contain any attachments we can disable SwA
+    	IMessageUnitEntity primary = procCtx.getPrimaryMessageUnit();
+        boolean hasAttachments = primary != null && (primary instanceof IUserMessage) &&
+        							((IUserMessage) primary).getPayloads() != null &&
+        							((IUserMessage) primary).getPayloads().stream()
+								  						  .anyMatch(p -> p.getContainment() == Containment.ATTACHMENT);
+        messageContext.setProperty(Constants.Configuration.ENABLE_SWA, hasAttachments);
+	}
 }

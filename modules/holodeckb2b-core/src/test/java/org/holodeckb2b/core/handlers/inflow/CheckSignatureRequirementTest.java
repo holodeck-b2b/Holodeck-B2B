@@ -46,18 +46,16 @@ import org.holodeckb2b.interfaces.security.ISignatureProcessingResult;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
-@RunWith(MockitoJUnitRunner.class)
+//@RunWith(MockitoJUnitRunner.class)
 public class CheckSignatureRequirementTest {
-	
+
 	private PMode pmode;
 	private MessageContext mc;
-	
+
     @BeforeClass
     public static void setUpClass() throws Exception {
         HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore());
@@ -70,21 +68,21 @@ public class CheckSignatureRequirementTest {
         PartnerConfig senderCfg = new PartnerConfig();
         senderCfg.setSecurityConfiguration(new SecurityConfig());
         pmode.setInitiator(senderCfg);
-    	
+
         HolodeckB2BCore.getPModeSet().add(pmode);
 
         UserMessage userMessage = new UserMessage();
         userMessage.setMessageId(MessageIdUtils.createMessageId());
         userMessage.setPModeId(pmode.getId());
-    	
+
     	mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
         mc.setServerSide(true);
-        
+
         IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(HolodeckB2BCore.getStorageManager().storeReceivedMessageUnit(userMessage));
     }
-    
+
     @Test
     public void testNoRequiredSigning() throws Exception {
         try {
@@ -98,10 +96,10 @@ public class CheckSignatureRequirementTest {
 
     @Test
     public void testSigned() throws Exception {
-    	
-    	pmode.getInitiator().getSecurityConfiguration().setSignatureConfiguration(new SigningConfig());    	 
-    	
-    	IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);    	
+
+    	pmode.getInitiator().getSecurityConfiguration().setSignatureConfiguration(new SigningConfig());
+
+    	IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         ISignatureProcessingResult  signatureResult = mock(ISignatureProcessingResult.class);
         procCtx.addSecurityProcessingResult(signatureResult);
 
@@ -110,28 +108,28 @@ public class CheckSignatureRequirementTest {
         } catch (AxisFault e) {
             fail("Unexpected exception: " + e.getClass().getSimpleName() + "/" + e.getMessage());
         }
-        
+
         assertTrue(Utils.isNullOrEmpty(procCtx.getGeneratedErrors()));
     }
 
     @Test
     public void testNotSigned() throws Exception {
-    	
+
     	SecurityConfig secCfg = new SecurityConfig();
     	secCfg.setSignatureConfiguration(new SigningConfig());
     	pmode.getInitiator().setSecurityConfiguration(secCfg);
-    	
+
         try {
         	new CheckSignatureRequirement().invoke(mc);
         } catch (AxisFault e) {
             fail("Unexpected exception: " + e.getClass().getSimpleName() + "/" + e.getMessage());
         }
-        
-        Map<String, Collection<IEbmsError>> generatedErrors = 
+
+        Map<String, Collection<IEbmsError>> generatedErrors =
         										MessageProcessingContext.getFromMessageContext(mc).getGeneratedErrors();
-        
+
         assertFalse(Utils.isNullOrEmpty(generatedErrors));
-        assertEquals(PolicyNoncompliance.ERROR_CODE, 
+        assertEquals(PolicyNoncompliance.ERROR_CODE,
         								generatedErrors.values().iterator().next().iterator().next().getErrorCode());
     }
 

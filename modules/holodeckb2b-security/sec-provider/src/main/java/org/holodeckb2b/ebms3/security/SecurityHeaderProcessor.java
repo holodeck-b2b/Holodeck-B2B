@@ -166,16 +166,10 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
 
         Collection<ISecurityProcessingResult> results = new ArrayList<>();
         log.debug("Prepare WSS4J context for processing of the security headers");
-        RequestData reqData = prepare();
+        RequestData reqData = prepare(senderConfig, receiverConfig);
         //
         // First process the default header
         //
-        // Configure access to the private key for decryption
-        final IEncryptionConfiguration encConfig = receiverConfig != null ? receiverConfig.getEncryptionConfiguration()
-                                                                          : null;
-        if (encConfig != null)
-            ((PasswordCallbackHandler) reqData.getCallbackHandler()).addUser(encConfig.getKeystoreAlias().toLowerCase(),
-                                                                             encConfig.getCertificatePassword());
         try {
             log.debug("Process the default WS-Security header");
             results.addAll(processSecurityHeader(SecurityHeaderTarget.DEFAULT, reqData));
@@ -238,11 +232,14 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
     /**
      * Prepares the WSS4J context for processing of the WS-Security headers.
      *
-     * @return          A correctly configured {@link RequestData} instance
+     * @param senderConfig 		the {@link ISecurityConfiguration} for the sender of the message
+     * @param receiverConfig 	the {@link ISecurityConfiguration} for the receiver of the message
+     * @return A correctly configured {@link RequestData} instance
      * @throws SecurityProcessingException When the WSS4J context cannot be created because a Crypto engine cannot be
      *                                     loaded
      */
-    private RequestData prepare() throws SecurityProcessingException {
+    private RequestData prepare(ISecurityConfiguration senderConfig, ISecurityConfiguration receiverConfig)
+    																				throws SecurityProcessingException {
         final RequestData reqData = new RequestData();
 
         final WSSConfig wssConfig = WSSConfig.getNewInstance();
@@ -268,12 +265,19 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
 
         // Configure signature verification action
         reqData.setSigVerCrypto(new CertManWSS4JCrypto(Action.VERIFY));
-        wssConfig.setValidator(WSConstants.SIGNATURE, new SignatureTrustValidator());
+        wssConfig.setValidator(WSConstants.SIGNATURE,
+				new SignatureTrustValidator(senderConfig != null ? senderConfig.getSignatureConfiguration() : null));
         reqData.setEnableRevocation(false);
         reqData.setEnableSignatureConfirmation(false);
         // Configure decryption action
         reqData.setDecCrypto(new CertManWSS4JCrypto(Action.DECRYPT));
-        reqData.setCallbackHandler(new PasswordCallbackHandler());
+        // Configure access to the private key for decryption
+        PasswordCallbackHandler pwcb = new PasswordCallbackHandler();
+        final IEncryptionConfiguration encConfig = receiverConfig != null ? receiverConfig.getEncryptionConfiguration()
+                                                                          : null;
+        if (encConfig != null)
+            pwcb.addUser(encConfig.getKeystoreAlias().toLowerCase(), encConfig.getCertificatePassword());
+        reqData.setCallbackHandler(pwcb);
         reqData.setAllowRSA15KeyTransportAlgorithm(false);
         reqData.setRequireSignedEncryptedDataElements(false);
 

@@ -16,6 +16,8 @@
  */
 package org.holodeckb2b.security.trust;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -24,6 +26,7 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PublicKey;
 import java.security.Security;
 import java.security.UnrecoverableEntryException;
@@ -40,6 +43,7 @@ import java.security.cert.PKIXParameters;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -52,9 +56,11 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.stream.StreamSource;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.holodeckb2b.common.VersionInfo;
 import org.holodeckb2b.commons.security.CertificateUtils;
 import org.holodeckb2b.commons.security.KeystoreUtils;
@@ -70,26 +76,32 @@ import org.holodeckb2b.security.trust.config.PasswordType;
 
 /**
  * Is the default implementation of the {@link ICertificateManager} which manages the storage of private keys and
- * certificates needed for the processing of the message level security.
- * <p>The certificate manager uses three JKS key stores to store the different type of certificates:<ol>
- * <li>Holding the key pairs used for signing and decrypting messages. Note that a key pair may need to contain more
- * than one certificate if a certificate chain needs to be included in a signature.</li>
+ * certificates needed for the processing of both the transport and message level security. It <b>does not</b> support
+ * configuration based trust validation.
+ * <p>
+ * The certificate manager uses three JKS key stores to store the different type of certificates:<ol>
+ * <li>Holding the key pairs used for signing and decrypting messages and for TLS client authentication. Note that a key
+ * pair may need to contain more than one certificate if a certificate chain needs to be included in a signature.</li>
  * <li>Holding the trading partner certificates with public keys used for encryption of messages and identification.
  * This means that the certificates in this key store are also used to find the signing certificate when a received
  * message only includes a reference to the certificate, e.g. a Serial Number or SKI.</li>
- * <li>Holding "trust anchors" used for trust validation of certificates used to sign messages. Normally these are the
- * certificates of trusted Certificate Authorities. Certificates on a certificate path are checked up to the first trust
- * anchor found, i.e. for path [<i>c<sub>0</sub></i>, <i>c<sub>1</sub></i>] with <i>c<sub>1</sub></i> registered as
- * trust anchor, it is checked that <i>c<sub>0</sub></i> is issued by <i>c<sub>1</sub></i> and is valid.</li></ol>
- * <p>The location and passwords of the key stores are managed in the <code>certmanager_config.xml</code> configuration
+ * <li>Holding "trust anchors" used for trust validation of certificates used to sign messages and by the server during
+ * the TLS handshake. Normally these are the certificates of trusted Certificate Authorities. Certificates on a
+ * certificate path are checked up to the first trust anchor found, i.e. for path [<i>c<sub>0</sub></i>,
+ * <i>c<sub>1</sub></i>] with <i>c<sub>1</sub></i> registered as trust anchor, it is checked that <i>c<sub>0</sub></i>
+ * is issued by <i>c<sub>1</sub></i> and is valid.</li></ol>
+ * <p>
+ * The location and passwords of the key stores are managed in the <code>certmanager_config.xml</code> configuration
  * file that must be stored in the <code>conf</code> directory of the Holodeck B2B installation. The structure of the
  * configuration file is defined by the XSD with namespace "http://holodeck-b2b.org/schemas/2019/09/config/certmanager"
  * which can be found in <a href="../xsd/certmanager.xsd">certmanager.xsd</a>.
- * <p>The trading partner certificates are by default not used during trust validation. However it can be useful in an
+ * <p>
+ * The trading partner certificates are by default not used during trust validation. However it can be useful in an
  * environment to directly trust the certificates of the trading partner (for example if there is just one). For this
  * the <i>direct trust</i> configuration setting is available in which case the trading partner certificates are handled
  * like trust anchors.
- * <p>Another feature of this Certificate Manager is the option to perform a revocation check using OCSP on
+ * <p>
+ * Another feature of this Certificate Manager is the option to perform a revocation check using OCSP on
  * certificates. This check is disabled by default for back-ward compatibility and can be enabled in the configuration.
  * Note however that when enabled and used in an environment where certificates don't provide OSCP information this will
  * result in a lot of {@link ISignatureVerifiedWithWarning} events as the revocation check could not be executed.
@@ -97,6 +109,7 @@ import org.holodeckb2b.security.trust.config.PasswordType;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 5.0.0	This class replaces the certificate manager implementation part of the <i>default Security
  * 			Provider</i> in version 4.x (<code>org.holodeckb2b.security.CertificateManager</code>)
+ * @since 8.0.0 Added support for handling key pairs and certificates used in transport level security
  */
 public class DefaultCertManager implements ICertificateManager {
 
@@ -156,13 +169,12 @@ public class DefaultCertManager implements ICertificateManager {
     public void init(final IConfiguration config) throws SecurityProcessingException {
     	final Path hb2bHome = config.getHolodeckB2BHome();
         final Path cfgFilePath = hb2bHome.resolve("conf/certmanager_config.xml");
-        try {
+        try (FileInputStream fis = new FileInputStream(cfgFilePath.toFile())) {
             log.debug("Reading configuration file at {}", cfgFilePath.toString());
             JAXBContext jaxbContext = JAXBContext.newInstance("org.holodeckb2b.security.trust.config");
             Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
             JAXBElement<CertManagerConfigurationType> rootConfigElement =
-                                        (JAXBElement<CertManagerConfigurationType>) jaxbUnmarshaller.unmarshal(
-                                        														cfgFilePath.toFile());
+            					jaxbUnmarshaller.unmarshal(new StreamSource(fis), CertManagerConfigurationType.class);
             CertManagerConfigurationType certMgrConfig = rootConfigElement.getValue();
             // Check revocation check and direct trust parameters
             performRevocationCheck = certMgrConfig.isPerformRevocationCheck() == null ? false :
@@ -178,7 +190,7 @@ public class DefaultCertManager implements ICertificateManager {
             trustKeystorePath = ensureAbsolutePath(certMgrConfig.getKeystores().getTrustedCertificates().getPath(),
             										hb2bHome);
             trustKeystorePwd = getPassword(certMgrConfig.getKeystores().getTrustedCertificates().getPassword());
-        } catch (JAXBException | NullPointerException e) {
+        } catch (JAXBException | NullPointerException | IOException e) {
             log.error("Problem reading the configuration file [{}]! Details: {}", cfgFilePath, e.getMessage());
             throw new SecurityProcessingException("Configuration file not available or invalid!");
         }
@@ -189,6 +201,8 @@ public class DefaultCertManager implements ICertificateManager {
         	log.fatal("One or more of the configured key stores are not available!");
         	throw new SecurityProcessingException("Invalid configuration!");
         }
+        // We enable OCSP by default, even if revocation checking is disabled
+        Security.setProperty("ocsp.enable", "true");
 
         if (log.isDebugEnabled()) {
             StringBuilder logMsg = new StringBuilder("Completed initialisation of the Default Certificate Manager:\n");
@@ -330,6 +344,20 @@ public class DefaultCertManager implements ICertificateManager {
     }
 
     @Override
+    public Collection<X509Certificate> getAllTlsCACertificates() throws SecurityProcessingException {
+    	try {
+    		KeyStore ks = KeystoreUtils.load(trustKeystorePath, trustKeystorePwd);
+    		Collection<X509Certificate> certs = new ArrayList<>();
+    		for (Enumeration<String> aliases = ks.aliases(); aliases.hasMoreElements();)
+	    		certs.add((X509Certificate) ks.getCertificate(aliases.nextElement()));
+    		return certs;
+    	} catch (KeyStoreException kse) {
+	    	log.error("Could not access the trust keystore! Error details: {}", kse.getMessage());
+	    	throw new SecurityProcessingException("Unable to get trust certificates", kse);
+    	}
+    }
+
+    @Override
     public String findCertificate(final X509Certificate cert) throws SecurityProcessingException {
     	try {
     		return findEntry(KeystoreUtils.load(partnerKeystorePath, partnerKeystorePwd), c -> c.equals(cert));
@@ -402,8 +430,24 @@ public class DefaultCertManager implements ICertificateManager {
     	boolean matches(X509Certificate c);
     }
 
-	@Override
-	public IValidationResult validateTrust(List<X509Certificate> certs) throws SecurityProcessingException {
+    @Override
+    public IValidationResult validateMlsCertificate(List<X509Certificate> certs) throws SecurityProcessingException {
+    	return validateTrust(certs);
+    }
+
+    @Override
+    public IValidationResult validateTlsCertificate(List<X509Certificate> certs) throws SecurityProcessingException {
+    	return validateTrust(certs);
+    }
+
+    /**
+     * Helper method to perform the actual trust validation of a certificate chain.
+     *
+     * @param certs	the certificate chain to validate
+     * @return	An instance of {@link IValidationResult} describing the validation result
+     * @throws SecurityProcessingException when an error occurs during the validation process
+     */
+	private IValidationResult validateTrust(List<X509Certificate> certs) throws SecurityProcessingException {
 		if (Utils.isNullOrEmpty(certs)) {
 			log.error("Cannot validate an empty certificate path!");
 			throw new SecurityProcessingException("Empty certificate path");
@@ -417,13 +461,13 @@ public class DefaultCertManager implements ICertificateManager {
 				StringBuilder sb = new StringBuilder("Validate trust in cert path: Leaf cert for Subject: ");
 				sb.append(certs.get(0).getSubjectDN().getName());
 				for (int i = 1; i < certs.size(); i++)
-					sb.append("\n\tNext :").append(certs.get(i).getSubjectDN().getName());
+					sb.append("\n\tNext: ").append(certs.get(i).getSubjectDN().getName());
 				log.debug(sb.toString());
 			}
 		}
 
 		log.trace("Create the set of trust anchors");
-		final Set<TrustAnchor> trustAnchors = new HashSet<TrustAnchor>();
+		Set<TrustAnchor> trustAnchors = new HashSet<TrustAnchor>();
 		trustAnchors.addAll(getTrustAnchorsFromKeyStore(trustKeystorePath, trustKeystorePwd));
 		if (enableDirectTrust) {
 			log.debug("Direct trust in partner certificates is enabled, add as trust anchors");
@@ -433,12 +477,12 @@ public class DefaultCertManager implements ICertificateManager {
 		log.trace("Calculate cert path to validate (i.e. find first trust anchor)");
 		// We only validate the given certificate path up to the first certificate that is listed as a trust anchor,
 		// so remove any certificate from the given path that is already in the set of trust anchors
-		final List<X509Certificate> cpToCheck = new ArrayList<>();
+		List<X509Certificate> cpToCheck = new ArrayList<>();
 		boolean foundAnchor = false;
 		for(int i = 0; !foundAnchor && i < certs.size(); i++) {
 			X509Certificate c = certs.get(i);
-			if (!(foundAnchor = trustAnchors.parallelStream().anyMatch(a -> a.getTrustedCert().equals(c))))
-				cpToCheck.add(c);
+			cpToCheck.add(c);
+			foundAnchor = trustAnchors.parallelStream().anyMatch(a -> a.getTrustedCert().equals(c));
 		}
 
 		if (cpToCheck.isEmpty()) {
@@ -449,21 +493,20 @@ public class DefaultCertManager implements ICertificateManager {
 		if (log.isTraceEnabled()) {
 			StringBuilder sb = new StringBuilder("Cert path to check: [");
 			sb.append(cpToCheck.get(0).getSubjectDN().getName());
-			for (int i = 1; i < certs.size(); i++)
-				sb.append(" << ").append(certs.get(i).getSubjectDN().getName());
+			for (int i = 1; i < cpToCheck.size(); i++)
+				sb.append(" << ").append(cpToCheck.get(i).getSubjectDN().getName());
 			sb.append(']');
 			log.trace(sb.toString());
 		}
 
 		try {
-			final CertPath cp = CertificateFactory.getInstance("X.509").generateCertPath(cpToCheck);
-			final PKIXParameters params = new PKIXParameters(trustAnchors);
+			CertPath cp = CertificateFactory.getInstance("X.509").generateCertPath(cpToCheck);
+			PKIXParameters params = new PKIXParameters(trustAnchors);
 			params.setRevocationEnabled(performRevocationCheck);
-			Security.setProperty("ocsp.enable", "true");
-			final CertPathValidator validator = CertPathValidator.getInstance("PKIX");
+
+			CertPathValidator validator = CertPathValidator.getInstance("PKIX", BouncyCastleProvider.PROVIDER_NAME);
 			try {
-				final PKIXCertPathValidatorResult validation = (PKIXCertPathValidatorResult)
-																						validator.validate(cp, params);
+				PKIXCertPathValidatorResult validation = (PKIXCertPathValidatorResult) validator.validate(cp, params);
 				// Add the found trust anchor to cert path to include in result
 				cpToCheck.add(validation.getTrustAnchor().getTrustedCert());
 				if (log.isDebugEnabled())
@@ -481,8 +524,7 @@ public class DefaultCertManager implements ICertificateManager {
 						log.debug("Validation with revocation check failed ({}), retry without",
 									validationException.getMessage());
 						params.setRevocationEnabled(false);
-						final PKIXCertPathValidatorResult validation = (PKIXCertPathValidatorResult)
-								validator.validate(cp, params);
+						PKIXCertPathValidatorResult validation = (PKIXCertPathValidatorResult) validator.validate(cp, params);
 						// Add the found trust anchor to cert path to include in result
 						cpToCheck.add(validation.getTrustAnchor().getTrustedCert());
 						log.warn("Certificate path could only be validated without revocation check! {}",
@@ -499,7 +541,8 @@ public class DefaultCertManager implements ICertificateManager {
 																							validationException));
 
 			}
-		} catch (InvalidAlgorithmParameterException | CertificateException | NoSuchAlgorithmException ex) {
+		} catch (InvalidAlgorithmParameterException | CertificateException | NoSuchAlgorithmException
+				| NoSuchProviderException ex) {
 			// These indicate some generic problem occured during the validation which is not related to the trust,
 			// so report as exception too
 			throw new SecurityProcessingException("Error during trust validation", ex);
@@ -591,10 +634,9 @@ public class DefaultCertManager implements ICertificateManager {
     private Map<String, X509Certificate> getCertificates(final Path ksPath, final String ksPwd)
     																				throws SecurityProcessingException {
 	    try {
-	    	final KeyStore ks = KeystoreUtils.load(ksPath, ksPwd);
-	        final Map<String, X509Certificate> result = new HashMap<>(ks.size());
-	        Enumeration<String> aliases = ks.aliases();
-	        while (aliases.hasMoreElements()) {
+	    	KeyStore ks = KeystoreUtils.load(ksPath, ksPwd);
+	        Map<String, X509Certificate> result = new HashMap<>(ks.size());
+	        for(Enumeration<String> aliases = ks.aliases(); aliases.hasMoreElements();) {
 	        	String alias = aliases.nextElement();
 	        	result.put(alias, (X509Certificate) ks.getCertificate(alias));
 	        }

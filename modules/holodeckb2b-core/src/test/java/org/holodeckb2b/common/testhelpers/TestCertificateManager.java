@@ -28,6 +28,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -270,7 +271,27 @@ public class TestCertificateManager implements ICertificateManager {
 	}
 
 	@Override
-	public IValidationResult validateTrust(List<X509Certificate> certs) throws SecurityProcessingException {
+	public Collection<X509Certificate> getAllTlsCACertificates() {
+		List<X509Certificate> certs = new ArrayList<>();
+		try {
+			for(Enumeration<String> aliases = trustedCerts.aliases(); aliases.hasMoreElements();)
+				certs.add((X509Certificate) trustedCerts.getCertificate(aliases.nextElement()));
+		} catch (KeyStoreException e) {
+		}
+		return certs;
+	}
+
+	@Override
+	public IValidationResult validateMlsCertificate(List<X509Certificate> certs) throws SecurityProcessingException {
+		return validateCert(certs);
+	}
+
+	@Override
+	public IValidationResult validateTlsCertificate(List<X509Certificate> certs) throws SecurityProcessingException {
+		return validateCert(certs);
+	}
+
+	private IValidationResult validateCert(List<X509Certificate> certs) throws SecurityProcessingException {
 		if (Utils.isNullOrEmpty(certs))
 			throw new SecurityProcessingException("No certs to validate!");
 
@@ -285,6 +306,8 @@ public class TestCertificateManager implements ICertificateManager {
 		}
 
 	}
+
+
 
 	class ValidationResult implements IValidationResult {
 		private List<X509Certificate> certpath;

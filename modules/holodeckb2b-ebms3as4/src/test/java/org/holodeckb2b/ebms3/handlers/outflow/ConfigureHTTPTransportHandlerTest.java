@@ -18,17 +18,12 @@ package org.holodeckb2b.ebms3.handlers.outflow;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import javax.activation.DataHandler;
-
 import org.apache.axis2.Constants;
-import org.apache.axis2.client.Options;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.Handler;
-import org.apache.axis2.kernel.http.HTTPConstants;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.common.pmode.Leg;
 import org.holodeckb2b.common.pmode.PMode;
@@ -52,13 +47,13 @@ import org.junit.Test;
  * @author Timur Shakuov (t.shakuov at gmail.com)
  */
 public class ConfigureHTTPTransportHandlerTest {
-   
+
     @BeforeClass
     public static void setUpClass() throws Exception {
         HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore());
     }
 
-    
+
     @After
     public void tearDown() throws Exception {
         HolodeckB2BCore.getPModeSet().removeAll();
@@ -69,18 +64,18 @@ public class ConfigureHTTPTransportHandlerTest {
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.OUT_FLOW);
         mc.setServerSide(false);
-        
-        PMode pmode = HB2BTestUtils.create1WaySendPushPMode();        
+
+        PMode pmode = HB2BTestUtils.create1WaySendPushPMode();
         Leg leg = pmode.getLeg(Label.REQUEST);
-        
+
         HolodeckB2BCore.getPModeSet().add(pmode);
 
-        UserMessage userMessage = new UserMessage();        
+        UserMessage userMessage = new UserMessage();
         userMessage.setPModeId(pmode.getId());
-        
-        // Simulate a payload attachment
-        mc.addAttachment("pl-1", new DataHandler("Some text", "application/text"));
-        
+
+        // Add attached payload
+        userMessage.addPayload(HB2BTestUtils.createPayload());
+
         IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(HolodeckB2BCore.getStorageManager().storeOutGoingMessageUnit(userMessage));
 
@@ -91,12 +86,7 @@ public class ConfigureHTTPTransportHandlerTest {
         }
 
         assertEquals(leg.getProtocol().getAddress(), mc.getProperty(Constants.Configuration.TRANSPORT_URL));
-
-        Options options = mc.getOptions();
-        assertNotNull(options);
-        assertFalse((Boolean) options.getProperty(HTTPConstants.MC_GZIP_REQUEST));
-        assertFalse((Boolean) options.getProperty(HTTPConstants.CHUNKED));
-        assertTrue((Boolean) options.getProperty(Constants.Configuration.ENABLE_SWA));
+        assertTrue((Boolean) mc.getProperty(Constants.Configuration.ENABLE_SWA));
     }
 
     @Test
@@ -104,35 +94,30 @@ public class ConfigureHTTPTransportHandlerTest {
     	MessageContext mc = new MessageContext();
     	mc.setFLOW(MessageContext.OUT_FLOW);
     	mc.setServerSide(false);
-        
-    	PMode pmode = HB2BTestUtils.create1WaySendPushPMode();        
+
+    	PMode pmode = HB2BTestUtils.create1WaySendPushPMode();
         Leg leg = pmode.getLeg(Label.REQUEST);
         // Setting all protocol configurations checked by the tested handler
     	Protocol protocolConfig = leg.getProtocol();
     	protocolConfig.setHTTPCompression(true);
     	protocolConfig.setChunking(true);
     	leg.setProtocol(protocolConfig);
-    	
+
     	HolodeckB2BCore.getPModeSet().add(pmode);
-    	
+
     	UserMessage userMessage = new UserMessage();
     	userMessage.setPModeId(pmode.getId());
-        
+
     	IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
     	procCtx.setUserMessage(HolodeckB2BCore.getStorageManager().storeOutGoingMessageUnit(userMessage));
-    	
+
     	try {
     		assertEquals(Handler.InvocationResponse.CONTINUE, new ConfigureHTTPTransportHandler().invoke(mc));
     	} catch (Exception e) {
     		fail(e.getMessage());
     	}
-    	
+
     	assertEquals(protocolConfig.getAddress(), mc.getProperty(Constants.Configuration.TRANSPORT_URL));
-    	
-    	Options options = mc.getOptions();
-    	assertNotNull(options);
-    	assertTrue((Boolean) options.getProperty(HTTPConstants.MC_GZIP_REQUEST));
-    	assertTrue((Boolean) options.getProperty(HTTPConstants.CHUNKED));
-    	assertFalse((Boolean) options.getProperty(Constants.Configuration.ENABLE_SWA));
+    	assertFalse((Boolean) mc.getProperty(Constants.Configuration.ENABLE_SWA));
     }
 }

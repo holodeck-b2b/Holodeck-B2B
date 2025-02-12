@@ -16,8 +16,6 @@
  */
 package org.holodeckb2b.core;
 
-import java.security.Provider;
-import java.security.Security;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,8 +26,6 @@ import org.apache.axis2.engine.AxisError;
 import org.apache.axis2.modules.Module;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.jsse.provider.BouncyCastleJsseProvider;
 import org.holodeckb2b.common.VersionInfo;
 import org.holodeckb2b.common.events.SyncEventProcessor;
 import org.holodeckb2b.common.workerpool.XMLWorkerPoolConfiguration;
@@ -242,12 +238,6 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
         deliveryManager = new DeliveryManager(storageManager, config);
         log.info("Initialised the Delivery Manager");
 
-        /*
-         * TODO: Installation of the BC providers should not be required at this level, but moved to the configuration of
-         * the https transport configuration, either at P-Mode or global level
-         */
-        installBCProviders();
-
         log.trace("Create list of managed worker pools");
         workerPools = new HashMap<>();
 
@@ -280,31 +270,6 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
         log.info("Holodeck B2B Core " + VersionInfo.fullVersion + " STARTED.");
         System.out.println("Holodeck B2B Core started.");
     }
-
-    /**
-     * Installs the BouncyCastle JCE and JSSE providers as the preferred security providers.
-     *
-     * @throws AxisFault	when the BC providers could not be registered
-     */
-    private void installBCProviders() throws AxisFault {
-		log.trace("Install BC Providers as first providers");
-		try {
-			for(Provider p : Security.getProviders()) {
-				if (p instanceof BouncyCastleProvider || p instanceof BouncyCastleJsseProvider) {
-					log.trace("Removing existing registration of {}", p.getClass().getSimpleName());
-					Security.removeProvider(p.getName());
-				}
-			}
-			log.trace("Registering BouncyCastle JCE provider");
-			Security.insertProviderAt(new BouncyCastleProvider(), 1);
-			log.trace("Registering BouncyCastle JSSE provider");
-			Security.insertProviderAt(new BouncyCastleJsseProvider(), 2);
-			log.info("Installed BouncyCastle security providers");
-		} catch (Exception bcRegistrationFailure) {
-			log.error("Could not install the BouncyCastle providers :", Utils.getExceptionTrace(bcRegistrationFailure));
-			throw new AxisFault("Required BouncyCastle security providers could not be installed!");
-		}
-	}
 
 	public void shutdown() {
         log.info("Shutting down Holodeck B2B Core...");
