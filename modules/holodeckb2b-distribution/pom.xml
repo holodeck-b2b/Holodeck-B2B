@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.holodeckb2b</groupId>
         <artifactId>holodeckb2b</artifactId>
-        <version>7.0.1</version>
+        <version>8.0.0-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -61,12 +61,18 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>holodeckb2b-ebms3as4</artifactId>
         </dependency>
+        <!-- The default Certificate Manager implementation -->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>holodeckb2b-certmanager</artifactId>
+            <version>${project.version}</version>
+        </dependency>        
         <!-- The default security provider implementation -->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>holodeckb2b-ebms3-secprovider</artifactId>
-            <version>${project.version}</version>
-        </dependency>        
+            <version>${project.version}</version>            
+        </dependency>     
         <!-- The extension for API to provide info to the default UI -->
         <dependency>
             <groupId>${project.groupId}</groupId>
