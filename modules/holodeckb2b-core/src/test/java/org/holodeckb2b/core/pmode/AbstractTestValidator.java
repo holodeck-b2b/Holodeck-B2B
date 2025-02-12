@@ -9,18 +9,27 @@ import org.holodeckb2b.interfaces.pmode.validation.PModeValidationError;
 
 public abstract class AbstractTestValidator implements IPModeValidator {
 
-	private boolean isExecuted = false;
-	
-	protected abstract boolean shouldReject();
-	
-	public boolean isExecuted() {
-		return isExecuted;
+	private static ThreadLocal<Boolean> isLoaded = ThreadLocal.withInitial(() -> false);
+	private static ThreadLocal<Boolean> isExecuted = ThreadLocal.withInitial(() -> false);
+
+	AbstractTestValidator() {
+		isLoaded.set(true);
 	}
-	
+
+	protected abstract boolean shouldReject(IPMode pmode);
+
+	public static boolean isLoaded() {
+		return isLoaded.get();
+	}
+
+	public static boolean isExecuted() {
+		return isExecuted.get();
+	}
+
 	@Override
 	public Collection<PModeValidationError> validatePMode(IPMode pmode) {
-		isExecuted = true;
-		if (shouldReject())
+		isExecuted.set(true);
+		if (shouldReject(pmode))
 			return Collections.singletonList(new PModeValidationError("Agreement", "Nothing allowed"));
 		else
 			return null;
@@ -29,5 +38,5 @@ public abstract class AbstractTestValidator implements IPModeValidator {
 	@Override
 	public boolean doesValidate(String pmodeType) {
 		return true;
-	}    
+	}
 }

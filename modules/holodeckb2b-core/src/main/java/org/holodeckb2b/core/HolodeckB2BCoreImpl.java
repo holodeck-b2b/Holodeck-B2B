@@ -157,8 +157,7 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
         this.instanceConfiguration = config;
         try {
         	log.trace("Initialize the P-Mode manager");
-			pmodeManager = new PModeManager();
-			pmodeManager.init(config);
+			pmodeManager = new PModeManager(config);
 		} catch (PModeSetException e) {
 			log.fatal("Cannot start Holodeck B2B because P-Mode manager couldn't be initialised!\n\tError details: {}",
 						e.getMessage());
