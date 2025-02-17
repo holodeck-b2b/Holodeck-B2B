@@ -63,7 +63,7 @@ public interface IKeyAgreement {
      * for exchanging the symmetric key is not specified in the WS-Security specification it is not clear how the
      * receiver's certificate should be included or referenced in the <code>xenc:RecipientKeyInfo</code> element.<br/>
      * For now we use the same options as specified in section 3.2 of the <a href="http://docs.oasis-open.org/wss-m/wss/v1.1.1/os/wss-x509TokenProfile-v1.1.1-os.html#_Toc307416641">
-     * WS-Security X.509 Certificate Token Profile Version 1.1.1 specification<ol>
+     * WS-Security X.509 Certificate Token Profile Version 1.1.1 specification</a><ol>
      * <li>Subject Key Identifier</li>
      * <li>Issuer and Serial number</li>
      * <li>Inclusion of the complete certificate</li>

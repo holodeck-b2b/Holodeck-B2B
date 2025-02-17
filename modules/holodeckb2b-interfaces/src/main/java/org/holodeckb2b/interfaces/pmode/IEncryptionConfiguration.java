@@ -68,7 +68,7 @@ public interface IEncryptionConfiguration {
      * in case the symmetric encryption key must be packaged in the message using the <i>key transport</i> method.
      * <p>NOTE 1: Either these settings or the settings for <i>key agreement</i> should be specified, but not both.<br/>
      * NOTE 2: Specification of these parameters is optional. In case nothing is specified, the installed <i>security
-     * provider will use default settings.
+     * provider</i> will use default settings.
      *
      * @return  An {@link IKeyTransport} object containing the key transport parameters, or<br>
      *          <code>null</code> if not specified
@@ -81,7 +81,7 @@ public interface IEncryptionConfiguration {
      * a <i>key agreement</i> method.
      * <p>NOTE 1: Either these settings or the settings for <i>key transport</i> should be specified, but not both.<br/>
      * NOTE 2: Specification of these parameters is optional. In case nothing is specified, the installed <i>security
-     * provider will use default settings.
+     * provider</i> will use default settings.
      *
      * @return  An {@link IKeyAgreement} object containing the key agreement parameters, or<br>
      *          <code>null</code> if not specified

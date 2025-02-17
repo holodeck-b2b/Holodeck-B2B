@@ -131,6 +131,12 @@
 								<goals>
 									<goal>jar</goal>
 								</goals>
+								<configuration>
+									<quiet>true</quiet>
+									<windowtitle>Holodeck B2B Interface Documentation</windowtitle>
+									<noindex>true</noindex>
+									<doctitle>Holodeck B2B ${project.version} Interfaces</doctitle>
+								</configuration>
 							</execution>
 						</executions>
 					</plugin>

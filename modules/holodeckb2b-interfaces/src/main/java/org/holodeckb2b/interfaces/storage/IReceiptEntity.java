@@ -21,9 +21,6 @@ import org.holodeckb2b.interfaces.messagemodel.IReceipt;
 /**
  * Defines the interface of the stored object that is used by the Holodeck B2B to store the Receipt message 
  * unit meta-data.
- * <p>Beside the generic meta-data fields that may be <i>lazily loaded</i> persistency implementations MAY load the
- * information on the <b>receipt content <i>lazily</i></b>, i.e. before  calling {@link #getContent()} to get this info
- * the {@link #isLoadedCompletely()} should be executed to check if all  information is loaded.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  3.0.0

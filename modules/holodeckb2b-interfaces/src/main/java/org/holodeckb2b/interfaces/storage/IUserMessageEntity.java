@@ -17,7 +17,7 @@
 package org.holodeckb2b.interfaces.storage;
 
 import java.util.Collection;
-
+import org.holodeckb2b.interfaces.storage.providers.IMetadataStorageProvider;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 
 /**
@@ -35,7 +35,8 @@ public interface IUserMessageEntity extends IMessageUnitEntity, IUserMessage {
 	 * <p>
 	 * As the Holodeck B2B Core will not modify the collection itself, the returned collection may be made unmodifiable.
 	 * However the contained {@link IPayloadEntity} objects may be updated by the Core using their respective update
-	 * methods. Once updated the Core will use {@link IUpdateManager#updatePayload(IPayloadEntity)} to save the updates.
+	 * methods. Once updated the Core will use {@link IMetadataStorageProvider#updatePayloadMetadata(IPayloadEntity)} to 
+	 * save the updates.
 	 *
 	 * @return 	collection of {@link IPayloadEntity} objects representing the payloads contained in this User Message
 	 * @since 7.0.0

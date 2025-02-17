@@ -43,7 +43,7 @@ import org.holodeckb2b.interfaces.submit.DuplicateMessageIdException;
  * of the provider implementation.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since 7.0.0 This interface is a merge of the <code>IPersistencyProvider</coder>, <code>IUpdateManager</code> and
+ * @since 7.0.0 This interface is a merge of the <code>IPersistencyProvider</code>, <code>IUpdateManager</code> and
  * 				<code>IQueryManager</code> interfaces from the previous version.
  */
 public interface IMetadataStorageProvider {
@@ -98,11 +98,11 @@ public interface IMetadataStorageProvider {
 	 * @return              The created entity object.
 	 * @throws DuplicateMessageIdException When the MessageId of the <b>outgoing</b> message unit already exists.
 	 * @throws StorageException   If an error occurs when saving the new message unit to the database. This can happen
-	 * 							  when the given message unit is a User Message that contains a {@link IPayloadEntity}
-	 * 							  with an non-existing <i>PayloadId</i>.
+	 * 			  when the given message unit is a User Message that contains a {@link IPayloadEntity}
+	 * 			  with an non-existing <i>PayloadId</i>.
 	 */
 	<T extends IMessageUnit, E extends IMessageUnitEntity> E storeMessageUnit(final T messageUnit)
-															throws DuplicateMessageIdException, StorageException;
+									throws DuplicateMessageIdException, StorageException;
 
 	/**
 	 * Saves the updated meta-data of the message unit to the database. If the database already contains newer data the
@@ -111,7 +111,7 @@ public interface IMetadataStorageProvider {
 	 * NOTE 1: The meta-data that can be updated is limited to the data for which update methods are specified in the
 	 * entity interfaces. Implementation may use this knowledge to optimise the database updates.<br/>
 	 * NOTE 2: This method should not update the meta-data on paylaods contained in a User Message. For updates to
-	 * payload meta-data the Holodeck B2B Core will use {@link #updatePayload(IPayloadEntity)}.
+	 * payload meta-data the Holodeck B2B Core will use {@link #updatePayloadMetadata(IPayloadEntity)}.
 	 *
 	 * @param messageUnit   Entity object containing the updated data that should be saved to storage
 	 * @throws AlreadyChangedException When the database contains more up to date data.
@@ -172,8 +172,6 @@ public interface IMetadataStorageProvider {
 	 * by a P-Mode with one of the given P-Mode ids. The message units are ordered ascending on the timestamp of the
 	 * current processing state, i.e. the messages that are the longest in the given state are at the front of the
 	 * list.
-	 * <br><b>NOTE:</b> The entity objects in the resulting list may not be completely loaded! Before a message unit is
-	 * going to be processed it must be checked if it is loaded completely.
 	 *
 	 * @param <T>       Limits the <code>type</code> parameter to only message unit classes
 	 * @param <V>       The returned objects will be entity objects. V and T will share the same parent type.
@@ -195,8 +193,6 @@ public interface IMetadataStorageProvider {
 	 * Retrieves all message units of the specified type and that are in one of the given states and are flowing in the
 	 * specified direction. The found message units are sorted on their time stamp starting with the oldest message
 	 * units.
-	 * <p><b>NOTE:</b> The entity objects in the resulting collection may not be completely loaded! Before a message
-	 * unit is going to be processed it must be checked if it is loaded completely.
 	 *
 	 * @param <T>       Limits the <code>type</code> parameter to only message unit classes
 	 * @param <V>       The returned objects will be entity objects. V and T will share the same parent type.
@@ -218,22 +214,17 @@ public interface IMetadataStorageProvider {
 	 * searched messages units flow can also be specified.
 	 * <p>Although messageIds should be unique there can exist multiple <code>MessageUnits</code> with the same
 	 * messageId due to resending (and because other MSH or business applications may not conform to this constraint).
-	 * <br><b>NOTE:</b> The entity objects in the resulting collection may not be completely loaded! Before a message
-	 * unit is going to be processed it must be checked if it is loaded completely.
 	 *
 	 * @param messageId     The messageId of the message units to retrieve
 	 * @param direction		The direction in which the message units to retrieve should be.
 	 * @return              The list of {@link IMessageUnitEntity}s with the given message id
 	 * @throws StorageException If an error occurs retrieving the message units from the database
 	 */
-	Collection<IMessageUnitEntity> getMessageUnitsWithId(final String messageId,
-														 final Direction... direction)
-																 						throws StorageException;
+	Collection<IMessageUnitEntity> getMessageUnitsWithId(final String messageId, final Direction... direction)
+											throws StorageException;
 
 	/**
 	 * Retrieves all message units of which the last change in processing state occurred before the given date and time.
-	 * <br><b>NOTE:</b> The entity objects in the resulting collection may not be completely loaded! Before a message
-	 * unit is going to be processed it must be checked if it is loaded completely.
 	 *
 	 * @param   maxLastChangeDate   The latest date of a processing state change that is to be included in the result
 	 * @return          Collection of entity objects representing the message units which processing state changed at
@@ -245,8 +236,6 @@ public interface IMetadataStorageProvider {
 
 	/**
 	 * Retrieves the message unit with the given <code>CoreId</code>.
-	 * <p><b>NOTE:</b> The returned entity object may not be completely loaded! Before a message unit is going to be
-	 * processed it must be checked if it is loaded completely.
 	 *
 	 * @param coreId     The CoreId of the message unit to retrieve
 	 * @return           The {@link IMessageUnitEntity} with the given CoreId or <code>null</code> if none exists
@@ -276,7 +265,7 @@ public interface IMetadataStorageProvider {
 	 * @param userMessage The <code>User Message</code> to check for if it's already processed
 	 * @return            <code>true</code> if there exists a User Message entity with {@link
 	 *                    IUserMessage#getMessageId()} == <code>messageId</code> and {@link IUserMessage#getDirection()}
-	 *                    == <code>IN</code> and {@link IUserMessage#getCurrentProcessingState()} ==
+	 *                    == <code>IN</code> and {@link IUserMessageEntity#getCurrentProcessingState()} ==
 	 *                    {@link ProcessingState#DELIVERED} | {@link ProcessingState#OUT_FOR_DELIVERY}
 	 *                    | {@link ProcessingState#FAILURE},
 	 *                    <br><code>false</code> otherwise.

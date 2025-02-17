@@ -190,7 +190,7 @@ public interface IMessageProcessingContext {
 	/**
 	 * Retrieves all entity objects of message units that are received in the current operation.
 	 *
-	 * @return      collection of {@link IMessageUnitInfo} objects for the message units in the received message.
+	 * @return      collection of {@link IMessageUnitEntity} objects for the message units in the received message.
 	 */
 	Collection<IMessageUnitEntity> getReceivedMessageUnits();
 
@@ -206,7 +206,7 @@ public interface IMessageProcessingContext {
 	 * Retrieves the collection of entity objects for all message units that are (to be) or were previously sent in the
 	 * current operation.
 	 *
-	 * @return      {@link Collection} of {@link IMessageUnitInfo} objects for the message units that were sent.
+	 * @return      {@link Collection} of {@link IMessageUnitEntity} objects for the message units that were sent.
 	 */
 	Collection<IMessageUnitEntity> getSendingMessageUnits();
 
@@ -285,7 +285,8 @@ public interface IMessageProcessingContext {
 	 * Gets the processing results for a specific type of security tokens (identified by the results class).
 	 *
 	 * @param type	The class of processing results to retrieve, MUST NOT be <code>null</code>
-	 * @param <T>
+	 * @param <T>   Limits the classes that can be used for the <code>type</code> parameter to sub-classes
+	 * 		of {@link ISecurityProcessingResult}
 	 * @return	All results of processing of the given class
 	 */
 	<T extends ISecurityProcessingResult> Collection<T> getSecurityProcessingResults(Class<T> type);

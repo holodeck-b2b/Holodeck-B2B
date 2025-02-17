@@ -25,4 +25,11 @@ package org.holodeckb2b.interfaces.storage.providers;
  */
 public class AlreadyChangedException extends StorageException {
 	private static final long serialVersionUID = 5309676598979015162L;
+
+	/**
+	 * Creates a new instance of the exception.
+	 */
+	public AlreadyChangedException() {
+		super("Message meta-data already updated");
+	}
 }
