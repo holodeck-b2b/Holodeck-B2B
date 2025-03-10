@@ -148,4 +148,13 @@ public interface IQueryManager {
      * @since 7.0.0
      */
     IMessageUnitEntity getMessageUnitWithCoreId(final String coreId) throws StorageException;
+
+    /**
+	 * Retrieves all the meta-data of all payloads that are not linked to any User Message message unit.
+	 *
+	 * @return Collection of {@link IPayloadEntity} objects representing the unbound payloads
+	 * @throws StorageException If an error occurs when executing this query
+	 * @since 8.0.0
+	 */
+	Collection<IPayloadEntity> getUnboundPayloads() throws StorageException;
 }

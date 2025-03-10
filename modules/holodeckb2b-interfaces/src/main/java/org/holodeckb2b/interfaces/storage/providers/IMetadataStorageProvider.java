@@ -285,4 +285,13 @@ public interface IMetadataStorageProvider {
 	 * @since 7.0.0 The argument type is now the entity class
 	 */
 	boolean isAlreadyProcessed(final IUserMessageEntity userMessage) throws StorageException;
+
+	/**
+	 * Retrieves all the meta-data of all payloads that are not linked to any User Message message unit.
+	 *
+	 * @return Collection of {@link IPayloadEntity} objects representing the unbound payloads
+	 * @throws StorageException If an error occurs when executing this query
+	 * @since 8.0.0
+	 */
+	Collection<IPayloadEntity> getUnboundPayloads() throws StorageException;
 }
