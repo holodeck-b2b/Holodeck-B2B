@@ -26,7 +26,9 @@ import org.apache.wss4j.common.SecurityActionToken;
 import org.apache.wss4j.common.crypto.Crypto;
 import org.apache.wss4j.common.crypto.CryptoType;
 import org.apache.wss4j.common.ext.WSSecurityException;
+import org.apache.wss4j.common.ext.WSSecurityException.ErrorCode;
 import org.apache.wss4j.common.util.KeyUtils;
+import org.apache.wss4j.dom.WSConstants;
 import org.apache.wss4j.dom.action.Action;
 import org.apache.wss4j.dom.handler.RequestData;
 import org.apache.wss4j.dom.handler.WSHandler;
@@ -43,7 +45,7 @@ import org.holodeckb2b.commons.util.Utils;
  */
 public class EncryptionAction implements Action {
 	/**
-	 * Value to use for the <i>TokenType</i> to indicate that the meta-date of the receiver's certificate used in the
+	 * Name of the option to indicate that the meta-date of the receiver's certificate used in the
 	 * key agreement should be included in a <code>wss:SecurityTokenReference</code> element.
 	 */
 	public static final String	KA_CERT_ASREF = "kaRcptCertAsRef";
@@ -66,15 +68,31 @@ public class EncryptionAction implements Action {
             wsEncrypt.setKeyIdentifierType(encryptionToken.getKeyIdentifierId());
         if (encryptionToken.getSymmetricAlgorithm() != null)
             wsEncrypt.setSymmetricEncAlgorithm(encryptionToken.getSymmetricAlgorithm());
-        if (encryptionToken.getKeyTransportAlgorithm() != null)
-            wsEncrypt.setKeyEncAlgo(encryptionToken.getKeyTransportAlgorithm());
-        if (encryptionToken.getKeyAgreementMethodAlgorithm() != null)
-            wsEncrypt.setKeyAgreementMethod(encryptionToken.getKeyAgreementMethodAlgorithm());
+        if (encryptionToken.getKeyTransportAlgorithm() != null) {
+            if (WSConstants.KEYTRANSPORT_RSA15.equals(encryptionToken.getKeyTransportAlgorithm()))
+            	throw new WSSecurityException(WSSecurityException.ErrorCode.UNSUPPORTED_ALGORITHM,
+            									"RSA-1_5 is not supported");
+            else
+            	wsEncrypt.setKeyEncAlgo(encryptionToken.getKeyTransportAlgorithm());
+        }
         if (encryptionToken.getDigestAlgorithm() != null)
-            wsEncrypt.setDigestAlgorithm(encryptionToken.getDigestAlgorithm());
-
+        	wsEncrypt.setDigestAlgorithm(encryptionToken.getDigestAlgorithm());
         if (encryptionToken.getMgfAlgorithm() != null)
-            wsEncrypt.setMGFAlgorithm(encryptionToken.getMgfAlgorithm());
+        	wsEncrypt.setMGFAlgorithm(encryptionToken.getMgfAlgorithm());
+
+        if (encryptionToken.getKeyAgreementMethodAlgorithm() != null) {
+        	// Key Agreement method and KDF are currently fixed to ECDH-ES with ConcatKDF, check if these are used
+            if (!DefaultSecurityAlgorithms.KEY_AGREEMENT.equals(encryptionToken.getKeyAgreementMethodAlgorithm())
+            	|| !DefaultSecurityAlgorithms.KEY_DERIVATION.equals(encryptionToken.getKeyDerivationFunction()))
+            	throw new WSSecurityException(ErrorCode.UNSUPPORTED_ALGORITHM, "unsupportedKeyAgreementMethod");
+            else {
+	            wsEncrypt.setKeyAgreementMethod(encryptionToken.getKeyAgreementMethodAlgorithm());
+	            wsEncrypt.setKeyDerivationMethod(encryptionToken.getKeyDerivationFunction());
+	            wsEncrypt.setKeyDerivationParameters(encryptionToken.getKeyDerivationParameters());
+	            wsEncrypt.setRecipientCertInSecRef(Utils.isTrue(
+            									(String) handler.getOption(PModeParameters.KA_RCPT_CERT_AS_WSSECREF)));
+			}
+        }
 
         wsEncrypt.setIncludeEncryptionToken(encryptionToken.isIncludeToken());
 
@@ -92,7 +110,6 @@ public class EncryptionAction implements Action {
         if (!encryptionToken.getParts().isEmpty())
             wsEncrypt.getParts().addAll(encryptionToken.getParts());
 
-
         KeyGenerator keyGen = KeyUtils.getKeyGenerator(wsEncrypt.getSymmetricEncAlgorithm());
         SecretKey symmetricKey = keyGen.generateKey();
 
@@ -101,16 +118,6 @@ public class EncryptionAction implements Action {
         wsEncrypt.setAttachmentCallbackHandler(reqData.getAttachmentCallbackHandler());
         wsEncrypt.setStoreBytesInAttachment(reqData.isStoreBytesInAttachment());
 
-        wsEncrypt.setRecipientCertInSecRef(Utils.isTrue(
-        										(String) handler.getOption(PModeParameters.KA_RCPT_CERT_AS_WSSECREF)));
-
-        // As Key Agreement method and KDF are currently fixed, we must check if KA is used and then set custom
-        // ConcatKDF attributes
-        if (DefaultSecurityAlgorithms.KEY_AGREEMENT.equals(wsEncrypt.getKeyAgreementMethod())) {
-        	wsEncrypt.setConcatKDFAlgorithmID((String) handler.getOption(PModeParameters.CONCAT_KDF_ALGORITHMID));
-        	wsEncrypt.setConcatKDFPartyUInfo((String) handler.getOption(PModeParameters.CONCAT_KDF_PARTY_U));
-        	wsEncrypt.setConcatKDFPartyVInfo((String) handler.getOption(PModeParameters.CONCAT_KDF_PARTY_V));
-        }
         try {
             wsEncrypt.build(encryptionToken.getCrypto(), symmetricKey);
         } catch (WSSecurityException e) {

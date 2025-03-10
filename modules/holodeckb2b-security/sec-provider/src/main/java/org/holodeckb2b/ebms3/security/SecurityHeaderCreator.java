@@ -48,8 +48,12 @@ import org.apache.wss4j.dom.engine.WSSConfig;
 import org.apache.wss4j.dom.handler.HandlerAction;
 import org.apache.wss4j.dom.handler.RequestData;
 import org.apache.wss4j.dom.handler.WSHandler;
+import org.apache.wss4j.dom.handler.WSHandlerConstants;
 import org.apache.wss4j.dom.message.WSSecHeader;
 import org.apache.wss4j.dom.util.WSSecurityUtil;
+import org.apache.xml.security.encryption.params.ConcatKDFParams;
+import org.apache.xml.security.encryption.params.ConcatKDFParams.Builder;
+import org.apache.xml.security.utils.EncryptionConstants;
 import org.holodeckb2b.common.VersionInfo;
 import org.holodeckb2b.common.security.results.EncryptionProcessingResult;
 import org.holodeckb2b.common.security.results.EncryptionProcessingResult.KeyAgreementInfo;
@@ -346,7 +350,8 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
 		} else if (kaConfig != null) {
 			// The algorithm used for encryption of the symmetric key. The WSSJ classes re-use the setting for the
 			// key transport algorithm for this parameter.
-			processingParams.put(ConfigurationConstants.ENC_KEY_TRANSPORT, kaConfig.getKeyEncryptionAlgorithm());
+			String keyEncAlgo = kaConfig.getKeyEncryptionAlgorithm();
+			processingParams.put(ConfigurationConstants.ENC_KEY_TRANSPORT, keyEncAlgo);
 			// The key agreement algorithm, for now must be ECDH-ES
 			String agreementMethod = kaConfig.getAgreementMethod();
 			if (!DefaultSecurityAlgorithms.KEY_AGREEMENT.equals(agreementMethod))
@@ -362,28 +367,60 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
 	        // The key derivation method must be ConcatKDF, but the digest algorithm is configurable
 			IKeyDerivationMethod kdfConfig = kaConfig.getKeyDerivationMethod();
 			String kdf = kdfConfig.getAlgorithm();
-			if (!DefaultSecurityAlgorithms.KEY_DERIVATION.equals(kdf))
-				throw new SecurityProcessingException("Only ConcatKDF is supported!");
-			// Because ConcatKDF is also fixed in WSSJ/Santuario we don't need to set a specific parameter, but we may
-			// need to set parameters for setting the optional AlgorithmID, PartyUInfo and PartyVInfo attributes
-			Map<String, ?> kdfParameters = kdfConfig.getParameters();
-			if (!Utils.isNullOrEmpty(kdfParameters)) {
-				processingParams.put(PModeParameters.CONCAT_KDF_ALGORITHMID,
-								Utils.isNullOrEmpty((String) kdfParameters.get(PModeParameters.CONCAT_KDF_ALGORITHMID))?
-								"" : kdfParameters.get(PModeParameters.CONCAT_KDF_ALGORITHMID));
-				processingParams.put(PModeParameters.CONCAT_KDF_PARTY_U,
-								Utils.isNullOrEmpty((String) kdfParameters.get(PModeParameters.CONCAT_KDF_PARTY_U))?
-										"" : kdfParameters.get(PModeParameters.CONCAT_KDF_PARTY_U));
-				processingParams.put(PModeParameters.CONCAT_KDF_PARTY_V,
-								Utils.isNullOrEmpty((String) kdfParameters.get(PModeParameters.CONCAT_KDF_PARTY_V))?
-										"" : kdfParameters.get(PModeParameters.CONCAT_KDF_PARTY_V));
+			processingParams.put(WSHandlerConstants.ENC_KEY_DERIVATION_FUNCTION, kdf);
+			if (DefaultSecurityAlgorithms.KEY_DERIVATION.equals(kdf)) {
+				Builder kdfPBuilder = ConcatKDFParams.createBuilder(getKeyLengthKeyEncAlg(keyEncAlgo),
+																  	kdfConfig.getDigestAlgorithm());
+				Map<String, ?> kdfParameters = kdfConfig.getParameters();
+				if (!Utils.isNullOrEmpty(kdfParameters)) {
+					kdfPBuilder.algorithmID(getKDFParameter(kdfParameters, PModeParameters.CONCAT_KDF_ALGORITHMID))
+							   .partyUInfo(getKDFParameter(kdfParameters, PModeParameters.CONCAT_KDF_PARTY_U))
+							   .partyVInfo(getKDFParameter(kdfParameters, PModeParameters.CONCAT_KDF_PARTY_V))
+							   .suppPubInfo(getKDFParameter(kdfParameters, PModeParameters.CONCAT_KDF_PUBINFO))
+							   .suppPrivInfo(getKDFParameter(kdfParameters, PModeParameters.CONCAT_KDF_PRIVINFO));
+				}
+				processingParams.put(WSHandlerConstants.ENC_KEY_DERIVATION_PARAMS, kdfPBuilder.build());
 			}
-
-			processingParams.put(ConfigurationConstants.ENC_DIGEST_ALGO, kdfConfig.getDigestAlgorithm());
 		} else {
 			log.error("No key transport or key agreement configuration found!");
 			throw new SecurityProcessingException("No key transport or key agreement configuration found!");
 		}
+    }
+
+    /**
+     * Gets the key length used by the key encryption algorithm.
+     *
+     * @param keyEncAlgo	the URI of the key encryption algorithm
+     * @return	key length of the given key encryption algorithm
+     * @throws SecurityProcessingException	when an unsupported key encryption algorithm is specified
+     */
+    private int getKeyLengthKeyEncAlg(String keyEncAlgo) throws SecurityProcessingException {
+    	switch (keyEncAlgo) {
+        case EncryptionConstants.ALGO_ID_KEYWRAP_AES128:
+            return 128;
+        case EncryptionConstants.ALGO_ID_KEYWRAP_AES192:
+            return 192;
+        case EncryptionConstants.ALGO_ID_KEYWRAP_AES256:
+            return 256;
+        default:
+            throw new SecurityProcessingException("Unsupported Key Encryption Algorithm");
+		}
+    }
+
+    /**
+     * Check if a parameter for KDF was specified in the P-Mode and returns the specified value. If the parameter exists
+     * but has value <code>null</code> the empty string is returned.
+     *
+     * @param params	the P-Mode KDF parameters
+     * @param name		parameter name to check
+     * @return	value of the parameter if it exists or <code>null</code> if it does not
+     */
+    private String getKDFParameter(Map<String, ?> params, String name) {
+	   if (!params.containsKey(name))
+		   return null;
+
+	   String v = (String) params.get(name);
+	   return v != null ? v : "";
     }
 
     /**
@@ -546,10 +583,6 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
                     EncryptionActionToken actionToken = new EncryptionActionToken();
                     reqData.setEncryptionToken(actionToken);
                     actionToken.setCrypto(loadEncryptionCrypto(reqData));
-                    if (getStringOption(ConfigurationConstants.ENC_KEY_TRANSPORT)
-                                                                                .equals(WSConstants.KEYTRANSPORT_RSA15))
-                        throw new WSSecurityException(WSSecurityException.ErrorCode.UNSUPPORTED_ALGORITHM,
-                                                      "RSA-1_5 is not supported");
                     decodeEncryptionParameter(reqData);
                 }
             }

@@ -48,5 +48,17 @@ public final class PModeParameters {
 	 */
 	public static final String  CONCAT_KDF_PARTY_V = "PartyVInfo";
 
+	/**
+	 * The Key Derivation parameter to specify the value of the <i>SuppPubInfo</i> attribute to include in the
+	 * <code>ConcatKDFParams</code>.
+	 */
+	public static final String  CONCAT_KDF_PUBINFO = "SuppPubInfo";
+
+	/**
+	 * The Key Derivation parameter to specify the value of the <i>SuppPrivInfo</i> attribute to include in the
+	 * <code>ConcatKDFParams</code>.
+	 */
+	public static final String  CONCAT_KDF_PRIVINFO = "SuppPrivInfo";
+
 
 }
