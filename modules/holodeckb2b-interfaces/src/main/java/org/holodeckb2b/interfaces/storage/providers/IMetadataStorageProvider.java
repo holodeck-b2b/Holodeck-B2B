@@ -97,9 +97,12 @@ public interface IMetadataStorageProvider {
 	 * @param messageUnit   The meta-data on message unit that should be stored in the new persistent object
 	 * @return              The created entity object.
 	 * @throws DuplicateMessageIdException When the MessageId of the <b>outgoing</b> message unit already exists.
-	 * @throws StorageException   If an error occurs when saving the new message unit to the database. This can happen
-	 * 							  when the given message unit is a User Message that contains a {@link IPayloadEntity}
-	 * 							  with an non-existing <i>PayloadId</i>.
+	 * @throws IllegalStateException When the given message unit is a User Message that contains one or more
+	 * 								 {@link IPayloadEntity} objects that either have a non-existing <i>PayloadId</i> or
+	 * 								 which are already bound to another User Message
+	 * @throws StorageException   If another error occurs when saving the new message unit to the database.
+	 * @since 8.0.0 The {@link IllegalStateException} should be used by implementations to indicate that there is a
+	 * 				problem with the payloads included in a User Message
 	 */
 	<T extends IMessageUnit, E extends IMessageUnitEntity> E storeMessageUnit(final T messageUnit)
 															throws DuplicateMessageIdException, StorageException;
@@ -157,11 +160,12 @@ public interface IMetadataStorageProvider {
 	 * deleted is related still exists, the delete request should be rejected.
 	 *
 	 * @param payload       The {@link IPayloadEntity} object to be deleted
-	 * @throws StorageException     When a problem occurs while removing the payload meta-data from the database. This
-	 * 								exception can be thrown when the User Message to which the payload is linked still
-	 * 								exists.
+	 * @throws IllegalStateException When the payload is still bound to a User Message
+	 * @throws StorageException    	 When a problem occurs while removing the payload meta-data from the database.
+	 * @since 8.0.0 The {@link IllegalStateException} should be used by implementations to indicate that the payload is
+	 * 				still bound to a User Message.
 	 */
-	void deletePayloadMetadata(final IPayloadEntity payload) throws StorageException;
+	void deletePayloadMetadata(final IPayloadEntity payload) throws IllegalStateException, StorageException;
 
 	/*----------------------------------------------------------------------------------------------------------------
 	 * Query methods to retrieve message unit meta-data
