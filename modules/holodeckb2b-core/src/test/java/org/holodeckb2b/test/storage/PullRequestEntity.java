@@ -21,35 +21,35 @@ import org.holodeckb2b.interfaces.storage.IPullRequestEntity;
 
 /**
  * Is the {@link IPullRequestEntity} implementation of the in-memory persistency provider used for testing.
- * 
+ *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class PullRequestEntity extends MessageUnitEntity implements IPullRequestEntity {
 	private String mpc;
-	
+
 	public PullRequestEntity() {}
-	
+
 	public PullRequestEntity(IPullRequest source) {
 		super(source);
 		copyFrom(source);
 	}
-	
-	public void copyFrom(IPullRequest source) {
+
+	void copyFrom(IPullRequest source) {
 		if (source == null)
 			return;
-		
+
 		super.copyFrom(source);
 		this.mpc = source.getMPC();
-	}	
-	
+	}
+
 	@Override
-	public MessageUnitEntity clone() {
+	protected MessageUnitEntity clone() {
 		return new PullRequestEntity(this);
 	}
-	
+
 	@Override
 	public String getMPC() {
 		return mpc;
 	}
-	
+
 }

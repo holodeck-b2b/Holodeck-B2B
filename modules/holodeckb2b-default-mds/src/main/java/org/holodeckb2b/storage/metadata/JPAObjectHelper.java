@@ -25,7 +25,6 @@ import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.messagemodel.IReceipt;
 import org.holodeckb2b.interfaces.messagemodel.ISelectivePullRequest;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
-import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
 import org.holodeckb2b.storage.metadata.jpa.ErrorMessage;
 import org.holodeckb2b.storage.metadata.jpa.JPAEntityObject;
 import org.holodeckb2b.storage.metadata.jpa.MessageUnit;
@@ -86,7 +85,7 @@ public class JPAObjectHelper {
 	 * @param jpaObjects The list of JPA entity objects
 	 * @return List with all JPA entity objects from the given list wrapped in the correct entity object.
 	 */
-	public static <T extends MessageUnit, V extends IMessageUnitEntity> List<V> proxy(List<T> jpaObjects) {
+	public static <T extends JPAEntityObject, V extends JPAObjectProxy<T>> List<V> proxy(List<T> jpaObjects) {
 		return jpaObjects.stream().map(jpa -> (V) proxy(jpa)).collect(Collectors.toList());
 	}
 

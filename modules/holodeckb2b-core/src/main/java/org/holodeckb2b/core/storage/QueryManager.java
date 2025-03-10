@@ -128,6 +128,13 @@ public class QueryManager implements IQueryManager {
 		}
 	}
 
+	@Override
+	public Collection<IPayloadEntity> getUnboundPayloads() throws StorageException {
+		return executeQuery(() -> mdsProvider.getUnboundPayloads())
+												.map(p -> new PayloadEntityProxy(p))
+												.collect(Collectors.toList());
+	}
+
 	private <R> Stream<R> executeQuery(Query<R> query) throws StorageException {
 		try {
 			return (Stream<R>) query.execute().stream()

@@ -35,18 +35,18 @@ public class ErrorMessageEntity extends MessageUnitEntity implements IErrorMessa
 	public ErrorMessageEntity() {
 		super();
 	}
-	
+
 	public ErrorMessageEntity(IErrorMessage source) {
 		super(source);
 		copyFrom(source);
 	}
-	
+
 	@Override
-	public MessageUnitEntity clone() {
+	protected MessageUnitEntity clone() {
 		return new ErrorMessageEntity(this);
 	}
-	
-	public void copyFrom(IErrorMessage source) {
+
+	void copyFrom(IErrorMessage source) {
 		if (source == null)
 			return;
 		super.copyFrom(source);
@@ -56,9 +56,9 @@ public class ErrorMessageEntity extends MessageUnitEntity implements IErrorMessa
 			IErrorMessageEntity e = (IErrorMessageEntity) source;
 			this.useSOAPFault = e.shouldHaveSOAPFault();
 			this.leg = e.getLeg();
-		}		
+		}
 	}
-	
+
 	@Override
 	public boolean shouldHaveSOAPFault() {
 		return useSOAPFault;
@@ -73,7 +73,8 @@ public class ErrorMessageEntity extends MessageUnitEntity implements IErrorMessa
 	public Label getLeg() {
 		return leg;
 	}
-	
+
+	@Override
 	public void setLeg(ILeg.Label leg) {
 		this.leg = leg;
 	}

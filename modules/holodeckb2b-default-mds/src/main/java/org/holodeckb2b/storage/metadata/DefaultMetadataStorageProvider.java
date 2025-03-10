@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -412,6 +413,22 @@ public class DefaultMetadataStorageProvider implements IMetadataStorageProvider 
             em.close();
         }
         return result;
+	}
+
+	@Override
+	public Collection<IPayloadEntity> getUnboundPayloads() throws StorageException {
+		final EntityManager em = emf.createEntityManager();
+		try {
+			em.getTransaction().begin();
+			return em.createQuery("SELECT p FROM PayloadInfo p WHERE p.parent IS NULL", PayloadInfo.class)
+						.getResultList().stream().map(p -> (IPayloadEntity) JPAObjectHelper.proxy(p))
+						.collect(Collectors.toList());
+		} catch (final Exception e) {
+			throw new StorageException("Could not execute query \"getMessageUnitsForPModesInState\"", e);
+		} finally {
+			em.getTransaction().commit();
+			em.close();
+		}
 	}
 
 	/**

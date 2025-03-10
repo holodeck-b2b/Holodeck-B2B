@@ -25,7 +25,7 @@ import org.holodeckb2b.interfaces.storage.ISelectivePullRequestEntity;
 
 /**
  * Is the {@link ISelectivePullRequestEntity} implementation of the in-memory persistency provider used for testing.
- * 
+ *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class SelectivePullRequestEntity extends PullRequestEntity implements ISelectivePullRequestEntity {
@@ -38,18 +38,18 @@ public class SelectivePullRequestEntity extends PullRequestEntity implements ISe
     public SelectivePullRequestEntity() {
     	super();
     }
-    
+
 	public SelectivePullRequestEntity(ISelectivePullRequest source) {
 		super(source);
 		copyFrom(source);
-	} 
-	
-	public void copyFrom(ISelectivePullRequest source) {
+	}
+
+	void copyFrom(ISelectivePullRequest source) {
 		if (source == null)
 			return;
 		super.copyFrom(source);
 		if (source instanceof ISelectivePullRequest) {
-            ISelectivePullRequest selective = (ISelectivePullRequest) source;
+            ISelectivePullRequest selective = source;
             this.refdMessageId = selective.getReferencedMessageId();
             this.conversationId = selective.getConversationId();
             this.action = selective.getAction();
@@ -58,12 +58,12 @@ public class SelectivePullRequestEntity extends PullRequestEntity implements ISe
             this.service = selective.getService() == null ? null : new Service(selective.getService());
         }
 	}
-	
+
 	@Override
-	public MessageUnitEntity clone() {
+	protected MessageUnitEntity clone() {
 		return new SelectivePullRequestEntity(this);
 	}
-	
+
     @Override
     public String getReferencedMessageId() { return refdMessageId; }
 

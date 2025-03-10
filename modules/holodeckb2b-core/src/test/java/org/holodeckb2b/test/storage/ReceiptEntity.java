@@ -24,36 +24,37 @@ import org.holodeckb2b.interfaces.storage.IReceiptEntity;
 
 /**
  * Is the {@link IReceiptEntity} implementation of the in-memory persistency provider used for testing.
- * 
+ *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class ReceiptEntity extends MessageUnitEntity implements IReceiptEntity {
 	private List<OMElement>    content;
-	
+
 	public ReceiptEntity() {
 		super();
 	}
 
-	@Override
-	public MessageUnitEntity clone() {
-		return new ReceiptEntity(this);
-	}
-	
+
     public ReceiptEntity(final IReceipt source) {
         super(source);
         copyFrom(source);
     }
-    
+
     public void copyFrom(IReceipt source) {
     	if (source == null)
     		return;
-    	
+
     	super.copyFrom(source);
-    	content = source.getContent();        	
+    	content = source.getContent();
     }
-    
-	@Override
+
+    @Override
+    protected MessageUnitEntity clone() {
+    	return new ReceiptEntity(this);
+    }
+
+    @Override
 	public List<OMElement> getContent() {
 		return content;
-	}	
+	}
 }

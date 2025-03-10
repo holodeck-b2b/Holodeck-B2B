@@ -18,8 +18,11 @@ package org.holodeckb2b.core.storage;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -64,9 +67,9 @@ import org.holodeckb2b.interfaces.storage.IPullRequestEntity;
 import org.holodeckb2b.interfaces.storage.IReceiptEntity;
 import org.holodeckb2b.interfaces.storage.ISelectivePullRequestEntity;
 import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
+import org.holodeckb2b.interfaces.storage.providers.StorageException;
 import org.holodeckb2b.test.storage.InMemoryMDSProvider;
 import org.holodeckb2b.test.storage.InMemoryPSProvider;
-import org.holodeckb2b.test.storage.PayloadEntity;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -287,9 +290,16 @@ class StorageManagerTest {
 		pl.setContainment(Containment.ATTACHMENT);
 		pl.setPayloadURI("cid:attachment");
 		pl.setContentStream(new FileInputStream(TestUtils.getTestResource("flower.jpg").toFile()));
+		UserMessage um = new UserMessage();
+		um.setDirection(Direction.IN);
+		um.setMessageId(UUID.randomUUID().toString());
+		um.addPayload(pl);
 
-		assertNotNull(assertDoesNotThrow(() ->
-							HolodeckB2BCore.getStorageManager().createStorageReceivedPayload(new PayloadEntity(pl))));
+		IUserMessageEntity umEntity = assertDoesNotThrow(() ->
+											HolodeckB2BCore.getStorageManager().storeReceivedMessageUnit(um));
+
+		assertNotNull(assertDoesNotThrow(() -> HolodeckB2BCore.getStorageManager()
+											.createStorageReceivedPayload(umEntity.getPayloads().iterator().next())));
 		assertEquals(1, psProvider.getPayloadCount());
 	}
 
@@ -381,6 +391,98 @@ class StorageManagerTest {
 		assertEquals(mimeType, assertDoesNotThrow(() ->
 								mdsProvider.getPayloadMetadata(entity.getPayloadId())).getMimeType());
 	}
+
+	@Test
+	void testDeleteSignalMessageUnit() {
+		Receipt r = new Receipt();
+		r.setMessageId(UUID.randomUUID().toString());
+		IMessageUnitEntity stored = assertDoesNotThrow(() -> mdsProvider.storeMessageUnit(r));
+		assertTrue(mdsProvider.existsMessageId(r.getMessageId()));
+
+		assertDoesNotThrow(() -> HolodeckB2BCore.getStorageManager().deleteMessageUnit(stored));
+
+		assertFalse(mdsProvider.existsMessageId(r.getMessageId()));
+	}
+
+	@Test
+	void testDeleteUserMessageNoPayloads() throws FileNotFoundException {
+		UserMessage um = new UserMessage();
+		um.setMessageId(UUID.randomUUID().toString());
+
+		IUserMessageEntity storedUm = assertDoesNotThrow(() -> mdsProvider.storeMessageUnit(um));
+		assertTrue(mdsProvider.existsMessageId(um.getMessageId()));
+
+		assertDoesNotThrow(() -> HolodeckB2BCore.getStorageManager().deleteMessageUnit(storedUm));
+
+		assertFalse(mdsProvider.existsMessageId(um.getMessageId()));
+	}
+
+	@Test
+	void testDeleteUserMessageWithPayloads() throws FileNotFoundException {
+		Payload pl = new Payload();
+		pl.setContainment(Containment.ATTACHMENT);
+		pl.setPayloadURI("cid:attachment");
+		pl.setContentStream(new FileInputStream(TestUtils.getTestResource("flower.jpg").toFile()));
+		UserMessage um = new UserMessage();
+		um.setMessageId(UUID.randomUUID().toString());
+		um.addPayload(pl);
+
+		IUserMessageEntity storedUm = assertDoesNotThrow(() -> mdsProvider.storeMessageUnit(um));
+		assertTrue(mdsProvider.existsMessageId(um.getMessageId()));
+		IPayloadEntity storedPl = storedUm.getPayloads().iterator().next();
+		assertDoesNotThrow(() -> psProvider.createNewPayloadStorage(storedPl));
+		assertTrue(psProvider.exists(storedPl.getPayloadId()));
+
+		assertDoesNotThrow(() -> HolodeckB2BCore.getStorageManager().deleteMessageUnit(storedUm));
+
+		assertFalse(mdsProvider.existsMessageId(um.getMessageId()));
+		assertFalse(psProvider.exists(storedPl.getPayloadId()));
+	}
+
+	@Test
+	void testDeletePayloadOkay() throws FileNotFoundException {
+		Payload pl = new Payload();
+		pl.setContainment(Containment.ATTACHMENT);
+		pl.setPayloadURI("cid:attachment");
+		pl.setContentStream(new FileInputStream(TestUtils.getTestResource("flower.jpg").toFile()));
+
+		PayloadEntityProxy entity = new PayloadEntityProxy(
+												assertDoesNotThrow(() -> mdsProvider.storePayloadMetadata(pl, null)));
+		assertTrue(mdsProvider.existsPayloadId(entity.getPayloadId()));
+		assertDoesNotThrow(() -> psProvider.createNewPayloadStorage(entity.getSource()));
+		assertTrue(psProvider.exists(entity.getPayloadId()));
+
+		assertDoesNotThrow(() -> HolodeckB2BCore.getStorageManager().deleteSubmittedPayload(entity));
+
+		assertFalse(mdsProvider.existsPayloadId(entity.getPayloadId()));
+		assertFalse(psProvider.exists(entity.getPayloadId()));
+	}
+
+	@Test
+	void testDeleteBoundPayload() throws FileNotFoundException {
+		Payload pl = new Payload();
+		pl.setContainment(Containment.ATTACHMENT);
+		pl.setPayloadURI("cid:attachment");
+		pl.setContentStream(new FileInputStream(TestUtils.getTestResource("flower.jpg").toFile()));
+		UserMessage um = new UserMessage();
+		um.setMessageId(UUID.randomUUID().toString());
+		um.addPayload(pl);
+
+		IUserMessageEntity storedUm = assertDoesNotThrow(() -> mdsProvider.storeMessageUnit(um));
+		assertTrue(mdsProvider.existsMessageId(um.getMessageId()));
+		IPayloadEntity storedPl = storedUm.getPayloads().iterator().next();
+		assertDoesNotThrow(() -> psProvider.createNewPayloadStorage(storedPl));
+		assertTrue(psProvider.exists(storedPl.getPayloadId()));
+
+		StorageException exception = assertThrows(StorageException.class,
+										() -> HolodeckB2BCore.getStorageManager().deleteSubmittedPayload(storedPl));
+		assertNotNull(exception.getCause());
+		assertInstanceOf(IllegalStateException.class, exception.getCause());
+
+		assertTrue(mdsProvider.existsMessageId(um.getMessageId()));
+		assertTrue(psProvider.exists(storedPl.getPayloadId()));
+	}
+
 
 	private boolean equalContent(IPayload p, Path expected) {
 		try (InputStream is1 = p.getContent(); FileInputStream is2 = new FileInputStream(expected.toFile());) {
