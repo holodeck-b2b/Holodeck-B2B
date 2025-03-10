@@ -80,9 +80,9 @@
                 <include>*.xsd</include>
             </includes>
         </fileSet>
-        <!-- From the default security provider module -->
+        <!-- From the default Certificate Manager module -->
         <fileSet>
-            <directory>../holodeckb2b-security/src/main/resources/xsd</directory>
+            <directory>../holodeckb2b-certmanager/src/main/resources/xsd</directory>
             <outputDirectory>repository/xsd</outputDirectory>
             <includes>
                 <include>*.xsd</include>

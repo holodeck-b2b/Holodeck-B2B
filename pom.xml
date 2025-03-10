@@ -104,7 +104,8 @@
 		<module>modules/holodeckb2b-interfaces</module>
 		<module>modules/holodeckb2b-core</module>
 		<module>modules/holodeckb2b-ebms3as4</module>
-		<module>modules/holodeckb2b-security</module>
+		<module>modules/holodeckb2b-certmanager</module>
+		<module>modules/holodeckb2b-as4secprovider</module>
 		<module>modules/holodeckb2b-default-mds</module>
 		<module>modules/holodeckb2b-default-psp</module>
 		<module>modules/holodeckb2b-ui</module>
@@ -205,12 +206,6 @@
 			<!--===============================================================
                 XML Processing libraries
             =============================================================== -->
-			<dependency>
-				<groupId>xerces</groupId>
-				<artifactId>xercesImpl</artifactId>
-				<version>2.12.2</version>
-				<scope>runtime</scope>
-			</dependency>
 			<dependency>
 				<groupId>org.simpleframework</groupId>
 				<artifactId>simple-xml</artifactId>
