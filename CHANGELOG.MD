@@ -5,6 +5,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## 8.0.0
 ##### 
 ### Added
+* Possibility to "pre-submit" Payloads before the actual User Message is submitted. See new methods in 
+  `org.holodeckb2b.interfaces.submit.IMessageSubmitter`  
 * Possibility to configure TLS parameters, such as the client certificate and allowed TLS protocols in P-Mode, see
   `org.holodeckb2b.interfaces.pmode.ITLSConfiguration` for more details.
 * Possibility to configure the connection and read time out in the P-Mode, see `org.holodeckb2b.interfaces.pmode.IProtocol` 
@@ -14,6 +16,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Event mechanism to allow components to react on changes in the P-Mode set. Components interested in these events must
   implement `org.holodeckb2b.interfaces.pmode.IPModeSetListener` and register with the P-Mode set through `
   org.holodeckb2b.interfaces.pmode.IPModeSet.registerEventListener(IPModeSetListener)`
+* Query method `getUnboundPayloads()` in `org.holodeckb2b.interfaces.storage.providers.IMetadataStorageProvider` and 
+  `org.holodeckb2b.interfaces.core.IQueryManager` to retrieve all payloads that are submitted but not bound to a User
+  Message unit.
 
 ### Changed
 * Changed names of the _Certificate Manager_ methods for trust validation of message level certificates to
@@ -21,7 +26,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Split the core interface to access the current P-Mode set and the interface defining the P-Mode storage 
   component in `org.holodeckb2b.interfaces.pmode.IPModeSet` respectively `org.holodeckb2b.interfaces.pmode.IPModeStorage`. 
   Extensions implementing a custom P-Mode storage component should be updated and implement the latter.
-* Updated version of Xerces to 2.12.2
+* Requirement to use `IllegalStateException` in the `storeMessageUnit()` and `deletePayloadMetadata()` methods of 
+  `org.holodeckb2b.interfaces.storage.providers.IMetadataStorageProvider` to indicate that there is an issue with the provided
+  payload(s)
 * Updated version of WSS4J to 3.0.4
 * Updated version of Santuario to 3.0.5
 
