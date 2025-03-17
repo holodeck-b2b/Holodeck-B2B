@@ -43,12 +43,13 @@ import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.AlreadyChangedException;
 import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
+import org.holodeckb2b.interfaces.storage.IMetadataStorageProvider;
 import org.holodeckb2b.interfaces.storage.IPayloadEntity;
 import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
-import org.holodeckb2b.interfaces.storage.providers.AlreadyChangedException;
-import org.holodeckb2b.interfaces.storage.providers.IMetadataStorageProvider;
-import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.holodeckb2b.interfaces.storage.PayloadBindingException;
+import org.holodeckb2b.interfaces.storage.StorageException;
 import org.holodeckb2b.interfaces.submit.DuplicateMessageIdException;
 import org.holodeckb2b.storage.metadata.jpa.JPAEntityObject;
 import org.holodeckb2b.storage.metadata.jpa.MessageUnit;
@@ -126,16 +127,13 @@ public class DefaultMetadataStorageProvider implements IMetadataStorageProvider 
 							storedPl = em.createNamedQuery("PayloadInfo.findByPayloadId", PayloadInfo.class)
 									.setParameter("payloadId", ((IPayloadEntity) p).getPayloadId()).getSingleResult();
 							if (storedPl.getParentCoreId() != null)
-								throw new StorageException("Payload (payloadId=" + ((IPayloadEntity) p).getPayloadId()
-										+ "already linked to other User Message (coreId=" + storedPl.getParentCoreId()
-										+ ")");
+								throw new PayloadBindingException((IPayloadEntity) p, "Payload already bound");
 							else if (!messageUnit.getPModeId().equals(storedPl.getPModeId())
 									|| messageUnit.getDirection() != storedPl.getDirection())
-								throw new StorageException("Payload (payloadId=" + ((IPayloadEntity) p).getPayloadId()
-										+ "meta-data does not match User Message (msgId=" + messageUnit.getMessageId()
-										+ ")");
+								throw new PayloadBindingException((IPayloadEntity) p,
+																	"Payload meta-data does not match User Message");
 						} catch (NoResultException notFound) {
-							throw new StorageException("Unknown payloadId: " + ((IPayloadEntity) p).getPayloadId());
+							throw new PayloadBindingException(((IPayloadEntity) p).getPayloadId());
 						}
 					else
 						storedPl = new PayloadInfo(p);
@@ -207,7 +205,7 @@ public class DefaultMetadataStorageProvider implements IMetadataStorageProvider 
 		assertManagedType(payload);
 		if (!Utils.isNullOrEmpty(payload.getParentCoreId())
 				&& getMessageUnitWithCoreId(payload.getParentCoreId()) != null)
-			throw new StorageException("Cannot delete payload linked to User Message");
+			throw new PayloadBindingException(payload, "Cannot delete payload still bound to User Message");
 		else
 			deleteEntity((JPAObjectProxy<PayloadInfo>) payload);
 	}

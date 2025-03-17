@@ -46,7 +46,7 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.storage.IPayloadEntity;
 import org.holodeckb2b.interfaces.storage.IPullRequestEntity;
 import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
-import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.holodeckb2b.interfaces.storage.StorageException;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
 import org.holodeckb2b.interfaces.submit.MessageSubmitException;
 

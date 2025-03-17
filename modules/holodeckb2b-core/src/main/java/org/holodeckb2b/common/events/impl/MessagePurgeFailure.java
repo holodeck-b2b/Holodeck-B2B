@@ -18,7 +18,7 @@ package org.holodeckb2b.common.events.impl;
 
 import org.holodeckb2b.interfaces.events.IMessagePurgeFailure;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
-import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.holodeckb2b.interfaces.storage.StorageException;
 
 /**
  * Is the implementation class of {@link IMessagePurgeFailure} to indicate that a message unit could not be to deleted

@@ -38,7 +38,7 @@ import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.storage.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
-import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.holodeckb2b.interfaces.storage.StorageException;
 
 /**
  * Is the <i>in flow handler</i> responsible for determining if and how Error Signals generated during the processing of

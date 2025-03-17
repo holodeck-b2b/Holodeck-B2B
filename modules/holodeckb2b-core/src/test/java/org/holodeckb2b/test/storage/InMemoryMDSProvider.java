@@ -36,12 +36,12 @@ import org.holodeckb2b.interfaces.messagemodel.IReceipt;
 import org.holodeckb2b.interfaces.messagemodel.ISelectivePullRequest;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.AlreadyChangedException;
 import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
+import org.holodeckb2b.interfaces.storage.IMetadataStorageProvider;
 import org.holodeckb2b.interfaces.storage.IPayloadEntity;
 import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
-import org.holodeckb2b.interfaces.storage.providers.AlreadyChangedException;
-import org.holodeckb2b.interfaces.storage.providers.IMetadataStorageProvider;
-import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.holodeckb2b.interfaces.storage.StorageException;
 
 /**
  * Is a {@link IPersistencyProvider} implementation for testing that stores the message units in-memory.

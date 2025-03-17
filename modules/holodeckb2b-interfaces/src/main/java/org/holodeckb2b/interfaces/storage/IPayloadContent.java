@@ -19,10 +19,6 @@ package org.holodeckb2b.interfaces.storage;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.holodeckb2b.interfaces.storage.providers.IMetadataStorageProvider;
-import org.holodeckb2b.interfaces.storage.providers.IPayloadStorageProvider;
-import org.holodeckb2b.interfaces.storage.providers.StorageException;
-
 /**
  * Defines the interface of the object that is used by the Holodeck B2B Core to store the payload meta-data.
  * 

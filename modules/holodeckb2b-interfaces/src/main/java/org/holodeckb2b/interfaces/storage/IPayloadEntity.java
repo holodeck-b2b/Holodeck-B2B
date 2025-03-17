@@ -22,8 +22,6 @@ import java.io.InputStream;
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
-import org.holodeckb2b.interfaces.storage.providers.IMetadataStorageProvider;
-import org.holodeckb2b.interfaces.storage.providers.IPayloadStorageProvider;
 
 /**
  * Defines the interface of the object that is used by the Holodeck B2B Core to store the payload meta-data. Note that

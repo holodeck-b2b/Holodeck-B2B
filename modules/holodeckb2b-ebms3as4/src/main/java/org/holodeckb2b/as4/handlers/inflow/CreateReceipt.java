@@ -42,7 +42,7 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.security.ISignatureProcessingResult;
 import org.holodeckb2b.interfaces.storage.IReceiptEntity;
 import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
-import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.holodeckb2b.interfaces.storage.StorageException;
 import org.holodeckb2b.interfaces.submit.DuplicateMessageIdException;
 
 /**

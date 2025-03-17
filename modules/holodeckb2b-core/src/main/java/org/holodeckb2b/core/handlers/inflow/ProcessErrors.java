@@ -33,7 +33,7 @@ import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.storage.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
-import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.holodeckb2b.interfaces.storage.StorageException;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for processing received error signals. For each error contained in one of

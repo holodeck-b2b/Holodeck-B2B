@@ -67,7 +67,7 @@ import org.holodeckb2b.interfaces.storage.IPullRequestEntity;
 import org.holodeckb2b.interfaces.storage.IReceiptEntity;
 import org.holodeckb2b.interfaces.storage.ISelectivePullRequestEntity;
 import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
-import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.holodeckb2b.interfaces.storage.StorageException;
 import org.holodeckb2b.test.storage.InMemoryMDSProvider;
 import org.holodeckb2b.test.storage.InMemoryPSProvider;
 import org.junit.jupiter.api.BeforeAll;

@@ -7,6 +7,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 * Possibility to "pre-submit" Payloads before the actual User Message is submitted. See new methods in 
   `org.holodeckb2b.interfaces.submit.IMessageSubmitter`  
+* Added `org.holodeckb2b.interfaces.storage.PayloadBindingException` to indicate problems with the binding of a payload to a
+  User Message, for example when a submitted User Message refers to a payload that is already bound to another User 
+  Message.
 * Possibility to configure TLS parameters, such as the client certificate and allowed TLS protocols in P-Mode, see
   `org.holodeckb2b.interfaces.pmode.ITLSConfiguration` for more details.
 * Possibility to configure the connection and read time out in the P-Mode, see `org.holodeckb2b.interfaces.pmode.IProtocol` 
@@ -26,9 +29,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Split the core interface to access the current P-Mode set and the interface defining the P-Mode storage 
   component in `org.holodeckb2b.interfaces.pmode.IPModeSet` respectively `org.holodeckb2b.interfaces.pmode.IPModeStorage`. 
   Extensions implementing a custom P-Mode storage component should be updated and implement the latter.
-* Requirement to use `IllegalStateException` in the `storeMessageUnit()` and `deletePayloadMetadata()` methods of 
+* Moved the interfaces of the _Payload_ and _Metadata Storage Providers_ from `org.holodeckb2b.interfaces.storage.providers` 
+  to the `org.holodeckb2b.interfaces.storage` package so all storage related interfaces are in one package.
+* Requirement to use `PayloadBindingException` in the `storeMessageUnit()` and `deletePayloadMetadata()` methods of 
   `org.holodeckb2b.interfaces.storage.providers.IMetadataStorageProvider` to indicate that there is an issue with the provided
-  payload(s)
+  payload(s) being already (in case of `storeMessageUnit()`) or still (in case of `deletePayloadMetadata()`) bound to a User
+  Message.
 * Updated version of WSS4J to 3.0.4
 * Updated version of Santuario to 3.0.5
 

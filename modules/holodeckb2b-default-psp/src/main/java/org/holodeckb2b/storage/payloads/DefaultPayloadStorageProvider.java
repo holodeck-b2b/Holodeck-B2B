@@ -28,8 +28,8 @@ import org.holodeckb2b.commons.util.FileUtils;
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.storage.IPayloadContent;
 import org.holodeckb2b.interfaces.storage.IPayloadEntity;
-import org.holodeckb2b.interfaces.storage.providers.IPayloadStorageProvider;
-import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.holodeckb2b.interfaces.storage.IPayloadStorageProvider;
+import org.holodeckb2b.interfaces.storage.StorageException;
 
 /**
  * Is the default implementation of the Holodeck B2B <i>Payload Storage Provider</i>. It stores the payload content on

@@ -25,7 +25,7 @@ import org.holodeckb2b.interfaces.delivery.IDeliveryManager;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
-import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.holodeckb2b.interfaces.storage.StorageException;
 
 /**
  * Is the handler that hands over the User Message that is ready for delivery to the back-end application to the 

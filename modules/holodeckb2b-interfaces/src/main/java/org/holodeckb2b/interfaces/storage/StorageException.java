@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.interfaces.storage.providers;
+package org.holodeckb2b.interfaces.storage;
 
 /**
  * Indicates that there was a problem executing a storage operation.

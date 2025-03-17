@@ -28,8 +28,8 @@ import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.ICollaborationInfo;
 import org.holodeckb2b.interfaces.processingmodel.IMessageUnitProcessingState;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.IMetadataStorageProvider;
 import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
-import org.holodeckb2b.interfaces.storage.providers.IMetadataStorageProvider;
 
 /**
  * Is a proxy to the {@link IUserMessageEntity} object managed by the {@link IMetadataStorageProvider} that holds a

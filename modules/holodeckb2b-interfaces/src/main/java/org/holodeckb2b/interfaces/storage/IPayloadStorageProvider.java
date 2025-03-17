@@ -14,11 +14,9 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.interfaces.storage.providers;
+package org.holodeckb2b.interfaces.storage;
 
 import org.holodeckb2b.interfaces.config.IConfiguration;
-import org.holodeckb2b.interfaces.storage.IPayloadContent;
-import org.holodeckb2b.interfaces.storage.IPayloadEntity;
 
 /**
  * Defines the interface of a Holodeck B2B <i>Payload Storage Provider</i> that allows the Holodeck B2B Core to persist

@@ -28,7 +28,7 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.storage.IPayloadEntity;
 import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
-import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.holodeckb2b.interfaces.storage.StorageException;
 
 /**
  * Defines the interface the Holodeck B2B Core offers to both other Core and  "external" components for retrieving the

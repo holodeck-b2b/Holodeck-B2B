@@ -34,7 +34,7 @@ import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.storage.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
-import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.holodeckb2b.interfaces.storage.StorageException;
 import org.holodeckb2b.interfaces.submit.DuplicateMessageIdException;
 
 /**

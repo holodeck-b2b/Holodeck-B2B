@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.interfaces.storage.providers;
+package org.holodeckb2b.interfaces.storage;
 
 import java.util.Collection;
 import java.util.Date;
@@ -27,9 +27,6 @@ import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
-import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
-import org.holodeckb2b.interfaces.storage.IPayloadEntity;
-import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
 import org.holodeckb2b.interfaces.submit.DuplicateMessageIdException;
 
 /**
@@ -97,7 +94,7 @@ public interface IMetadataStorageProvider {
 	 * @param messageUnit   The meta-data on message unit that should be stored in the new persistent object
 	 * @return              The created entity object.
 	 * @throws DuplicateMessageIdException When the MessageId of the <b>outgoing</b> message unit already exists.
-	 * @throws IllegalStateException When the given message unit is a User Message that contains one or more
+	 * @throws PayloadBindingException When the given message unit is a User Message that contains one or more
 	 * 								 {@link IPayloadEntity} objects that either have a non-existing <i>PayloadId</i> or
 	 * 								 which are already bound to another User Message
 	 * @throws StorageException   If another error occurs when saving the new message unit to the database.
@@ -105,7 +102,7 @@ public interface IMetadataStorageProvider {
 	 * 				problem with the payloads included in a User Message
 	 */
 	<T extends IMessageUnit, E extends IMessageUnitEntity> E storeMessageUnit(final T messageUnit)
-															throws DuplicateMessageIdException, StorageException;
+										throws DuplicateMessageIdException, PayloadBindingException, StorageException;
 
 	/**
 	 * Saves the updated meta-data of the message unit to the database. If the database already contains newer data the
@@ -160,12 +157,12 @@ public interface IMetadataStorageProvider {
 	 * deleted is related still exists, the delete request should be rejected.
 	 *
 	 * @param payload       The {@link IPayloadEntity} object to be deleted
-	 * @throws IllegalStateException When the payload is still bound to a User Message
+	 * @throws PayloadBindingException When the payload is still bound to a User Message
 	 * @throws StorageException    	 When a problem occurs while removing the payload meta-data from the database.
 	 * @since 8.0.0 The {@link IllegalStateException} should be used by implementations to indicate that the payload is
 	 * 				still bound to a User Message.
 	 */
-	void deletePayloadMetadata(final IPayloadEntity payload) throws IllegalStateException, StorageException;
+	void deletePayloadMetadata(final IPayloadEntity payload) throws PayloadBindingException, StorageException;
 
 	/*----------------------------------------------------------------------------------------------------------------
 	 * Query methods to retrieve message unit meta-data
@@ -211,8 +208,7 @@ public interface IMetadataStorageProvider {
 	 * 					in one of the given states, in ascending order on time stamp
 	 * @throws StorageException When a problem occurs during the retrieval of the message units
 	 */
-	<T extends IMessageUnit, V extends IMessageUnitEntity> List<V>
-	                                             getMessageUnitsInState(final Class<T> type,
+	<T extends IMessageUnit, V extends IMessageUnitEntity> List<V> getMessageUnitsInState(final Class<T> type,
 	                                                                    final Direction direction,
 	                                                                    final Set<ProcessingState> states)
 	                                                                                    throws StorageException;
@@ -231,8 +227,7 @@ public interface IMetadataStorageProvider {
 	 * @throws StorageException If an error occurs retrieving the message units from the database
 	 */
 	Collection<IMessageUnitEntity> getMessageUnitsWithId(final String messageId,
-														 final Direction... direction)
-																 						throws StorageException;
+														 final Direction... direction) throws StorageException;
 
 	/**
 	 * Retrieves all message units of which the last change in processing state occurred before the given date and time.

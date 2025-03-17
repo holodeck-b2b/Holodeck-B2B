@@ -28,7 +28,7 @@ import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.interfaces.core.IQueryManager;
 import org.holodeckb2b.interfaces.events.IMessageUnitPurged;
 import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
-import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.holodeckb2b.interfaces.storage.StorageException;
 
 /**
  * Is the default <i>purge worker</i> responsible for cleaning up information on old and processed messages, i.e. remove

@@ -51,7 +51,7 @@ import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.storage.IPullRequestEntity;
 import org.holodeckb2b.interfaces.storage.IReceiptEntity;
 import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
-import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.holodeckb2b.interfaces.storage.StorageException;
 
 /**
  * Is responsible for sending the message unit using the Axis2 framework. Depending on the messaging protocol the

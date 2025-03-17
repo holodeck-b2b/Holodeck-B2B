@@ -54,15 +54,15 @@ import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.AlreadyChangedException;
 import org.holodeckb2b.interfaces.storage.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
+import org.holodeckb2b.interfaces.storage.IMetadataStorageProvider;
 import org.holodeckb2b.interfaces.storage.IPayloadContent;
 import org.holodeckb2b.interfaces.storage.IPayloadEntity;
+import org.holodeckb2b.interfaces.storage.IPayloadStorageProvider;
 import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
-import org.holodeckb2b.interfaces.storage.providers.AlreadyChangedException;
-import org.holodeckb2b.interfaces.storage.providers.IMetadataStorageProvider;
-import org.holodeckb2b.interfaces.storage.providers.IPayloadStorageProvider;
-import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.holodeckb2b.interfaces.storage.StorageException;
 import org.holodeckb2b.interfaces.submit.DuplicateMessageIdException;
 
 /**

@@ -48,7 +48,8 @@ public interface IMessageSubmitter {
      * @return                      The ebMS message-id assigned to the user message.
      * @throws MessageSubmitException   When the user message can not be submitted successfully. Reasons for failure can
      *                                  be that no P-Mode can be found to handle the message or the given P-Mode
-     *                                  conflicts with supplied meta-data.
+     *                                  conflicts with supplied meta-data. When the submitted User Message refers to
+     *                                  pre-submitted payloads this could also indicate an issue with the payloads.
      */
     String submitMessage(IUserMessage submission) throws MessageSubmitException;
 

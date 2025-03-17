@@ -17,7 +17,7 @@
 
 package org.holodeckb2b.interfaces.events;
 
-import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.holodeckb2b.interfaces.storage.StorageException;
 
 /**
  * Is the <i>message processing event</i> that indicates that a problem occurred when deleting the message unit from the

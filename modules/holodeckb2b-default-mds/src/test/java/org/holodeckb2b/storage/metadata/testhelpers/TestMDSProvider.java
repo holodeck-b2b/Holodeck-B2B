@@ -19,7 +19,7 @@ package org.holodeckb2b.storage.metadata.testhelpers;
 import java.lang.reflect.Field;
 
 import org.holodeckb2b.interfaces.config.IConfiguration;
-import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.holodeckb2b.interfaces.storage.StorageException;
 import org.holodeckb2b.storage.metadata.DefaultMetadataStorageProvider;
 
 /**

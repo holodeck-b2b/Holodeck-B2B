@@ -25,7 +25,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import org.holodeckb2b.interfaces.storage.IPayloadContent;
-import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.holodeckb2b.interfaces.storage.StorageException;
 
 /**
  * Is the default Payload Storage Provider's implementation of {@link IPayloadContent}.

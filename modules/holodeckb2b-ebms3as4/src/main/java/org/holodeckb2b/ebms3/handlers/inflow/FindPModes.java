@@ -39,7 +39,7 @@ import org.holodeckb2b.interfaces.storage.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.storage.IReceiptEntity;
 import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
-import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.holodeckb2b.interfaces.storage.StorageException;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for determining the P-Modes that define how the received message units
