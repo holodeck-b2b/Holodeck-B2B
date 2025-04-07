@@ -148,6 +148,11 @@ public class DefaultCertManager implements ICertificateManager {
      * Indicator whether the trading partners' certificates should be used as trust anchors.
      */
     private boolean enableDirectTrust;
+    /**
+     * Contains the security levels in which the default trust anchors of the Java runtime should be included when
+     * validating certificates.
+     */
+    private Set<SecurityLevel> includeJDKTrustAnchors;
 
     /**
      * {@inheritDoc}
@@ -181,6 +186,23 @@ public class DefaultCertManager implements ICertificateManager {
             															certMgrConfig.isPerformRevocationCheck();
             enableDirectTrust = certMgrConfig.isDirectTrustPartnerCertificates() == null ? false :
             														certMgrConfig.isDirectTrustPartnerCertificates();
+            includeJDKTrustAnchors = new HashSet<SecurityLevel>();
+            DefaultTrustOptions defaultTrustOption = certMgrConfig.getIncludeDefaultTrustStore() == null ?
+            														DefaultTrustOptions.NEVER :
+            														certMgrConfig.getIncludeDefaultTrustStore();
+            switch (defaultTrustOption) {
+            case ALWAYS:
+				includeJDKTrustAnchors.add(SecurityLevel.TLS);
+				includeJDKTrustAnchors.add(SecurityLevel.MLS);
+				break;
+			case TLS_ONLY:
+				includeJDKTrustAnchors.add(SecurityLevel.TLS);
+				break;
+			case MLS_ONLY:
+				includeJDKTrustAnchors.add(SecurityLevel.MLS);
+				break;
+			case NEVER:
+			}
             // Load key store configs
             privateKeystorePath = ensureAbsolutePath(certMgrConfig.getKeystores().getPrivateKeys().getPath(), hb2bHome);
             privateKeystorePwd = getPassword(certMgrConfig.getKeystores().getPrivateKeys().getPassword());
@@ -208,6 +230,7 @@ public class DefaultCertManager implements ICertificateManager {
             StringBuilder logMsg = new StringBuilder("Completed initialisation of the Default Certificate Manager:\n");
             logMsg.append("\tRevocation check : ").append(performRevocationCheck).append('\n')
             	  .append("\tDirect trust     : ").append(enableDirectTrust).append('\n')
+            	  .append("\tTrust default CA for: ").append(includeJDKTrustAnchors.toString()).append('\n')
                   .append("\tKey stores: ").append('\n')
                   .append("\t\tPrivate keys  :").append(privateKeystorePath).append('\n')
                   .append("\t\tPartner certs :").append(partnerKeystorePath).append('\n')
@@ -344,17 +367,25 @@ public class DefaultCertManager implements ICertificateManager {
     }
 
     @Override
-    public Collection<X509Certificate> getAllTlsCACertificates() throws SecurityProcessingException {
+    public Collection<X509Certificate> getAllTrustedCertificates(SecurityLevel secLevel)
+    																			throws SecurityProcessingException {
+    	HashSet<X509Certificate>	certs = new HashSet<X509Certificate>();
+
+		log.trace("Include the gateway specific trusted certificates");
+		certs.addAll(getCertsFromKeyStore(trustKeystorePath, trustKeystorePwd));
+
+		if (includeJDKTrustAnchors.contains(secLevel)) {
+			log.trace("Include JDK trusted certificates");
+			Path jdkTrustStore = null;
     	try {
-    		KeyStore ks = KeystoreUtils.load(trustKeystorePath, trustKeystorePwd);
-    		Collection<X509Certificate> certs = new ArrayList<>();
-    		for (Enumeration<String> aliases = ks.aliases(); aliases.hasMoreElements();)
-	    		certs.add((X509Certificate) ks.getCertificate(aliases.nextElement()));
-    		return certs;
-    	} catch (KeyStoreException kse) {
-	    	log.error("Could not access the trust keystore! Error details: {}", kse.getMessage());
-	    	throw new SecurityProcessingException("Unable to get trust certificates", kse);
+				jdkTrustStore = Path.of(System.getProperty("java.home"), "lib", "security", "cacerts");
+			} catch (InvalidPathException e) {
+				log.error("Could not construct path to JDK trust store! Error details: {}", e.getMessage());
+				throw new SecurityProcessingException("Could not load the JDK trust store", e);
+			}
+			certs.addAll(getCertsFromKeyStore(jdkTrustStore, null));
     	}
+		return certs;
     }
 
     @Override
@@ -550,26 +581,26 @@ public class DefaultCertManager implements ICertificateManager {
 	}
 
 	/**
-	 * Helper method to load the certificates from a key store as trust anchors for validation.
+	 * Helper method to read all the certificates from a key store.
 	 *
 	 * @param ksPath	Path to key store
 	 * @param ksPwd		Password to access key store
-	 * @return			Set of trust anchors
+	 * @return			Set of certificates contained in the key store
 	 * @throws SecurityProcessingException	If the key store cannot be accessed or certificates cannot be read
 	 */
-	private Set<TrustAnchor> getTrustAnchorsFromKeyStore(final Path ksPath, final String ksPwd)
+	private Set<X509Certificate> getCertsFromKeyStore(final Path ksPath, final String ksPwd)
 																					throws SecurityProcessingException {
-		HashSet<TrustAnchor>	trustanchors = new HashSet<TrustAnchor>();
 		try {
+			HashSet<X509Certificate> certs = new HashSet<X509Certificate>();
 			KeyStore ks = KeystoreUtils.load(ksPath, ksPwd);
 			Enumeration<String> aliases = ks.aliases();
 			while (aliases.hasMoreElements())
-				trustanchors.add(new TrustAnchor((X509Certificate) ks.getCertificate(aliases.nextElement()), null));
+				certs.add((X509Certificate) ks.getCertificate(aliases.nextElement()));
+			return certs;
 		} catch (KeyStoreException kse) {
-			log.error("Could not retrieve trust anchors from key store ({})", ksPath);
-			throw new SecurityProcessingException("Could not retrieve trust anchors");
+			log.error("Could not read certificates from key store ({})! Error details: {}", ksPath, kse.getMessage());
+			throw new SecurityProcessingException("Could not read certificates from key store", kse);
 		}
-		return trustanchors;
 	}
 
 	/**

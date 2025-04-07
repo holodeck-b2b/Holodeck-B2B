@@ -18,13 +18,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
     targetNamespace="http://holodeck-b2b.org/schemas/2019/09/config/certmanager"
-    version="7.0.0" xmlns="http://holodeck-b2b.org/schemas/2019/09/config/certmanager">
+    version="8.0.0" xmlns="http://holodeck-b2b.org/schemas/2019/09/config/certmanager">
     <xs:annotation>
         <xs:documentation>This XML schema defines the structure of the configuration file of the default <i>Certificate Manager</i> of Holodeck B2B.
         It configures the access to the three key stores of the Certificate Manager and includes two optional elements to configure OCSP revocation
         checks and "direct trust" in trading partner certificates.</xs:documentation>
         <xs:documentation>In version 7.0.0 the type attribute was added to the Password element to enable retrieving the password from a Java system 
         property or system environment variable.</xs:documentation>        
+        <xs:documentation>In version 8.0.0 the <code></code></xs:documentation>
     </xs:annotation>
     <xs:element name="CertManagerConfiguration" type="CertManagerConfigurationType"/>
     <xs:complexType name="CertManagerConfigurationType">
@@ -40,10 +41,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         	<xs:element name="DirectTrustPartnerCertificates" type="xs:boolean" minOccurs="0" default="false">
         		<xs:annotation>
         			<xs:documentation>This OPTIONAL element indicates whether the Certificate Manager should use the trading partner certificate as
-        			 as trust anchors when validating trust in a certificate (path). N</xs:documentation>
+        			 as trust anchors when validating trust in a certificate (path).</xs:documentation>
         			 <xs:documentation>The default value <i>false</i> results in the same behaviour as in version 4.x. Setting the value to <i>true</i>
         			 results in the same behaviour as in version 3 and before. The default is considered safer as the correct issuing of the certificates
         			 will be checked. </xs:documentation>
+        		</xs:annotation>
+        	</xs:element>        	
+        	<xs:element name="IncludeDefaultTrustStore" type="default-trust-options" minOccurs="0" default="tlsOnly">
+        		<xs:annotation>
+        			<xs:documentation>This OPTIONAL element indicates whether the Certificate Manager should include the certificates of the well-known
+        			 and generically trusted Certificate Authorities as stored in the Java runtime's default trust store for the trust validation of
+        			 certificates.</xs:documentation>
+        			 <xs:documentation>The default value <i>tlsOnly</i> results in the same behaviour as in previous versions where the default trust
+        			 store is only used for the validation of TLS certificates.</xs:documentation>
         		</xs:annotation>
         	</xs:element>        	
             <xs:element name="Keystores" type="KeystoresType">
@@ -53,6 +63,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             </xs:element>
         </xs:sequence>
     </xs:complexType>
+    <xs:simpleType name="default-trust-options">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="never"/>
+			<xs:enumeration value="tlsOnly"/>
+			<xs:enumeration value="mlsOnly"/>			
+			<xs:enumeration value="always"/>
+		</xs:restriction>
+    </xs:simpleType>
     <xs:complexType name="KeystoresType">
         <xs:sequence>
             <xs:element name="PrivateKeys" type="KeystoreAccessType">
