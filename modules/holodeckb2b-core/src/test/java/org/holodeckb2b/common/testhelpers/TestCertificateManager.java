@@ -41,6 +41,7 @@ import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
 import org.holodeckb2b.interfaces.security.trust.IValidationResult;
 import org.holodeckb2b.interfaces.security.trust.IValidationResult.Trust;
+import org.holodeckb2b.interfaces.security.trust.SecurityLevel;
 
 /**
  * Is an implementation of the {@link ICertificateManager} for testing. It uses three in-memory Java key store to
@@ -270,8 +271,9 @@ public class TestCertificateManager implements ICertificateManager {
 		return TestCertificateManager.class.getName();
 	}
 
+
 	@Override
-	public Collection<X509Certificate> getAllTlsCACertificates() {
+	public Collection<X509Certificate> getAllTrustedCertificates(SecurityLevel secLevel) {
 		List<X509Certificate> certs = new ArrayList<>();
 		try {
 			for(Enumeration<String> aliases = trustedCerts.aliases(); aliases.hasMoreElements();)
@@ -282,16 +284,8 @@ public class TestCertificateManager implements ICertificateManager {
 	}
 
 	@Override
-	public IValidationResult validateMlsCertificate(List<X509Certificate> certs) throws SecurityProcessingException {
-		return validateCert(certs);
-	}
-
-	@Override
-	public IValidationResult validateTlsCertificate(List<X509Certificate> certs) throws SecurityProcessingException {
-		return validateCert(certs);
-	}
-
-	private IValidationResult validateCert(List<X509Certificate> certs) throws SecurityProcessingException {
+	public IValidationResult validateCertificate(List<X509Certificate> certs, SecurityLevel secLevel)
+																					throws SecurityProcessingException {
 		if (Utils.isNullOrEmpty(certs))
 			throw new SecurityProcessingException("No certs to validate!");
 

@@ -128,10 +128,10 @@ public class PModeManager implements IPModeSet {
     	ServiceLoader.load(IPModeValidator.class).forEach(v -> validators.add(v));
 
     	acceptNonValidable = ((InternalConfiguration) config).acceptNonValidablePMode();
-        // If no validators were loaded and validation is required we have a problem, otherwise we just log the loaded
-        // validators
-        if (!acceptNonValidable && validators.isEmpty()) {
-        	log.fatal("No P-Mode validators are available, but validation is required!");
+        // If only the TLS config validator is loaded and validation is required we have a problem, otherwise we just
+    	// log the loaded validators
+        if (!acceptNonValidable && validators.size() == 1) {
+        	log.fatal("No specific P-Mode validators are available, but validation is required!");
         	throw new PModeSetException("Missing P-Mode validators for required validation");
         } else if (acceptNonValidable)
         	log.warn("To reduce risk of issues during exchanges it's NOT RECOMMENDED to accept non validable P-Modes!");

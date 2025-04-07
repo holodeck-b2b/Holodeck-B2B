@@ -19,6 +19,7 @@ package org.holodeckb2b.security.trust;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.InvalidAlgorithmParameterException;
@@ -37,7 +38,9 @@ import java.security.cert.CertPathValidatorException.BasicReason;
 import java.security.cert.CertPathValidatorException.Reason;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateFactory;
+import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.PKIXCertPathValidatorResult;
 import java.security.cert.PKIXParameters;
 import java.security.cert.TrustAnchor;
@@ -71,7 +74,9 @@ import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
 import org.holodeckb2b.interfaces.security.trust.IValidationResult;
 import org.holodeckb2b.interfaces.security.trust.IValidationResult.Trust;
+import org.holodeckb2b.interfaces.security.trust.SecurityLevel;
 import org.holodeckb2b.security.trust.config.CertManagerConfigurationType;
+import org.holodeckb2b.security.trust.config.DefaultTrustOptions;
 import org.holodeckb2b.security.trust.config.PasswordType;
 
 /**
@@ -112,7 +117,6 @@ import org.holodeckb2b.security.trust.config.PasswordType;
  * @since 8.0.0 Added support for handling key pairs and certificates used in transport level security
  */
 public class DefaultCertManager implements ICertificateManager {
-
     private final Logger log = LogManager.getLogger(DefaultCertManager.class);
 
     /**
@@ -228,8 +232,8 @@ public class DefaultCertManager implements ICertificateManager {
 
         if (log.isDebugEnabled()) {
             StringBuilder logMsg = new StringBuilder("Completed initialisation of the Default Certificate Manager:\n");
-            logMsg.append("\tRevocation check : ").append(performRevocationCheck).append('\n')
-            	  .append("\tDirect trust     : ").append(enableDirectTrust).append('\n')
+            logMsg.append("\tRevocation check    : ").append(performRevocationCheck).append('\n')
+            	  .append("\tDirect trust        : ").append(enableDirectTrust).append('\n')
             	  .append("\tTrust default CA for: ").append(includeJDKTrustAnchors.toString()).append('\n')
                   .append("\tKey stores: ").append('\n')
                   .append("\t\tPrivate keys  :").append(privateKeystorePath).append('\n')
@@ -377,14 +381,14 @@ public class DefaultCertManager implements ICertificateManager {
 		if (includeJDKTrustAnchors.contains(secLevel)) {
 			log.trace("Include JDK trusted certificates");
 			Path jdkTrustStore = null;
-    	try {
+			try {
 				jdkTrustStore = Path.of(System.getProperty("java.home"), "lib", "security", "cacerts");
 			} catch (InvalidPathException e) {
 				log.error("Could not construct path to JDK trust store! Error details: {}", e.getMessage());
 				throw new SecurityProcessingException("Could not load the JDK trust store", e);
 			}
 			certs.addAll(getCertsFromKeyStore(jdkTrustStore, null));
-    	}
+		}
 		return certs;
     }
 
@@ -461,24 +465,9 @@ public class DefaultCertManager implements ICertificateManager {
     	boolean matches(X509Certificate c);
     }
 
-    @Override
-    public IValidationResult validateMlsCertificate(List<X509Certificate> certs) throws SecurityProcessingException {
-    	return validateTrust(certs);
-    }
-
-    @Override
-    public IValidationResult validateTlsCertificate(List<X509Certificate> certs) throws SecurityProcessingException {
-    	return validateTrust(certs);
-    }
-
-    /**
-     * Helper method to perform the actual trust validation of a certificate chain.
-     *
-     * @param certs	the certificate chain to validate
-     * @return	An instance of {@link IValidationResult} describing the validation result
-     * @throws SecurityProcessingException when an error occurs during the validation process
-     */
-	private IValidationResult validateTrust(List<X509Certificate> certs) throws SecurityProcessingException {
+	@Override
+	public IValidationResult validateCertificate(List<X509Certificate> certs, SecurityLevel secLevel)
+																					throws SecurityProcessingException {
 		if (Utils.isNullOrEmpty(certs)) {
 			log.error("Cannot validate an empty certificate path!");
 			throw new SecurityProcessingException("Empty certificate path");
@@ -499,10 +488,11 @@ public class DefaultCertManager implements ICertificateManager {
 
 		log.trace("Create the set of trust anchors");
 		Set<TrustAnchor> trustAnchors = new HashSet<TrustAnchor>();
-		trustAnchors.addAll(getTrustAnchorsFromKeyStore(trustKeystorePath, trustKeystorePwd));
+		getAllTrustedCertificates(secLevel).forEach(c -> trustAnchors.add(new TrustAnchor(c, null)));
 		if (enableDirectTrust) {
 			log.debug("Direct trust in partner certificates is enabled, add as trust anchors");
-			trustAnchors.addAll(getTrustAnchorsFromKeyStore(partnerKeystorePath, partnerKeystorePwd));
+			getCertsFromKeyStore(partnerKeystorePath, partnerKeystorePwd)
+								.forEach(c -> trustAnchors.add(new TrustAnchor(c, null)));
 		}
 
 		log.trace("Calculate cert path to validate (i.e. find first trust anchor)");
@@ -512,13 +502,22 @@ public class DefaultCertManager implements ICertificateManager {
 		boolean foundAnchor = false;
 		for(int i = 0; !foundAnchor && i < certs.size(); i++) {
 			X509Certificate c = certs.get(i);
-			cpToCheck.add(c);
-			foundAnchor = trustAnchors.parallelStream().anyMatch(a -> a.getTrustedCert().equals(c));
+			if (!(foundAnchor = trustAnchors.parallelStream().anyMatch(a -> a.getTrustedCert().equals(c))))
+				cpToCheck.add(c);
 		}
 
 		if (cpToCheck.isEmpty()) {
-			log.debug("Leaf certificate (Subject={}) is directly trusted", certs.get(0).getSubjectDN().getName());
-			return new ValidationResult(Trust.OK, cpToCheck, "Leaf certificate is registered a trust anchor");
+			X509Certificate cert = certs.get(0);
+			log.trace("Leaf certificate is directly trusted, check validity");
+			try {
+				cert.checkValidity();
+				log.debug("Valid directly trusted leaf certificate (Subject={})", CertificateUtils.getSubjectCN(cert));
+				return new ValidationResult(Trust.OK, cpToCheck, "Leaf certificate is registered a trust anchor");
+			} catch (CertificateExpiredException | CertificateNotYetValidException validationException) {
+				log.error("Invalid directly trusted leaf certificate (Subject={}) : {}",
+						  CertificateUtils.getSubjectCN(cert), validationException.getMessage());
+				return new ValidationResult(Trust.NOK, cpToCheck, "Invalid directly trusted leaf certificate");
+			}
 		}
 
 		if (log.isTraceEnabled()) {

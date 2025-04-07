@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.pmode.ITLSConfiguration;
+import org.holodeckb2b.interfaces.security.trust.IValidationParameters;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.core.Persist;
 import org.simpleframework.xml.core.Validate;
@@ -145,6 +146,11 @@ public class TLSConfiguration implements ITLSConfiguration, Serializable {
 		clientCertRef = new KeystoreAlias();
 		clientCertRef.name = alias;
 		clientCertRef.password = password;
+	}
+
+	@Override
+	public IValidationParameters getValidationParameters() {
+		return null;
 	}
 
 	@Override

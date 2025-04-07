@@ -265,8 +265,7 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
 
         // Configure signature verification action
         reqData.setSigVerCrypto(new CertManWSS4JCrypto(Action.VERIFY));
-        wssConfig.setValidator(WSConstants.SIGNATURE,
-				new SignatureTrustValidator(senderConfig != null ? senderConfig.getSignatureConfiguration() : null));
+        wssConfig.setValidator(WSConstants.SIGNATURE, new SignatureTrustValidator());
         reqData.setEnableRevocation(false);
         reqData.setEnableSignatureConfirmation(false);
         // Configure decryption action

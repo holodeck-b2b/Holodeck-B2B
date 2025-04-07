@@ -25,11 +25,11 @@ import org.apache.wss4j.dom.handler.RequestData;
 import org.apache.wss4j.dom.validate.Credential;
 import org.apache.wss4j.dom.validate.Validator;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.holodeckb2b.interfaces.pmode.ISigningConfiguration;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
 import org.holodeckb2b.interfaces.security.trust.IValidationResult;
 import org.holodeckb2b.interfaces.security.trust.IValidationResult.Trust;
+import org.holodeckb2b.interfaces.security.trust.SecurityLevel;
 
 /**
  * Is a WSS4J <code>Validator</code> that uses the <i>Certificate Manager</i>v to verify the trust in the certificate(s)
@@ -44,18 +44,9 @@ import org.holodeckb2b.interfaces.security.trust.IValidationResult.Trust;
  */
 public class SignatureTrustValidator implements Validator {
 	/*
-	 * The <code>ISigningConfiguration</code> of the sender of the message which will be provided to the <i>Certificate
-	 * Manager</i> to perform the trust validation (only in case this is supported by the <i>Certificate Manager</i>).
-	 */
-	private ISigningConfiguration signatureConfig;
-	/*
 	 * Holds the result of the trust validation check as executed by the <i>Certificate Manager</i>.
 	 */
 	private IValidationResult	trustCheckResult = null;
-
-	SignatureTrustValidator(ISigningConfiguration signatureConfig) {
-		this.signatureConfig = signatureConfig;
-	}
 
 	/**
 	 * Validates the certificate (path) used in the WS-Security signature using the installed <i>Certificate Manager</i>.
@@ -76,10 +67,7 @@ public class SignatureTrustValidator implements Validator {
         // Use the installed Certificate Manager to perform the validation and store the result for future use
         ICertificateManager certManager = HolodeckB2BCoreInterface.getCertificateManager();
         try {
-        	if (certManager.supportsConfigBasedValidation() && signatureConfig != null)
-        		trustCheckResult = certManager.validateMlsCertificate(Arrays.asList(certs), signatureConfig);
-        	else
-        		trustCheckResult = certManager.validateMlsCertificate(Arrays.asList(certs));
+    		trustCheckResult = certManager.validateCertificate(Arrays.asList(certs), SecurityLevel.MLS);
 		} catch (SecurityProcessingException e) {
 			throw new WSSecurityException(ErrorCode.FAILED_CHECK);
 		}
