@@ -27,8 +27,6 @@ import java.util.List;
 import javax.security.auth.x500.X500Principal;
 
 import org.holodeckb2b.interfaces.config.IConfiguration;
-import org.holodeckb2b.interfaces.pmode.ISigningConfiguration;
-import org.holodeckb2b.interfaces.pmode.ITLSConfiguration;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 
 /**
@@ -160,7 +158,7 @@ public interface ICertificateManager {
      * @throws SecurityProcessingException When there is a problem in searching the key pairs
      * @since 6.0.0
      */
-    String findKeyPair(final byte[] hash, MessageDigest digester) throws SecurityProcessingException;
+    String findKeyPair(final byte[] hash, final MessageDigest digester) throws SecurityProcessingException;
 
     /**
      * Gets the key pair registered under the given alias.
@@ -242,13 +240,15 @@ public interface ICertificateManager {
      * @throws SecurityProcessingException When there is a problem in searching for the certificate.
      * @since 6.0.0
      */
-    X509Certificate findCertificate(final byte[] hash, MessageDigest digester) throws SecurityProcessingException;
+    X509Certificate findCertificate(final byte[] hash, final MessageDigest digester) throws SecurityProcessingException;
 
     /**
-     * Checks if the given certificate path is trusted for the validation of signatures. The Certificate Manager may
-     * extend the given path with already registered trusted certificates to perform the actual trust validation.
+     * Checks if the given certificate path is trusted for the validation of signatures on the given security level.
+     * The Certificate Manager may extend the given path with already registered trusted certificates to perform the
+     * actual trust validation.
      *
      * @param certs	List of certificates that form the path to validate trust in. Must be in forward order.
+     * @param secLevel	Security level on which the certificate (path) to validate is used
      * @return		An instance of {@link IValidationResult} describing the validation result
      * @throws SecurityProcessingException 	When the trust cannot be validated due to some error. NOTE: This exception
      * 										MUST only be used to indicate errors that prevent checking the trust. When
@@ -256,18 +256,17 @@ public interface ICertificateManager {
      * 										in the certificate is undetermined.
      * @since 8.0.0 this method was previously named <code>validateTrust()</code>
      */
-    IValidationResult validateMlsCertificate(final List<X509Certificate> certs) throws SecurityProcessingException;
+    IValidationResult validateCertificate(final List<X509Certificate> certs, final SecurityLevel secLevel)
+    																				throws SecurityProcessingException;
 
     /**
-     * Checks if the given certificate path is trusted for the validation of a signature given the specific signing
-     * configuration. The Certificate Manager may extend the given path with already registered trusted certificates to
-     * perform the actual trust validation.
-     * <p>NOTE: This is an optional function of the <i>Certificate Manager</i> which by default returns the generic
-     * trust in the given certificate. The {@link #supportsConfigBasedValidation()} method can be used to determine
-     * whether the message based check is supported.
+     * Checks if the given certificate path is trusted for the validation of a signature on the given security level and
+     * taking into account the specified validation parameters. The Certificate Manager may extend the given path with
+     * already registered trusted certificates to perform the actual trust validation.
      *
      * @param certs		List of certificates that form the path to validate trust in. Must be in forward order.
-     * @param sigCfg	Configuration that applies to signature for which the certificate (path) to validate applies
+     * @param parameters	Validation parameters that should be used to validate the trust.
+     * @param secLevel	Security level on which the certificate (path) to validate is used
      * @return			An instance of {@link IValidationResult} describing the validation result
      * @throws SecurityProcessingException 	When the trust cannot be validated due to some error. NOTE: This exception
      * 										MUST only be used to indicate errors that prevent checking the trust. When
@@ -275,14 +274,15 @@ public interface ICertificateManager {
      * 										in the certificate is undetermined.
      * @since 8.0.0 this method was previously named <code>validateTrust()</code>
      */
-    default IValidationResult validateMlsCertificate(final List<X509Certificate> certs,
-    												 final ISigningConfiguration sigCfg)
-    														 						throws SecurityProcessingException {
-    	return validateMlsCertificate(certs);
+    default IValidationResult validateCertificate(final List<X509Certificate> certs,
+    												 final IValidationParameters parameters,
+    												 final SecurityLevel secLevel) throws SecurityProcessingException {
+    	throw new UnsupportedOperationException();
     }
 
     /**
-     * Indicates whether the <i>Certificate Manager</i> implementation supports configuration based trust validation.
+     * Indicates whether the <i>Certificate Manager</i> implementation supports configuration based trust validation,
+     * i.e. accepts {@link IValidationParameters validation parameters}.
      *
      * @return	<code>true</code> if supported, <code>false</code> if not.
      * 			Since this is an optional feature <code>false</code> is default.
@@ -293,50 +293,32 @@ public interface ICertificateManager {
     }
 
     /**
-     * Gets the certificates of all <i>Certificate Authorities</i> that are trusted to issue TLS certificates. Note that
-     * the returned CA's not necessarily issue the certificates of end users but could just be the root CA's.
+     * Gets the certificates of all <i>Certificate Authorities</i> that are trusted to issue certificates for use on the
+     * indicated security level, e.g. for transport level security. Note that the returned CA's not necessarily issue
+     * the certificates of end users but could just be the root CA's.
      *
-     * @return collection containing the X509 certificates of all trusted TLS CA's
+     * @param secLevel	Security level for which the CA certificates are required
+     * @return collection containing the X509 certificates of all trusted CA's
      * @throws SecurityProcessingException when the CA certificates cannot be retrieved
      * @since 8.0.0
      */
-    Collection<X509Certificate> getAllTlsCACertificates() throws SecurityProcessingException;
+    Collection<X509Certificate> getAllTrustedCertificates(final SecurityLevel secLevel)
+    																				throws SecurityProcessingException;
 
     /**
-     * Checks if the given [server] TLS certificate path is trusted for the setting up a secure connection. Note that
-     * the Certificate Manager may extend the given path with already registered trusted certificates to perform the
-     * actual trust validation.
+     * Gets the certificates of all <i>Certificate Authorities</i> that are trusted to issue certificates for use on the
+     * indicated security level and taking into account the specified validation parameters. Note that the returned CA's
+     * not necessarily issue the certificates of end users but could just be the root CA's.
      *
-     * @param certs	List of certificates that form the path to validate trust in. Must be in forward order.
-     * @return		An instance of {@link IValidationResult} describing the validation result
-     * @throws SecurityProcessingException 	When the trust cannot be validated due to some error. NOTE: This exception
-     * 										MUST only be used to indicate errors that prevent checking the trust. When
-     * 										thrown it indicates only that the trust could not be checked, i.e. the trust
-     * 										in the certificate is undetermined.
+     * @param secLevel		Security level for which the CA certificates are required
+     * @param parameters	Validation parameters that should be used to determine the trusted CA's
+     * @return collection containing the X509 certificates of all trusted CA's
+     * @throws SecurityProcessingException when the CA certificates cannot be retrieved
      * @since 8.0.0
      */
-    IValidationResult validateTlsCertificate(final List<X509Certificate> certs) throws SecurityProcessingException;
-
-    /**
-     * Checks if the given [server] TLS certificate path is trusted for the setting up a secure connection based on the
-     * specified TLS configuration. Note that the Certificate Manager may extend the given path with already registered
-     * trusted certificates to perform the actual trust validation.
-     * <p>NOTE: This is an optional function of the <i>Certificate Manager</i> which by default returns the generic
-     * trust in the given certificate. The {@link #supportsConfigBasedValidation()} method can be used to determine
-     * whether the message based check is supported.
-     *
-     * @param certs	List of certificates that form the path to validate trust in. Must be in forward order.
-     * @param tlsConfig The TLS configuration specific to the connection being set up. Can be <code>null</code> in which
-     * 					case the default TLS trust policy should be used.
-     * @return		An instance of {@link IValidationResult} describing the validation result
-     * @throws SecurityProcessingException 	When the trust cannot be validated due to some error. NOTE: This exception
-     * 										MUST only be used to indicate errors that prevent checking the trust. When
-     * 										thrown it indicates only that the trust could not be checked, i.e. the trust
-     * 										in the certificate is undetermined.
-     * @since 8.0.0
-     */
-    default IValidationResult validateTlsCertificate(final List<X509Certificate> certs,
-    										 final ITLSConfiguration tlsConfig) throws SecurityProcessingException {
-    	return validateTlsCertificate(certs);
+    default Collection<X509Certificate> getAllTrustedCertificates(final SecurityLevel secLevel,
+    															  final IValidationParameters parameters)
+    																				throws SecurityProcessingException {
+    	throw new UnsupportedOperationException();
     }
 }

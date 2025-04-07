@@ -16,6 +16,8 @@
  */
 package org.holodeckb2b.interfaces.pmode;
 
+import org.holodeckb2b.interfaces.security.trust.IValidationParameters;
+
 /**
  * Defines the parameters for establishing a secure connection to the communication partner. These consist of the
  * allowed TLS protocols, cipher suites and client certificate that should be used.
@@ -65,4 +67,16 @@ public interface ITLSConfiguration {
 	 * @return password of the key pair to use for TLS client authentication
 	 */
 	String getClientCertificatePassword();
+
+	/**
+	 * Gets the optional parameters which the <i>Certificate Manager</i> should use for the trust validation of the
+	 * server's TLS certificate.
+	 * <p>
+	 * NOTE: Whether validation parameters are supported and which specific parameters can be set depends on the
+	 * installed <i>Certificate Manager</i>. When parameters are specified but not supported, the P-Mode will be
+	 * rejected.
+	 *
+	 * @return	the parameters to be used by the <i>Certificate Manager</i> for validation of TLS server certificates
+	 */
+	IValidationParameters getValidationParameters();
 }
