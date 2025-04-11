@@ -39,8 +39,11 @@ import java.util.UUID;
 import org.holodeckb2b.common.pmode.Agreement;
 import org.holodeckb2b.common.pmode.InMemoryPModeSet;
 import org.holodeckb2b.common.pmode.PMode;
+import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.commons.testing.TestUtils;
+import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.config.InternalConfiguration;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.holodeckb2b.interfaces.pmode.IPModeSetListener;
 import org.holodeckb2b.interfaces.pmode.PModeSetEvent;
@@ -68,7 +71,8 @@ public class PModeManagerTest {
 
 	@BeforeAll
 	static void setUpClass() throws Exception {
-		config = new InternalConfiguration(TestUtils.getTestClassBasePath());
+		HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore(TestUtils.getTestClassBasePath()));
+		config = HolodeckB2BCore.getConfiguration();
 		dcl = Thread.currentThread().getContextClassLoader();
 		ecl = new URLClassLoader(new URL[] { TestUtils.getTestClassBasePath().toUri().toURL() }, dcl);
 	}
