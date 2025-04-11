@@ -20,6 +20,7 @@ import java.security.KeyStore.PrivateKeyEntry;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.apache.axis2.description.TransportOutDescription;
 import org.apache.logging.log4j.LogManager;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
@@ -42,7 +43,8 @@ public class TLSConfigurationValidator implements IPModeValidator {
 
 	@Override
 	public boolean doesValidate(String pmodeType) {
-		return HolodeckB2BCore.getConfiguration().getTransportOut("http").getSender() instanceof HTTPTransportSender;
+		TransportOutDescription httpTransport = HolodeckB2BCore.getConfiguration().getTransportOut("http");
+		return httpTransport != null && httpTransport.getSender() instanceof HTTPTransportSender;
 	}
 
 	@Override
