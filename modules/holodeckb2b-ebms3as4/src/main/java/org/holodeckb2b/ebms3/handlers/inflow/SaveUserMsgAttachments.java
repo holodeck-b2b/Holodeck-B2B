@@ -86,7 +86,7 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
             for(final IPayloadEntity p : payloads) {
             	log.trace("Get the storage for payload {}", p.getPayloadURI());
             	IPayloadContent storage = updateManager.createStorageReceivedPayload(p);
-            	if (storage.getContent() != null) {
+            	if (storage.isContentAvailable()) {
 	            	log.debug("Content of payload ({}) has already been saved", p.getPayloadURI());
 	            	continue;
             	}

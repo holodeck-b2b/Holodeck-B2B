@@ -39,6 +39,11 @@ public class PayloadContent implements IPayloadContent {
 	}
 
 	@Override
+	public boolean isContentAvailable() {
+		return content != null;
+	}
+
+	@Override
 	public InputStream getContent() throws StorageException {
 		return content != null ? new ByteArrayInputStream(content) : null;
 	}

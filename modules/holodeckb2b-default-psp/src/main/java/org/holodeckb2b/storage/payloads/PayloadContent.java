@@ -64,6 +64,11 @@ public class PayloadContent implements IPayloadContent {
 	}
 
 	@Override
+	public boolean isContentAvailable() {
+		return contentPath.exists() && (writeStream == null || writeStream.closed);
+	}
+
+	@Override
 	public InputStream getContent() throws StorageException {
 		if (writeStream != null && !writeStream.closed)
 			// Content is still written, so not available for reading right now
