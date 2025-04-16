@@ -67,7 +67,8 @@ public interface IPayloadStorageProvider {
 	 *
 	 * @param payloadInfo	meta-data of the payload which content are to be stored
 	 * @return {@link IPayloadContent} object to use for storing the payload content
-	 * @throws StorageException when an error occurs storing the payload content
+	 * @throws StorageException when the storage for the given payload is already created or an error occurs creating
+	 * 							the storage for the payload content
 	 */
 	IPayloadContent createNewPayloadStorage(final IPayloadEntity payloadInfo) throws StorageException;
 
