@@ -44,7 +44,7 @@ public class FindPModesForPullRequest extends AbstractBaseHandler {
 	 * Name of the message processing context property that will hold the found P-Modes for the received Pull Request
 	 */
 	static final String FOUND_PULL_PMODES = "found-pull-pmodes";
-	
+
     @Override
     protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log) throws Exception {
         final IPullRequestEntity pullRequest = procCtx.getReceivedPullRequest();
@@ -54,23 +54,33 @@ public class FindPModesForPullRequest extends AbstractBaseHandler {
              * MPC and given authentication info are used.
              */
             log.trace("Find P-Modes matching the pull request");
-            final Collection<IPMode> pmodes = PModeFinder.findForPulling(procCtx.getSecurityProcessingResults(),
-            															 pullRequest.getMPC());
-            if (Utils.isNullOrEmpty(pmodes)) {
+            Collection<IPMode> pullPModes;
+            @SuppressWarnings("unchecked")
+			Collection<IPMode> pmodeSet = (Collection<IPMode>) procCtx.getProperty(FindPModes.CTX_APPL_PMODESET);
+            if (pmodeSet != null) {
+            	log.debug("Using restricted P-Mode set specified in Message Processing Context");
+				pullPModes = PModeFinder.findForPulling(pmodeSet,
+													procCtx.getSecurityProcessingResults(), pullRequest.getMPC());
+			} else {
+				pullPModes = PModeFinder.findForPulling(procCtx.getSecurityProcessingResults(), pullRequest.getMPC());
+            }
+
+
+            if (Utils.isNullOrEmpty(pullPModes)) {
                 // No P-Modes found for the MPC and authentication info provided in pull request
                 log.info("No P-Mode found for PullRequest [" + pullRequest.getMessageId() + "]");
-                                              
+
                 procCtx.addGeneratedError(new ProcessingModeMismatch(
-                										"Can not process pull request because no P-Mode was found!", 
+                										"Can not process pull request because no P-Mode was found!",
                 										pullRequest.getMessageId()));
                 log.trace("Set the processing state of this PullRequest to failure");
                 HolodeckB2BCore.getStorageManager().setProcessingState(pullRequest, ProcessingState.FAILURE);
             } else {
-                log.debug("Store the list of " + pmodes.size()
+                log.debug("Store the list of " + pullPModes.size()
                             + " authorized PModes so next handler can retrieve message unit to return");
-                procCtx.setProperty(FOUND_PULL_PMODES, pmodes);
+                procCtx.setProperty(FOUND_PULL_PMODES, pullPModes);
             }
-        } 
+        }
 
         return InvocationResponse.CONTINUE;
     }

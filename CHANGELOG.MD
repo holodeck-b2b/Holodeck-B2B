@@ -27,6 +27,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 * Added parameter to the `ICertificateManager.validateCertificate()` method to indicate on which security level, e.g. 
   transport is used.  
+* It is now possible to specify a specific set of P-Modes that should be searched by ebMS3/AS4 handlers for finding the
+  P-Mode(s) of a _User Message_ or applicable to a _Pull Request_. 
 * Split the core interface to access the current P-Mode set and the interface defining the P-Mode storage 
   component in `org.holodeckb2b.interfaces.pmode.IPModeSet` respectively `org.holodeckb2b.interfaces.pmode.IPModeStorage`. 
   Extensions implementing a custom P-Mode storage component should be updated and implement the latter.

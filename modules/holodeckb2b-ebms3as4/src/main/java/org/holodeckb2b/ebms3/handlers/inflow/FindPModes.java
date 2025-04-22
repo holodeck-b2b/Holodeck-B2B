@@ -25,6 +25,7 @@ import org.holodeckb2b.common.util.MessageUnitUtils;
 import org.holodeckb2b.commons.Pair;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
+import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.core.pmode.PModeUtils;
 import org.holodeckb2b.core.storage.StorageManager;
 import org.holodeckb2b.ebms3.pmode.PModeFinder;
@@ -64,7 +65,11 @@ import org.holodeckb2b.interfaces.storage.StorageException;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class FindPModes extends AbstractBaseHandler {
-
+	/**
+	 * Name of the {@link MessageProcessingContext Message Processing Context} property that can be used to restrict
+	 * the collection of P-Modes that should be checked to find the P-Mode for the User Message.
+	 */
+	public static final String CTX_APPL_PMODESET = "ebms3as4-pmodeset";
 
     @Override
     protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log)
@@ -73,7 +78,15 @@ public class FindPModes extends AbstractBaseHandler {
         final IUserMessageEntity userMsg = procCtx.getReceivedUserMessage();
         if (userMsg != null) {
             log.debug("Finding P-Mode for User Message [" + userMsg.getMessageId() + "]");
-            IPMode pmode = PModeFinder.forReceivedUserMessage(userMsg);
+            @SuppressWarnings("unchecked")
+			Collection<IPMode> pmodeSet = (Collection<IPMode>) procCtx.getProperty(CTX_APPL_PMODESET);
+            IPMode pmode;
+            if (pmodeSet != null) {
+            	log.debug("Using restricted P-Mode set specified in Message Processing Context");
+				pmode = PModeFinder.forReceivedUserMessage(pmodeSet, userMsg);
+			} else {
+				pmode = PModeFinder.forReceivedUserMessage(userMsg);
+            }
             if (pmode == null && procCtx.isHB2BInitiated()) {
             	final IPullRequest pullRequest = procCtx.getSendingPullRequest();
             	if (pullRequest != null) {
