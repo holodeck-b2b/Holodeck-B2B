@@ -55,9 +55,10 @@ import org.holodeckb2b.interfaces.storage.StorageException;
  * <p>For Pull Request message units finding the P-Mode is dependent on the information supplied in the WS-Security
  * header. As we have not read the WSS header at this point the P-Mode can not be determined for Pull Request signals.
  * <p>Finding the P-Mode for a User Message is done by the {@link PModeFinder} utility class by matching the meta-data
- * from the received message to the P-Mode configuration data. Since version 4.1.0 this handler will check if the User
- * Message was received as result of a Pull Request and if no P-Mode was found, assign the P-Mode used by the
- * Pull Request to the User Message.
+ * from the received message to the P-Mode configuration data. Since version 8.0.0 the set of P-Mode to evaluate to find
+ * a match can be specified in the Message Processing Context property <i>ebms3as4-pmodeset</i>. This could for example
+ * be done by a "dispatch" handler. Since version 4.1.0 this handler will check if the User Message was received as
+ * result of a Pull Request and if no P-Mode was found, assign the P-Mode used by the Pull Request to the User Message.
  * <p><b>NOTE:</b> The Error generated in case the P-Mode can not be determined is <i>ProcessingModeMismatch</i>. The
  * ebMS specification is not very clear if a specific error must be used. Current choice is based on discussion on <a
  * href="https://issues.oasis-open.org/browse/EBXMLMSG-67">issue 67 of ebMS TC</a>.

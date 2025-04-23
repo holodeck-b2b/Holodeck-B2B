@@ -35,7 +35,9 @@ import org.holodeckb2b.interfaces.storage.IPullRequestEntity;
  * FindPModes}) as it requires knowledge of information contained in the WS-Security header.
  * <p>Based on only the MPC and authentication info it may not be possible to uniquely identify a P-Mode, so the result
  * of P-Mode finding for a Pull Request is a collection of P-Modes that a User Message may be pulled from. Finding the
- * P-Mode for a User Message is done by the {@link PModeFinder} utility class.
+ * P-Mode(s) for a Pul Request is done by the {@link PModeFinder} utility class. Since version 8.0.0 the set of P-Modes
+ * to evaluate to find a match can be specified in the Message Processing Context property <i>ebms3as4-pmodeset</i>.
+ * This could for example be done by a "dispatch" handler.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
