@@ -101,6 +101,11 @@ import org.holodeckb2b.security.trust.config.PasswordType;
  * configuration file is defined by the XSD with namespace "http://holodeck-b2b.org/schemas/2019/09/config/certmanager"
  * which can be found in <a href="../xsd/certmanager.xsd">certmanager.xsd</a>.
  * <p>
+ * Since TLS certificates are often issued by one of the common and well-known Certificate Authorities the default
+ * Certificate Manager implementation also uses the JVM default trust store for trust validation of TLS certificates.
+ * The use of this default trust store can be fine tuned by setting a different value for the <code>
+ * IncludeDefaultTrustStore</code> element in the configuration file.
+ * <p>
  * The trading partner certificates are by default not used during trust validation. However it can be useful in an
  * environment to directly trust the certificates of the trading partner (for example if there is just one). For this
  * the <i>direct trust</i> configuration setting is available in which case the trading partner certificates are handled
@@ -192,7 +197,7 @@ public class DefaultCertManager implements ICertificateManager {
             														certMgrConfig.isDirectTrustPartnerCertificates();
             includeJDKTrustAnchors = new HashSet<SecurityLevel>();
             DefaultTrustOptions defaultTrustOption = certMgrConfig.getIncludeDefaultTrustStore() == null ?
-            														DefaultTrustOptions.NEVER :
+            														DefaultTrustOptions.TLS_ONLY :
             														certMgrConfig.getIncludeDefaultTrustStore();
             switch (defaultTrustOption) {
             case ALWAYS:
