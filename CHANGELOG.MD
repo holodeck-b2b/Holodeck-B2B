@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## 8.0.0
-##### 
+##### 2025-07-23
 ### Added
 * Possibility to "pre-submit" Payloads before the actual User Message is submitted. See new methods in 
   `org.holodeckb2b.interfaces.submit.IMessageSubmitter`  
