@@ -25,7 +25,9 @@ import org.apache.logging.log4j.LogManager;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.axis2.HTTPTransportSender;
+import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
+import org.holodeckb2b.interfaces.pmode.IProtocol;
 import org.holodeckb2b.interfaces.pmode.ITLSConfiguration;
 import org.holodeckb2b.interfaces.pmode.validation.IPModeValidator;
 import org.holodeckb2b.interfaces.pmode.validation.PModeValidationError;
@@ -51,7 +53,9 @@ public class TLSConfigurationValidator implements IPModeValidator {
 	public Collection<PModeValidationError> validatePMode(IPMode pmode) {
 		Collection<PModeValidationError>    errors = new ArrayList<>();
 
-		ITLSConfiguration tlsConfiguration = PModeUtils.getSendLeg(pmode).getProtocol().getTLSConfiguration();
+		ILeg sendLeg = PModeUtils.getSendLeg(pmode);
+		IProtocol protocol = sendLeg != null ? sendLeg.getProtocol() : null;
+		ITLSConfiguration tlsConfiguration = protocol != null ? protocol.getTLSConfiguration() : null;
 
 		// Only if there is a TLS configuration we need to validate the P-Mode
 		if (tlsConfiguration != null) {
