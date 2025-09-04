@@ -39,6 +39,7 @@ import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
+import org.holodeckb2b.interfaces.security.trust.IValidationParameters;
 import org.holodeckb2b.interfaces.security.trust.IValidationResult;
 import org.holodeckb2b.interfaces.security.trust.IValidationResult.Trust;
 import org.holodeckb2b.interfaces.security.trust.SecurityLevel;
@@ -273,7 +274,8 @@ public class TestCertificateManager implements ICertificateManager {
 
 
 	@Override
-	public Collection<X509Certificate> getAllTrustedCertificates(SecurityLevel secLevel) {
+	public Collection<X509Certificate> getAllTrustedCertificates(SecurityLevel secLevel, IValidationParameters params) 
+																					throws SecurityProcessingException {
 		List<X509Certificate> certs = new ArrayList<>();
 		try {
 			for(Enumeration<String> aliases = trustedCerts.aliases(); aliases.hasMoreElements();)
@@ -284,8 +286,8 @@ public class TestCertificateManager implements ICertificateManager {
 	}
 
 	@Override
-	public IValidationResult validateCertificate(List<X509Certificate> certs, SecurityLevel secLevel)
-																					throws SecurityProcessingException {
+	public IValidationResult validateCertificate(List<X509Certificate> certs, IValidationParameters params, 
+												 SecurityLevel secLevel) throws SecurityProcessingException {
 		if (Utils.isNullOrEmpty(certs))
 			throw new SecurityProcessingException("No certs to validate!");
 

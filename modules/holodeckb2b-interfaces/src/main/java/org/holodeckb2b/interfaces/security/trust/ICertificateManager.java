@@ -256,8 +256,10 @@ public interface ICertificateManager {
      * 										in the certificate is undetermined.
      * @since 8.0.0 this method was previously named <code>validateTrust()</code>
      */
-    IValidationResult validateCertificate(final List<X509Certificate> certs, final SecurityLevel secLevel)
-    																				throws SecurityProcessingException;
+    default IValidationResult validateCertificate(final List<X509Certificate> certs, final SecurityLevel secLevel)
+    																				throws SecurityProcessingException {
+    	return validateCertificate(certs, null, secLevel);
+    }
 
     /**
      * Checks if the given certificate path is trusted for the validation of a signature on the given security level and
@@ -265,7 +267,8 @@ public interface ICertificateManager {
      * already registered trusted certificates to perform the actual trust validation.
      *
      * @param certs		List of certificates that form the path to validate trust in. Must be in forward order.
-     * @param parameters	Validation parameters that should be used to validate the trust.
+     * @param parameters	Validation parameters that should be used to validate the trust. May be <code>null</code> if 
+     * 						there are no parameters to take into account.
      * @param secLevel	Security level on which the certificate (path) to validate is used
      * @return			An instance of {@link IValidationResult} describing the validation result
      * @throws SecurityProcessingException 	When the trust cannot be validated due to some error. NOTE: This exception
@@ -274,11 +277,8 @@ public interface ICertificateManager {
      * 										in the certificate is undetermined.
      * @since 8.0.0 this method was previously named <code>validateTrust()</code>
      */
-    default IValidationResult validateCertificate(final List<X509Certificate> certs,
-    												 final IValidationParameters parameters,
-    												 final SecurityLevel secLevel) throws SecurityProcessingException {
-    	throw new UnsupportedOperationException();
-    }
+    IValidationResult validateCertificate(final List<X509Certificate> certs, final IValidationParameters parameters,
+    									  final SecurityLevel secLevel) throws SecurityProcessingException;
 
     /**
      * Indicates whether the <i>Certificate Manager</i> implementation supports configuration based trust validation,
@@ -302,8 +302,10 @@ public interface ICertificateManager {
      * @throws SecurityProcessingException when the CA certificates cannot be retrieved
      * @since 8.0.0
      */
-    Collection<X509Certificate> getAllTrustedCertificates(final SecurityLevel secLevel)
-    																				throws SecurityProcessingException;
+    default Collection<X509Certificate> getAllTrustedCertificates(final SecurityLevel secLevel)
+    																				throws SecurityProcessingException {
+    	return getAllTrustedCertificates(secLevel, null);
+    }
 
     /**
      * Gets the certificates of all <i>Certificate Authorities</i> that are trusted to issue certificates for use on the
@@ -311,14 +313,14 @@ public interface ICertificateManager {
      * not necessarily issue the certificates of end users but could just be the root CA's.
      *
      * @param secLevel		Security level for which the CA certificates are required
-     * @param parameters	Validation parameters that should be used to determine the trusted CA's
+     * @param parameters	Validation parameters that should be used to determine the trusted CA's. May be 
+     * 						<code>null</code> if there are no parameters to take into account.
      * @return collection containing the X509 certificates of all trusted CA's
      * @throws SecurityProcessingException when the CA certificates cannot be retrieved
      * @since 8.0.0
      */
-    default Collection<X509Certificate> getAllTrustedCertificates(final SecurityLevel secLevel,
-    															  final IValidationParameters parameters)
-    																				throws SecurityProcessingException {
-    	throw new UnsupportedOperationException();
-    }
+    Collection<X509Certificate> getAllTrustedCertificates(final SecurityLevel secLevel,
+    													  final IValidationParameters parameters)
+    																				throws SecurityProcessingException;
+    
 }
