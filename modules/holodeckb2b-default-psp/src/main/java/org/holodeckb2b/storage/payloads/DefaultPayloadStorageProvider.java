@@ -63,7 +63,7 @@ public class DefaultPayloadStorageProvider implements IPayloadStorageProvider {
 			directory = config.getTempDirectory().resolve("pldata");
 			if (!Files.exists(directory))
 				try {
-					Files.createDirectory(directory);
+					Files.createDirectories(directory);
 				} catch (IOException ioError) {
 					throw new StorageException("Could not create payload directory", ioError);
 				}
