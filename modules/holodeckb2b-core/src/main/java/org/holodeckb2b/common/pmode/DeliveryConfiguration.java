@@ -70,7 +70,7 @@ public class DeliveryConfiguration implements IDeliverySpecification, Serializab
     public DeliveryConfiguration(final IDeliverySpecification source) {
         this.id = source.getId();
         this.deliveryMethodClass = source.getDeliveryMethod();
-        this.deliveryMethodClassName = source.getDeliveryMethod().getName();
+        this.deliveryMethodClassName = source.getDeliveryMethod() == null ? null : source.getDeliveryMethod().getName();
         this.performAsync = source.performAsyncDelivery();
         setSettings(source.getSettings());
     }
