@@ -246,7 +246,7 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl implements IHolodec
     	for(i = 0; i < eventConfig.size() && !exists; i++)
     		exists = eventConfig.get(i).getId().equals(id);
     	if (exists)
-    		eventConfig.set(i, eventConfiguration);
+    		eventConfig.set(i - 1, eventConfiguration);
     	else
     		eventConfig.add(eventConfiguration);
     	return exists;

@@ -416,7 +416,7 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
     		exists = eventConfigurations.get(i).getId().equals(id);
     	if (exists) {
     		log.trace("Replacing existing event handler configuration [id={}]", id);
-    		eventConfigurations.set(i, eventConfiguration);
+    		eventConfigurations.set(i - 1, eventConfiguration);
     	} else
     		eventConfigurations.add(eventConfiguration);
     	log.info("Registered event handler configuration [id={}]", id);
@@ -433,7 +433,7 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
     	for(i = 0; i < eventConfigurations.size() && !exists; i++)
     		exists = eventConfigurations.get(i).getId().equals(id);
     	if (exists) {
-    		eventConfigurations.remove(i);
+    		eventConfigurations.remove(i - 1);
     		log.info("Removing event handler configuration [id=]", id);
     	} else
     		log.warn("No event handler configuration registered for id=[{}]", id);
