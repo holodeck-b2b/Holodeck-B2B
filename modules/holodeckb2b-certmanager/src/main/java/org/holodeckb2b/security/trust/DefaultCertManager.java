@@ -233,6 +233,16 @@ public class DefaultCertManager implements ICertificateManager {
         	log.fatal("One or more of the configured key stores are not available!");
         	throw new SecurityProcessingException("Invalid configuration!");
         }
+        log.trace("Check that BC Provider is available");
+		try {
+			if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
+				log.debug("Adding BouncyCastle JCE provider");
+				Security.addProvider(new BouncyCastleProvider());
+			}
+		} catch (Throwable bcUnavailable) {
+			log.fatal("Required BouncyCastle provider is not available! Details: {}", bcUnavailable.getMessage());
+			throw new SecurityProcessingException("BouncyCastle provider not available!");
+		}       
         // We enable OCSP by default, even if revocation checking is disabled
         Security.setProperty("ocsp.enable", "true");
 
