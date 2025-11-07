@@ -62,7 +62,7 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl implements IHolodec
 
 	private InternalConfiguration		configuration;
 	private IMessageSubmitter	messageSubmitter;
-	private PModeManager		pmodes;
+	private IPModeSet		pmodes;
 	private IMessageProcessingEventProcessor eventProcessor;
 	private IValidationExecutor validationExec;
 	private ICertificateManager certManager;
@@ -157,13 +157,12 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl implements IHolodec
 	@Override
 	public IPModeSet getPModeSet() {
 		if (pmodes == null)
-			try {
-				pmodes = new PModeManager(this.configuration);
-			} catch (PModeSetException e) {
-				e.printStackTrace();
-				return null;
-			}
+			pmodes = new TestPModeManager();
 		return pmodes;
+	}
+	
+	public void setPModeManager(final IPModeSet manager) {
+		this.pmodes = manager;
 	}
 
 	public void setMessageProcessingEventProcessor(final IMessageProcessingEventProcessor processor) {
