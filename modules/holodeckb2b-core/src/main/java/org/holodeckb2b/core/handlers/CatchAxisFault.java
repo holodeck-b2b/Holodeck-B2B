@@ -88,7 +88,7 @@ public class CatchAxisFault extends AbstractBaseHandler {
                                     + "] could not be processed due to an unexpected error.");
                         HolodeckB2BCore.getStorageManager().setProcessingState(mu,
                         			mu instanceof IUserMessage && mu.getDirection() == Direction.OUT ?
-                        										ProcessingState.SUSPENDED : ProcessingState.FAILURE);
+                        										ProcessingState.SUSPENDED : ProcessingState.INTERRUPTED);
                         // Raise event to signal the processing failure
                         HolodeckB2BCore.getEventProcessor().raiseEvent(receiving ?
 		                        								new GenericReceiveMessageFailure(mu, failureDescription)

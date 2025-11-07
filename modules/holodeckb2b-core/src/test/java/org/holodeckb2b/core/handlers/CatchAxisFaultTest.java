@@ -80,7 +80,7 @@ public class CatchAxisFaultTest {
         assertFalse(Utils.isNullOrEmpty(procCtx.getReceivedMessageUnits()));
         assertFalse(Utils.isNullOrEmpty(procCtx.getSendingMessageUnits()));
         assertTrue(procCtx.getReceivedMessageUnits().stream()
-        					   .noneMatch(mu -> mu.getCurrentProcessingState().getState() == ProcessingState.FAILURE));
+        					   .noneMatch(mu -> mu.getCurrentProcessingState().getState() == ProcessingState.INTERRUPTED));
         assertTrue(procCtx.getSendingMessageUnits().stream()
         						.noneMatch(mu -> mu.getCurrentProcessingState().getState() == ProcessingState.FAILURE));
     }
@@ -121,7 +121,7 @@ public class CatchAxisFaultTest {
         assertNull(procCtx.getSendingPullRequest());
         assertNull(procCtx.getSendingUserMessage());
         assertEquals(ProcessingState.DELIVERED, umEntity.getCurrentProcessingState().getState());
-        assertEquals(ProcessingState.FAILURE, rcptEntity.getCurrentProcessingState().getState());
+        assertEquals(ProcessingState.INTERRUPTED, rcptEntity.getCurrentProcessingState().getState());
     }
 
     @Test
@@ -153,7 +153,7 @@ public class CatchAxisFaultTest {
     	assertTrue(Utils.isNullOrEmpty(procCtx.getSendingReceipts()));
     	assertNull(procCtx.getSendingPullRequest());
     	assertNull(procCtx.getSendingUserMessage());
-    	assertEquals(ProcessingState.FAILURE, umEntity.getCurrentProcessingState().getState());
+    	assertEquals(ProcessingState.INTERRUPTED, umEntity.getCurrentProcessingState().getState());
     }
 
     @Test
