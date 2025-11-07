@@ -2,6 +2,15 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 7.1.0
+##### 
+### Added
+* New processing state _INTERRUPTED_ to indicate that an [unexpected] error occurred that prevented completion of
+  processing a received Message Unit but which could be recovered on a next attempt.
+ 
+### Fixed
+* Received message marked as duplicate even if not completely processed before.
+
 ## 7.0.1
 ##### 2025-01-13
 ### Fixed

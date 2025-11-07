@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.holodeckb2b</groupId>
 		<artifactId>holodeckb2b</artifactId>
-		<version>7.0.1</version>
+		<version>7.1.0</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 	<artifactId>holodeckb2b-ui</artifactId>
