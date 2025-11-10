@@ -2,8 +2,21 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 8.1.0
+##### 
+### Added
+* New processing state _INTERRUPTED_ to indicate that an [unexpected] error occurred that prevented completion of
+  processing a received Message Unit but which could be recovered on a next attempt.
+* Option to set the _P-Mode Manager_ in `HolodeckB2BTestCore`
+ 
+### Fixed
+* Received message marked as duplicate even if not completely processed before.
+* Out of Bound exception when registering global event handler.
+* NPE when copying P-Mode delivery configuration
+* Fix IOException when parent directories of specified payload storage path do not exist 
+
 ## 8.0.0
-##### 2025-07-23
+##### Unreleased
 ### Added
 * Possibility to "pre-submit" Payloads before the actual User Message is submitted. See new methods in 
   `org.holodeckb2b.interfaces.submit.IMessageSubmitter`  
