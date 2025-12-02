@@ -86,6 +86,8 @@
     <!-- may cause Holodeck B2B to stop functioning correctly,   -->
     <!-- so handle with care!                                    -->
     <!-- ========================================================-->
+    <module ref="holodeckb2b-core"></module>
+    
     <parameter name="hotdeployment">false</parameter>
     <parameter name="hotupdate">false</parameter>
     <parameter name="enableMTOM">false</parameter>
