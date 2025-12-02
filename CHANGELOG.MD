@@ -8,6 +8,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * New processing state _INTERRUPTED_ to indicate that an [unexpected] error occurred that prevented completion of
   processing a received Message Unit but which could be recovered on a next attempt.
 * Option to set the _P-Mode Manager_ in `HolodeckB2BTestCore`
+* Support for running on JVM version 17
  
 ### Fixed
 * Received message marked as duplicate even if not completely processed before.

@@ -110,7 +110,12 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
     private static Logger  log = LogManager.getLogger(SecurityHeaderCreator.class);
 
     /**
-     * The Certificate manager of the security provider
+     * The Security Provider instance
+     */
+    private DefaultProvider securityProvider;
+
+    /**
+     * The installed Certificate manager
      */
     private ICertificateManager certManager;
 
@@ -151,8 +156,11 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
 
     /**
      * Creates a new <code>SecurityHeaderCreator</code> instance
+     *
+     * @param securityProvider The Security Provider instance that creates this instance
      */
-    SecurityHeaderCreator() {
+    SecurityHeaderCreator(DefaultProvider securityProvider) {
+    	this.securityProvider = securityProvider;
         this.certManager = HolodeckB2BCoreInterface.getCertificateManager();
     }
 
@@ -550,6 +558,7 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
         });
         wssConfig.setAction(WSConstants.ENCR, EncryptionAction.class);
         reqData.setWssConfig(wssConfig);
+        reqData.setSignatureProvider(securityProvider.getJceProvider());
         reqData.setMsgContext(msgContext);
         reqData.setActor(target.id());
 
@@ -576,6 +585,7 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
                 case WSConstants.SIGN : {
                     SignatureActionToken actionToken = new SignatureActionToken();
                     reqData.setSignatureToken(actionToken);
+                    reqData.setSignatureProvider(securityProvider.getJceProvider());
                     actionToken.setCrypto(loadSignatureCrypto(reqData));
                     decodeSignatureParameter(reqData);
                     break;

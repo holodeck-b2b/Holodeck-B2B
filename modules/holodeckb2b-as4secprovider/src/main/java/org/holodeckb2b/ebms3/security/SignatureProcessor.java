@@ -23,8 +23,6 @@ import java.security.Provider;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.security.spec.AlgorithmParameterSpec;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -88,19 +86,19 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 /**
- * Is a copy of the WSS4J <code>org.apache.wss4j.dom.processor.SignatureProcessor</code> modified to allow an unlimited 
- * number of <code>@lt;ds:Reference&gt;</code> elements in the signature and therefore an unlimited number of payloads 
+ * Is a copy of the WSS4J <code>org.apache.wss4j.dom.processor.SignatureProcessor</code> modified to allow an unlimited
+ * number of <code>@lt;ds:Reference&gt;</code> elements in the signature and therefore an unlimited number of payloads
  * in the ebMS message.
- * <p>The limitation in the number of references is part of the Java "secure validation mode". In the default WSS4J 
+ * <p>The limitation in the number of references is part of the Java "secure validation mode". In the default WSS4J
  * signature processor use of this mode is hard-coded in a private method. Therefore we cannot simply extend the class
- * and override the method where the mode is enabled, but have to create a copy of the class.   
- * 
+ * and override the method where the mode is enabled, but have to create a copy of the class.
+ *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  5.1.0
  */
 public class SignatureProcessor implements Processor {
 	private Logger log = LogManager.getLogger();
-	
+
 	private XMLSignatureFactory signatureFactory;
 
 	public SignatureProcessor() {
@@ -126,6 +124,7 @@ public class SignatureProcessor implements Processor {
 		}
 	}
 
+	@Override
 	public List<WSSecurityEngineResult> handleToken(Element elem, RequestData data) throws WSSecurityException {
 		log.debug("Found signature element");
 		Element keyInfoElement = XMLUtils.getDirectChildElement(elem, "KeyInfo", WSConstants.SIG_NS);
@@ -267,7 +266,7 @@ public class SignatureProcessor implements Processor {
 
 	/**
 	 * Get the default certificates from the KeyStore
-	 * 
+	 *
 	 * @param crypto The Crypto object containing the default alias
 	 * @return The default certificates
 	 * @throws WSSecurityException
@@ -335,9 +334,10 @@ public class SignatureProcessor implements Processor {
 		context.setProperty("org.apache.jcp.xml.dsig.secureValidation", Boolean.FALSE);
 		context.setProperty("org.jcp.xml.dsig.secureValidation", Boolean.FALSE);
 		context.setProperty(STRTransform.TRANSFORM_WS_DOC_INFO, wsDocInfo);
-
 		context.setProperty(AttachmentContentSignatureTransform.ATTACHMENT_CALLBACKHANDLER,
 				data.getAttachmentCallbackHandler());
+	    context.setProperty("org.jcp.xml.dsig.internal.dom.SignatureProvider", data.getSignatureProvider());
+
 
 		try {
 			XMLSignature xmlSignature = signatureFactory.unmarshalXMLSignature(context);
@@ -386,7 +386,7 @@ public class SignatureProcessor implements Processor {
 
 	/**
 	 * Retrieve the Reference elements and set them on the ValidateContext
-	 * 
+	 *
 	 * @param xmlSignature the XMLSignature object to get the references from
 	 * @param context      the ValidateContext
 	 * @param wsDocInfo    the WSDocInfo object where tokens are stored
@@ -457,7 +457,7 @@ public class SignatureProcessor implements Processor {
 
 	/**
 	 * Get the signature method algorithm URI from the associated signature element.
-	 * 
+	 *
 	 * @param signatureElement The signature element
 	 * @return the signature method URI
 	 */
@@ -476,7 +476,7 @@ public class SignatureProcessor implements Processor {
 	/**
 	 * This method digs into the Signature element to get the elements that this
 	 * Signature covers. Build the QName of these Elements and return them to caller
-	 * 
+	 *
 	 * @param doc         The owning document
 	 * @param signedInfo  The SignedInfo object
 	 * @param requestData A RequestData instance
@@ -527,7 +527,7 @@ public class SignatureProcessor implements Processor {
 
 				// Set the Transform algorithms as well
 				@SuppressWarnings("unchecked")
-				List<Transform> transforms = (List<Transform>) siRef.getTransforms();
+				List<Transform> transforms = siRef.getTransforms();
 				List<String> transformAlgorithms = new ArrayList<>(transforms.size());
 				for (Transform transform : transforms) {
 					transformAlgorithms.add(transform.getAlgorithm());
@@ -583,7 +583,7 @@ public class SignatureProcessor implements Processor {
 	/**
 	 * Test for a replayed message. The cache key is the Timestamp Created String,
 	 * the signature value, and the encoded value of the signing key.
-	 * 
+	 *
 	 * @param signatureElement
 	 * @param signatureValue
 	 * @param key
@@ -640,7 +640,7 @@ public class SignatureProcessor implements Processor {
 	/**
 	 * Check BSP compliance (Note some other checks are done elsewhere in this
 	 * class)
-	 * 
+	 *
 	 * @throws WSSecurityException
 	 */
 	private void checkBSPCompliance(XMLSignature xmlSignature, BSPEnforcer bspEnforcer) throws WSSecurityException {
@@ -681,7 +681,7 @@ public class SignatureProcessor implements Processor {
 				bspEnforcer.handleBSPRule(BSPRule.R5416);
 			}
 			for (int i = 0; i < reference.getTransforms().size(); i++) {
-				Transform transform = (Transform) reference.getTransforms().get(i);
+				Transform transform = reference.getTransforms().get(i);
 				String algorithm = transform.getAlgorithm();
 				if (!(WSConstants.C14N_EXCL_OMIT_COMMENTS.equals(algorithm)
 						|| STRTransform.TRANSFORM_URI.equals(algorithm)

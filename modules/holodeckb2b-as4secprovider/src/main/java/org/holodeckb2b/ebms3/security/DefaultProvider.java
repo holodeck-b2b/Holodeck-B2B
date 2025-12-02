@@ -16,6 +16,12 @@
  */
 package org.holodeckb2b.ebms3.security;
 
+import java.security.Provider;
+import java.security.Security;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.holodeckb2b.common.VersionInfo;
 import org.holodeckb2b.interfaces.security.ISecurityHeaderCreator;
 import org.holodeckb2b.interfaces.security.ISecurityHeaderProcessor;
@@ -34,6 +40,12 @@ import org.holodeckb2b.security.trust.DefaultCertManager;
  * 			manager has been split off.
  */
 public class DefaultProvider implements ISecurityProvider {
+	private static final Logger log = LogManager.getLogger(DefaultProvider.class);
+
+	/**
+	 * The preferred JCE Provider, i.e. Bouncy Castle, that will be used when processing the WS-Security headers
+	 */
+	private Provider jceProvider;
 
     /**
      * {@inheritDoc}
@@ -45,16 +57,28 @@ public class DefaultProvider implements ISecurityProvider {
 
     @Override
     public void init() throws SecurityProcessingException {
+    	log.debug("Check that BouncyCaste JCE Provider is available");
+    	if ((jceProvider = Security.getProvider(BouncyCastleProvider.PROVIDER_NAME)) == null) {
+			log.debug("Install BouncyCaste JCE Provider");
+			Security.addProvider(jceProvider = new BouncyCastleProvider());
+		} else
+			log.trace("BouncyCaste JCE Provider is already installed");
     }
 
     @Override
     public ISecurityHeaderProcessor getSecurityHeaderProcessor() throws SecurityProcessingException {
-        return new SecurityHeaderProcessor();
+        return new SecurityHeaderProcessor(this);
     }
 
     @Override
     public ISecurityHeaderCreator getSecurityHeaderCreator() throws SecurityProcessingException {
-        return new SecurityHeaderCreator();
+        return new SecurityHeaderCreator(this);
     }
 
+    /**
+     * @return	the JCE provider used by the default HB2B Security Provider
+     */
+    Provider getJceProvider() {
+    	return jceProvider;
+    }
  }
