@@ -70,7 +70,8 @@ class KAConfigWithDefaults implements IKeyAgreement {
 
 	@Override
 	public X509ReferenceType getCertReferenceMethod() {
-		return original != null ? original.getCertReferenceMethod() : DefaultSecurityAlgorithms.CERT_REFERENCE;
+		return original != null && original.getCertReferenceMethod() != null ? original.getCertReferenceMethod()
+																			: DefaultSecurityAlgorithms.CERT_REFERENCE;
 	}
 
 	@Override

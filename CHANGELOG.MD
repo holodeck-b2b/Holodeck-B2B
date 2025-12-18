@@ -16,6 +16,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * NPE when copying P-Mode delivery configuration
 * Fix IOException when parent directories of specified payload storage path do not exist
 * Fix NPE on connection release with empty response
+* Fix NPE when using the default certificate reference method in Key Agreement
 
 ## 8.0.0
 ##### Unreleased
