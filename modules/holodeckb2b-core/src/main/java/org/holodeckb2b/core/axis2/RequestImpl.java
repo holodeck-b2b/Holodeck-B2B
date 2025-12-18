@@ -223,7 +223,7 @@ class RequestImpl implements Request {
 
     @Override
     public void releaseConnection() {
-        HttpEntity entity = response.getEntity();
+        HttpEntity entity = response != null ? response.getEntity() : null;
         if (entity != null) {
         	log.trace("Cleanup response and release connection");
             try {

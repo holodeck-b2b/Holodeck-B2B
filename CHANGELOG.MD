@@ -14,7 +14,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Received message marked as duplicate even if not completely processed before.
 * Out of Bound exception when registering global event handler.
 * NPE when copying P-Mode delivery configuration
-* Fix IOException when parent directories of specified payload storage path do not exist 
+* Fix IOException when parent directories of specified payload storage path do not exist
+* Fix NPE on connection release with empty response
 
 ## 8.0.0
 ##### Unreleased
