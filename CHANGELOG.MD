@@ -12,6 +12,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
  
 ### Fixed
 * Received message marked as duplicate even if not completely processed before.
+* HTTP Authorization header not included in HTTP request when using Basic Authentication
 * Out of Bound exception when registering global event handler.
 * NPE when copying P-Mode delivery configuration
 * Fix IOException when parent directories of specified payload storage path do not exist
