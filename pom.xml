@@ -93,7 +93,7 @@
 		<maven.compiler.source>11</maven.compiler.source>
 		<maven.compiler.target>11</maven.compiler.target>
 
-		<hb2b-utils-version>1.6.0</hb2b-utils-version>
+		<hb2b-utils-version>2.0.0</hb2b-utils-version>
 		<axis2-version>1.8.2</axis2-version>
 		<axiom-version>1.4.0</axiom-version>
 		<netbeans.hint.license>gpl30</netbeans.hint.license>
