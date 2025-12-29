@@ -176,6 +176,12 @@
 				<groupId>org.apache.axis2</groupId>
 				<artifactId>axis2-kernel</artifactId>
 				<version>${axis2-version}</version>
+				<exclusions>
+					<exclusion>
+				    	<groupId>commons-io</groupId>
+				    	<artifactId>commons-io</artifactId>					
+					</exclusion>
+				</exclusions>				
 			</dependency>
 			<dependency>
 				<groupId>org.apache.axis2</groupId>
