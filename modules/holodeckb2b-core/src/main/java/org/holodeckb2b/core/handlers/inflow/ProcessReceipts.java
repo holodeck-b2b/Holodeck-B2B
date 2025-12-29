@@ -34,7 +34,7 @@ import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.storage.IReceiptEntity;
-import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.holodeckb2b.interfaces.storage.StorageException;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for processing received receipt signals.
@@ -165,7 +165,7 @@ public class ProcessReceipts extends AbstractBaseHandler {
      *
      * @param mu    The {@link IMessageUnitEntity} to check
      * @return      <code>true</code> if the message unit is waiting for a receipt, <code>false</code> otherwise
-     * @throws org.holodeckb2b.interfaces.persistency.StorageException When the given message unit entity can not
+     * @throws org.holodeckb2b.interfaces.storage.persistency.StorageException When the given message unit entity can not
      *                                                                     be loaded from storage
      */
     protected boolean isWaitingForReceipt(final IMessageUnitEntity mu) throws StorageException {

@@ -28,6 +28,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -38,8 +39,10 @@ import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
+import org.holodeckb2b.interfaces.security.trust.IValidationParameters;
 import org.holodeckb2b.interfaces.security.trust.IValidationResult;
 import org.holodeckb2b.interfaces.security.trust.IValidationResult.Trust;
+import org.holodeckb2b.interfaces.security.trust.SecurityLevel;
 
 /**
  * Is an implementation of the {@link ICertificateManager} for testing. It uses three in-memory Java key store to
@@ -269,8 +272,22 @@ public class TestCertificateManager implements ICertificateManager {
 		return TestCertificateManager.class.getName();
 	}
 
+
 	@Override
-	public IValidationResult validateTrust(List<X509Certificate> certs) throws SecurityProcessingException {
+	public Collection<X509Certificate> getAllTrustedCertificates(SecurityLevel secLevel, IValidationParameters params) 
+																					throws SecurityProcessingException {
+		List<X509Certificate> certs = new ArrayList<>();
+		try {
+			for(Enumeration<String> aliases = trustedCerts.aliases(); aliases.hasMoreElements();)
+				certs.add((X509Certificate) trustedCerts.getCertificate(aliases.nextElement()));
+		} catch (KeyStoreException e) {
+		}
+		return certs;
+	}
+
+	@Override
+	public IValidationResult validateCertificate(List<X509Certificate> certs, IValidationParameters params, 
+												 SecurityLevel secLevel) throws SecurityProcessingException {
 		if (Utils.isNullOrEmpty(certs))
 			throw new SecurityProcessingException("No certs to validate!");
 
@@ -285,6 +302,8 @@ public class TestCertificateManager implements ICertificateManager {
 		}
 
 	}
+
+
 
 	class ValidationResult implements IValidationResult {
 		private List<X509Certificate> certpath;

@@ -16,20 +16,23 @@
  */
 /**
  * During the message processing Holodeck B2B will need to store the meta-data and payload content. The message meta-
- * data is relatively small and can be stored in a database. For the payload data, which can be large, it may be more 
- * efficient to store it on the file system. Therefore the responsibility for storing the meta-data and payload is 
- * is divided between two components, the <i>Metadata</i> and <i>Payload Storage Providers</i>. 
+ * data is relatively small and can be stored in a database. For the payload data, which can be large, it may be more
+ * efficient to store it on the file system. Therefore the responsibility for storing the meta-data and payload is
+ * is divided between two components, the <i>Metadata</i> and <i>Payload Storage Providers</i>.
  * <p>
  * This package defines the interfaces that represent the data model of the information of message units that needs to
- * be stored during processing by the Holodeck B2B Core and a component to query the data. The data model mimics the 
- * general message model defined in {@link org.holodeckb2b.interfaces.messagemodel} and extends is with additional 
- * attributes needed for efficient processing of the message by both the Core and the storage providers.   
+ * be stored during processing by the Holodeck B2B Core and of the <i>Provider</i> components that manage the data.
  * <p>
  * The <i>entity</i> interfaces represent the meta-data of message units and should therefore be implemented as part of
- * and handled by the <i>Metadata Storage Provider</i>. The {@link org.holodeckb2b.interfaces.storage.IPayloadContent}
- * interface represents the payload content and should be implemented and handled by the <i>Payload Storage Provider</i>.
- * 
- * @since 7.0.0 The interfaces for the entity objects in this packages are moved from the old 
+ * and handled by the <i>Metadata Storage Provider</i>. The data model mimics the general message model defined in
+ * {@link org.holodeckb2b.interfaces.messagemodel} and extends is with additional attributes needed for efficient
+ * processing of the message by both the Core and the Provider.<br/>
+ * The {@link org.holodeckb2b.interfaces.storage.IPayloadContent} interface represents the payload content and should be
+ * implemented and handled by the <i>Payload Storage Provider</i>.<br/>
+ * Note that the entity interfaces define only a limited set of <i>setter</i> methods which are used by the Core to
+ * update the meta-data. This limitation MAY be used by the Provider implementation to optimise the implementation.
+ *
+ * @since 7.0.0 The interfaces for the entity objects in this packages are moved from the old
  * 				<code>org.holodeckb2b.interfaces.persistency.entities</code> package.
  */
 package org.holodeckb2b.interfaces.storage;

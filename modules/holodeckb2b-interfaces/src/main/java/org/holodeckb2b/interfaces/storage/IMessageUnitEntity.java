@@ -23,9 +23,6 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 /**
  * Defines the interface of the stored object that is used by the Holodeck B2B to store the general message unit
  * meta-data.
- * <p>It is based on the {@link IMessageUnit} interface from the generic message model and adds setter methods for the
- * meta-data that can be changed during the processing of a message unit. The <i>Meta-data Storage Provider</i> may use
- * this to optimise the storage of the meta-data.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  3.0.0

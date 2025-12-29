@@ -25,7 +25,7 @@
 	<groupId>org.holodeckb2b</groupId>
 	<artifactId>holodeckb2b</artifactId>
 	<packaging>pom</packaging>
-	<version>7.1.0</version>
+	<version>8.1.0</version>
 	<name>Holodeck B2B</name>
 	<url>http://www.holodeck-b2b.org/</url>
 	<inceptionYear>2015</inceptionYear>
@@ -93,7 +93,7 @@
 		<maven.compiler.source>11</maven.compiler.source>
 		<maven.compiler.target>11</maven.compiler.target>
 
-		<hb2b-utils-version>1.6.0</hb2b-utils-version>
+		<hb2b-utils-version>2.0.0</hb2b-utils-version>
 		<axis2-version>1.8.2</axis2-version>
 		<axiom-version>1.4.0</axiom-version>
 		<netbeans.hint.license>gpl30</netbeans.hint.license>
@@ -104,7 +104,8 @@
 		<module>modules/holodeckb2b-interfaces</module>
 		<module>modules/holodeckb2b-core</module>
 		<module>modules/holodeckb2b-ebms3as4</module>
-		<module>modules/holodeckb2b-security</module>
+		<module>modules/holodeckb2b-certmanager</module>
+		<module>modules/holodeckb2b-as4secprovider</module>
 		<module>modules/holodeckb2b-default-mds</module>
 		<module>modules/holodeckb2b-default-psp</module>
 		<module>modules/holodeckb2b-ui</module>
@@ -175,6 +176,12 @@
 				<groupId>org.apache.axis2</groupId>
 				<artifactId>axis2-kernel</artifactId>
 				<version>${axis2-version}</version>
+				<exclusions>
+					<exclusion>
+				    	<groupId>commons-io</groupId>
+				    	<artifactId>commons-io</artifactId>					
+					</exclusion>
+				</exclusions>				
 			</dependency>
 			<dependency>
 				<groupId>org.apache.axis2</groupId>
@@ -205,12 +212,6 @@
 			<!--===============================================================
                 XML Processing libraries
             =============================================================== -->
-			<dependency>
-				<groupId>xerces</groupId>
-				<artifactId>xercesImpl</artifactId>
-				<version>2.10.0</version>
-				<scope>runtime</scope>
-			</dependency>
 			<dependency>
 				<groupId>org.simpleframework</groupId>
 				<artifactId>simple-xml</artifactId>
@@ -280,7 +281,7 @@
 			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-junit-jupiter</artifactId>
-				<version>2.28.2</version>
+				<version>5.14.2</version>
 				<scope>test</scope>
 			</dependency>		    
 	        <dependency>

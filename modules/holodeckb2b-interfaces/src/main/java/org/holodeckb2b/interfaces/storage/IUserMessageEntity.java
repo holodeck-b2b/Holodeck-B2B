@@ -17,7 +17,6 @@
 package org.holodeckb2b.interfaces.storage;
 
 import java.util.Collection;
-import org.holodeckb2b.interfaces.storage.providers.IMetadataStorageProvider;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 
 /**

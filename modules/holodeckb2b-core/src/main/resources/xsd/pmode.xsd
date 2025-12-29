@@ -20,7 +20,7 @@
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
 	targetNamespace="http://holodeck-b2b.org/schemas/2014/10/pmode"
 	attributeFormDefault="unqualified" xmlns:tns="http://holodeck-b2b.org/schemas/2014/10/pmode"
-	version="7.0.0">
+	version="8.0.0">
 	<xs:annotation>
 		<xs:documentation><p>The ebMS specification only defines an abstract P-Mode model, the actual P-Mode definition is left up to implementations. This schema defines the XML structure for the representation of a P-Mode as used by the default implementation for maintaining the P-Mode set. In this implementation the P-Mode set consists of all XML documents in a directory. Each XML document represents one P-Mode and must conform to this schema. See the package <code>org.holodeckb2b.pmode.xml</code> for more info on the default implementation of P-Modes.</p></xs:documentation>
 		<xs:documentation><p>In version 2.1.0 of the schema the <code>EventHandler</code> and <code>AddActorOrRoleAttribute</code> elements were added. As these are optional elements P-Mode documents constructed using the old version are still valid and result in unchanged processing. Therefore the same namespace is used and only the version has been increased</p></xs:documentation>
@@ -36,8 +36,13 @@
 		<xs:documentation><p>In version 7.0.0 of the schema the following changes were applied:<ol>
 			<li>added element <code>KeyAgreement</code> as part of <code>EncryptionConfiguration</code> and the defining complex type to enable configuration the <i>key agreement</i> method for establishing the symmetric encryption key.</li>
 			<li>added element <code>EventHandlers</code> as child of <code>PMode</code> to allow configuration of event handlers that apply to all messages governed by the P-Mode</li>
-		</ol></p>
-			
+		</ol></p>			
+		</xs:documentation>
+		<xs:documentation><p>In version 8.0.0 of the schema the following elements were added:<ol>
+			<li><code>//Protocol/ConnectionTimeout</code> : the connection timeout in milliseconds that should be used to establish a connection to the trading partner's MSH. If not specified the default timeout as specified in the Holodeck B2B configuration will be used.</li>			
+			<li><code>//Protocol/ReadTimeout</code> : the read timeout in milliseconds that should be used to receive the response data from the trading partner's MSH. If not specified the default timeout as specified in the Holodeck B2B configuration will be used.</li>			
+			<li><code>//Protocol/TLSConfiguration</code> : allows to specify the settings to be used when establishing a secure [transport level] connection to the trading partner's MSH</li>
+		</ol>The (forbidden) <code>//SignatureConfiguration/enableRevocationCheck</code> element was removed. When using the default <i>Certificate Manager</i>, OCSP revocation checking is managed in its configuration file.</p>
 		</xs:documentation>
 	</xs:annotation>
 	<xs:element name="PMode" type="tns:PMode">
@@ -139,7 +144,7 @@ In the P-Mode model described in the ebMS specification a leg can be identified 
 				<xs:annotation>
 					<xs:documentation><p>This element contains one or more <code>EventHandler</code> element that contain the configuration for handling <i>"events"</i> that can occur during the processing of message units governed by this P-Mode. These <i>message processing events</i> are used to provide additional information to the business application about the processing of a message unit in addition to the formally specified <i>Submit</i>, <i>Deliver</i> and <i>Notify</i> operations. An example of an event is that a message unit has been (re)sent.</p></xs:documentation>
 				</xs:annotation>
-			</xs:element>			
+			</xs:element>
 		</xs:sequence>
 		<xs:attribute default="false" name="useStrictHeaderValidation" type="xs:boolean">
 			<xs:annotation>
@@ -271,6 +276,26 @@ The ebMS specification defines the <b>PMode[1].Security.SendReceipt</b> paramete
 					<xs:documentation><p>This element contains the URL where messages must be delivered to.</p></xs:documentation>
 				</xs:annotation>
 			</xs:element>
+			<xs:element minOccurs="0" name="ConnectionTimeout" type="xs:nonNegativeInteger">
+				<xs:annotation>
+					<xs:documentation><p>This element can be used to specify a custom connection time out for connections to the trading partner's MSH. The time must be specified in milliseconds. 
+</p>
+<p>If not specified the default timeout as specified in the Holodeck B2B configuration will be used.</p>
+</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" name="ReadTimeout" type="xs:nonNegativeInteger">
+				<xs:annotation>
+					<xs:documentation><p>This element can be used to specify a custom read time out, i.e. time to wait for response data, for connections to the trading partner's MSH. The time must be specified in milliseconds. 
+</p>
+<p>If not specified the default timeout as specified in the Holodeck B2B configuration will be used.</p></xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" name="TLSConfiguration" type="tns:TLSConfiguration">
+				<xs:annotation>
+					<xs:documentation><p>This element can be used to specify a custom configuration of the [transport level] secure connection to the trading partner's MSH.</p></xs:documentation>
+				</xs:annotation>
+			</xs:element>
 			<xs:element default="false" minOccurs="0" name="AddActorOrRoleAttribute"
 				type="xs:boolean">
 				<xs:annotation>
@@ -300,6 +325,42 @@ The ebMS specification defines the <b>PMode[1].Security.SendReceipt</b> paramete
 					<xs:documentation><p>Indicates whether the HTTP "gzip" compression content encoding should be used. See section 3.5 of the HTTP/1.1 protocol [RFC2616] for more details.</p>
 <p>As using http compression requires the use of the chunked encoding as well, this element overrides the chunked setting in <code>UseChunking</code> element.</p></xs:documentation>
 					<xs:documentation><p>NOTE: Because of a problem in Holodeck B2B with the gzip encoding for HTTP responses this setting should only be used for requests!</p></xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="TLSConfiguration">
+		<xs:sequence>
+			<xs:element minOccurs="0" name="AllowedProtocols">
+				<xs:annotation>
+					<xs:documentation><p>This element contains the list of allowed SSL/TLS protocols for setting up a secure connection to the trading partner's MSH. If not included Holodeck B2B will use TLSv1.2 or TLSv1.3 when establishing the secure connection.</p>
+<p>It should contain the comma separated list of protocol names as specified in in the table <i>Standard Names for a Protocol</i> found in the <a href="https://docs.oracle.com/en/java/javase/11/docs/specs/security/standard-names.html#additional-jsse-standard-names">Additional JSSE Standard Names</a> section of the Java Cryptography Architecture Standard Algorithm Name Documentation.</p></xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="\c*( *, *\c+)*"/>
+						<xs:whiteSpace value="collapse"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element minOccurs="0" name="AllowedCipherSuites">
+				<xs:annotation>
+					<xs:documentation><p>This element can be used to restrict the allowed cipher suites for setting up the secure [transport level] connection to the trading partner's MSH. It must contain a comma separated list of cipher suites that are allowed for use when connecting to the other MSH. If not included all supported cipher suites are allowed.</p>
+<p>The names of the allowed cipher suites are specified in the  <a href="https://docs.oracle.com/en/java/javase/11/docs/specs/security/standard-names.html#jsse-cipher-suite-names">JSSE Cipher Suite Names</a> section of the Java Cryptography Architecture Standard Algorithm Name Documentation.
+</p></xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="\c*( *, *\c+)*"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element minOccurs="0" name="ClientCertificate" type="tns:KeystoreAliasType">
+				<xs:annotation>
+					<xs:documentation><p>This element can be used to specify the certificate that must be used as client certificate when establishing the secure connection to the trading partner's MSH.<br/>
+It must contain the reference and password to get the key pair from the Holodeck B2B <i>Certificate Manager</i>.
+</p>
+<p>NOTE: When the password contains special characters they may need to be encoded to get a well formed XML document!</p></xs:documentation>
 				</xs:annotation>
 			</xs:element>
 		</xs:sequence>
@@ -732,18 +793,7 @@ As this authorization is also based on WS-Security headers this type uses the ge
 
 <p>NOTE: When the password contains special characters they may need to be encoded to get a well formed XML document!</p></xs:documentation>
 				</xs:annotation>
-			</xs:element>
-			<xs:element minOccurs="0" name="enableRevocationCheck" type="xs:boolean" maxOccurs="0">
-				<xs:annotation>
-					<xs:documentation>At the moment Holodeck B2B does not support certificate revocation checks! This element will be enabled when support is completed.
-
-Indicate whether Holodeck B2B must check whether the certificate used for signing a message is revoked. Applies only to received messages.
-
-NOTE 1: When an error occurs during the revocation check the certificate will be treated as invalid resulting in rejection of the complete ebMS message and all message units contained in it. Therefor the revocation check should only be enabled if the PKI infrastructure works correctly.
-
-NOTE 2: Setting the revocation check is OPTIONAL. If not set the global setting will be used.</xs:documentation>
-				</xs:annotation>
-			</xs:element>
+			</xs:element>			
 			<xs:element default="IssuerSerial" minOccurs="0" name="KeyReferenceMethod"
 				type="tns:KeyReferenceMethods">
 				<xs:annotation>

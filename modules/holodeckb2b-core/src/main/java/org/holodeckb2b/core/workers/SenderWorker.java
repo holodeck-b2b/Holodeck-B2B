@@ -20,8 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.util.MessageUnitUtils;
 import org.holodeckb2b.common.workers.AbstractWorkerTask;
 import org.holodeckb2b.commons.util.Utils;
@@ -31,7 +31,7 @@ import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
-import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.holodeckb2b.interfaces.storage.StorageException;
 import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
 
 /**
@@ -44,7 +44,7 @@ import org.holodeckb2b.interfaces.workerpool.TaskConfigurationException;
  */
 public class SenderWorker extends AbstractWorkerTask {
 
-    private static final Log log = LogFactory.getLog(SenderWorker.class.getName());
+    private static final Logger log = LogManager.getLogger(SenderWorker.class.getName());
 
     /**
      * Looks for message units that are for sending and kicks off the send process
@@ -61,31 +61,30 @@ public class SenderWorker extends AbstractWorkerTask {
                                                                 Set.of(ProcessingState.READY_TO_PUSH));
 
             if (!Utils.isNullOrEmpty(msgUnitsToSend)) {
-                log.trace("Found " + msgUnitsToSend.size() + " message units to send");
+                log.trace("Found {} message units to send",  msgUnitsToSend.size());
                 for (final IMessageUnitEntity msgUnit : msgUnitsToSend) {
                     // Only message units associated with a P-Mode can be send
                     if (Utils.isNullOrEmpty(msgUnit.getPModeId())) {
-                        log.error("Can not sent message [" + msgUnit.getMessageId()
-                                    + "] because it has no associated P-Mode");
+                        log.error("Can not sent message [{}] because it has no P-Mode", msgUnit.getMessageId());
                         HolodeckB2BCore.getStorageManager().setProcessingState(msgUnit, ProcessingState.FAILURE);
                         continue;
                     }
 
                     // Indicate that processing will start
                     if (HolodeckB2BCore.getStorageManager().setProcessingState(msgUnit, ProcessingState.PROCESSING)) {
-                        // only when we could succesfully set processing state really start processing
-                        log.trace("Start processing " + MessageUnitUtils.getMessageUnitName(msgUnit)
-                                    + "[" + msgUnit.getMessageId() + "]");
+                    	// only when we could succesfully set processing state really start processing
+                        log.trace("Trigger send process for {} [{}]", MessageUnitUtils.getMessageUnitName(msgUnit),
+                        			msgUnit.getMessageId());
                         Axis2Sender.sendMessage(msgUnit);
                     } else
                         // Message probably already in process
-                        log.trace("Could not start processing message [" + msgUnit.getMessageId()
-                                    + "] because switching to processing state was unsuccesful");
+                        log.trace("Could not start sending [{}] because processing state was already changed",
+                        		  msgUnit.getMessageId());
                 }
             }
         } catch (final StorageException dbError) {
-            log.error("Could not process messages because a database error occurred. Details:"
-                        + dbError.toString() + "\n");
+            log.error("Could not process messages because a database error occurred. Details: {}",
+                        Utils.getExceptionTrace(dbError));
         }
     }
 

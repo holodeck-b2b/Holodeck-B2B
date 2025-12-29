@@ -54,15 +54,15 @@ import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.AlreadyChangedException;
 import org.holodeckb2b.interfaces.storage.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
+import org.holodeckb2b.interfaces.storage.IMetadataStorageProvider;
 import org.holodeckb2b.interfaces.storage.IPayloadContent;
 import org.holodeckb2b.interfaces.storage.IPayloadEntity;
+import org.holodeckb2b.interfaces.storage.IPayloadStorageProvider;
 import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
-import org.holodeckb2b.interfaces.storage.providers.AlreadyChangedException;
-import org.holodeckb2b.interfaces.storage.providers.IMetadataStorageProvider;
-import org.holodeckb2b.interfaces.storage.providers.IPayloadStorageProvider;
-import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.holodeckb2b.interfaces.storage.StorageException;
 import org.holodeckb2b.interfaces.submit.DuplicateMessageIdException;
 
 /**
@@ -549,10 +549,11 @@ public class StorageManager {
      * @throws StorageException     If an error occurs when saving the payload meta-data to the database
      */
     public void updatePayloadInformation(final IPayloadEntity payloadInfo) throws StorageException {
-    	if (!(payloadInfo instanceof PayloadEntityProxy))
-    		throw new IllegalArgumentException("Can only update payload meta-data of type PayloadEntityProxy");
+//    	if (!(payloadInfo instanceof PayloadEntityProxy))
+//    		throw new IllegalArgumentException("Can only update payload meta-data of type PayloadEntityProxy");
 		try {
-			mdsProvider.updatePayloadMetadata(((PayloadEntityProxy) payloadInfo).getSource());
+			mdsProvider.updatePayloadMetadata(payloadInfo instanceof PayloadEntityProxy ?
+												((PayloadEntityProxy) payloadInfo).getSource() : payloadInfo);
 		} catch (AlreadyChangedException alreadyChanged) {
 			log.warn("The meta-data of payload (URI={}) contained in User Message (coreId={}) was already updated!",
 						payloadInfo.getPayloadURI(), payloadInfo.getParentCoreId());
@@ -561,6 +562,34 @@ public class StorageManager {
 	    	log.error("Error in update of payload meta-data (URI={}) contained in User Message (coreId={}) : {}",
 	    			  payloadInfo.getPayloadURI(), payloadInfo.getParentCoreId(), Utils.getExceptionTrace(updFailure));
 	    	throw updFailure;
+		}
+    }
+
+    /**
+     * Deletes both the meta-data and content of the given payload. This action can only be executed when the given
+     * payload instance is not bound to a User Message. This
+     *
+     * @param payload	   		The {@link IPayloadEntity} object representing the payload to be deleted
+     * @throws StorageException	When an error occurs deleting the payload data, most probable cause is that the payload
+     * 							is still bound to a User Message.
+     * @since 8.0.0
+     */
+    public void deleteSubmittedPayload(IPayloadEntity payload) throws StorageException {
+    	log.trace("Deleting payload (PayloadId={}, URI={})", payload.getPayloadId(), payload.getPayloadURI());
+    	try {
+			log.trace("Deleting payload meta-data");
+			mdsProvider.deletePayloadMetadata(payload instanceof PayloadEntityProxy ?
+												((PayloadEntityProxy) payload).getSource() : payload);
+			log.trace("Deleting payload content");
+			psProvider.removePayloadContent(payload);
+    	} catch (IllegalStateException stillBound) {
+    		log.warn("Payload (PayloadId={};URI={}) cannot be removed as it's still bound to User Message (CoreId={})",
+    				 payload.getPayloadId(), payload.getPayloadURI(), payload.getParentCoreId());
+    		throw new StorageException("Payload still bound to User Message", stillBound);
+		} catch (StorageException mdDeleteFailure) {
+	    	log.error("Error removing payload (PayloadId={};URI={}): {}", payload.getPayloadId(),
+	    			  payload.getPayloadURI(), Utils.getExceptionTrace(mdDeleteFailure));
+	    	throw mdDeleteFailure;
 		}
     }
 

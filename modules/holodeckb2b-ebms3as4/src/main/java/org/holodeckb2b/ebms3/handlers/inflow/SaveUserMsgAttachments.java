@@ -48,7 +48,7 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.storage.IPayloadContent;
 import org.holodeckb2b.interfaces.storage.IPayloadEntity;
 import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
-import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.holodeckb2b.interfaces.storage.StorageException;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for reading the payload content from the SOAP message.
@@ -86,7 +86,7 @@ public class SaveUserMsgAttachments extends AbstractUserMessageHandler {
             for(final IPayloadEntity p : payloads) {
             	log.trace("Get the storage for payload {}", p.getPayloadURI());
             	IPayloadContent storage = updateManager.createStorageReceivedPayload(p);
-            	if (storage.getContent() != null) {
+            	if (storage.isContentAvailable()) {
 	            	log.debug("Content of payload ({}) has already been saved", p.getPayloadURI());
 	            	continue;
             	}

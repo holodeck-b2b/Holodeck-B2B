@@ -33,7 +33,7 @@ import org.holodeckb2b.storage.metadata.jpa.PayloadInfo;
  */
 public class PayloadEntity extends JPAObjectProxy<PayloadInfo> implements IPayloadEntity {
 
-    PayloadEntity(PayloadInfo p) {
+    public PayloadEntity(PayloadInfo p) {
     	super(p);
     }
 

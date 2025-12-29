@@ -72,8 +72,7 @@ public class PayloadEntity implements IPayloadEntity {
     	this.direction = parent.getDirection();
     }
 
-
-    public void copyFrom(IPayload source) {
+    void copyFrom(IPayload source) {
     	if (source == null)
     		return;
     	if (source instanceof IPayloadEntity) {
@@ -95,16 +94,20 @@ public class PayloadEntity implements IPayloadEntity {
     }
 
     @Override
-	public PayloadEntity clone() {
+	protected PayloadEntity clone() {
     	return new PayloadEntity(this);
     }
 
-	public Date getLastChanged() {
+	Date getLastChanged() {
 		return lastChange;
 	}
 
-	public void setChanged(Date d) {
+	void setChanged(Date d) {
 		this.lastChange = d;
+	}
+
+	void setParentCoreId(String coreId) {
+		this.parentCoreId = coreId;
 	}
 
     @Override

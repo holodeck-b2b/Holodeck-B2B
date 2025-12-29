@@ -32,12 +32,12 @@ import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
+import org.holodeckb2b.interfaces.storage.IMetadataStorageProvider;
 import org.holodeckb2b.interfaces.storage.IPayloadContent;
 import org.holodeckb2b.interfaces.storage.IPayloadEntity;
+import org.holodeckb2b.interfaces.storage.IPayloadStorageProvider;
 import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
-import org.holodeckb2b.interfaces.storage.providers.IMetadataStorageProvider;
-import org.holodeckb2b.interfaces.storage.providers.IPayloadStorageProvider;
-import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.holodeckb2b.interfaces.storage.StorageException;
 
 /**
  * Is the Holodeck B2B Core component that offers access to message data (both meta-data and payload data) to both other
@@ -126,6 +126,13 @@ public class QueryManager implements IQueryManager {
 						Utils.getExceptionTrace(payloadFailure));
 			throw payloadFailure;
 		}
+	}
+
+	@Override
+	public Collection<IPayloadEntity> getUnboundPayloads() throws StorageException {
+		return executeQuery(() -> mdsProvider.getUnboundPayloads())
+												.map(p -> new PayloadEntityProxy(p))
+												.collect(Collectors.toList());
 	}
 
 	private <R> Stream<R> executeQuery(Query<R> query) throws StorageException {

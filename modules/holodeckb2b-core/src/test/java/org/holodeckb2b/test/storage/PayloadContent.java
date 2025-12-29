@@ -23,19 +23,24 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import org.holodeckb2b.interfaces.storage.IPayloadContent;
-import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.holodeckb2b.interfaces.storage.StorageException;
 
 public class PayloadContent implements IPayloadContent {
 	private String	payloadId;
 	private byte[]	content;
-	
+
 	public PayloadContent(String id) {
 		this.payloadId = id;
 	}
-	
+
 	@Override
 	public String getPayloadId() {
 		return payloadId;
+	}
+
+	@Override
+	public boolean isContentAvailable() {
+		return content != null;
 	}
 
 	@Override
@@ -50,11 +55,11 @@ public class PayloadContent implements IPayloadContent {
 
 	class ContentOutputStream extends ByteArrayOutputStream {
 		private PayloadContent	container;
-		
+
 		public ContentOutputStream(PayloadContent c) {
 			container = c;
 		}
-		
+
 		@Override
 		public void close() throws IOException {
 			super.close();

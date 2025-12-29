@@ -19,7 +19,7 @@ package org.holodeckb2b.interfaces.events;
 
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
-import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.holodeckb2b.interfaces.storage.StorageException;
 
 /**
  * Is the <i>message processing event</i> that indicates that a message unit is deleted from the Holodeck B2B Core

@@ -25,11 +25,11 @@ import org.holodeckb2b.interfaces.general.IDescription;
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.general.ISchemaReference;
 import org.holodeckb2b.interfaces.messagemodel.Direction;
+import org.holodeckb2b.interfaces.storage.IMetadataStorageProvider;
 import org.holodeckb2b.interfaces.storage.IPayloadContent;
 import org.holodeckb2b.interfaces.storage.IPayloadEntity;
-import org.holodeckb2b.interfaces.storage.providers.IMetadataStorageProvider;
-import org.holodeckb2b.interfaces.storage.providers.IPayloadStorageProvider;
-import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.holodeckb2b.interfaces.storage.IPayloadStorageProvider;
+import org.holodeckb2b.interfaces.storage.StorageException;
 
 /**
  * Is a proxy to the {@link IPayloadEntity} object managed by the {@link IMetadataStorageProvider} that also implements

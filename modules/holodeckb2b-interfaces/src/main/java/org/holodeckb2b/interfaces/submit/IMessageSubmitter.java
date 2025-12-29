@@ -17,19 +17,18 @@
 package org.holodeckb2b.interfaces.submit;
 
 
+import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.pmode.IUserMessageFlow;
+import org.holodeckb2b.interfaces.storage.IPayloadEntity;
 
 /**
- * Describes the interface the Holodeck B2B Core exposes to create a new ebMS message unit for sending. Since version
- * 2.1.0 the Submitter is also be able to accept a pull request for submission.
- * <p>Note that this is more or less an internal interface intended for use by helper classes that handle the submission
- * of business data from the client application (called the <i>Producer</i> in the ebMS V3 Specification).<br>
- * By decoupling the internal and external interface it is easier to implement different protocols for accepting
- * messages from the client applications without these "acceptors" needing to know about the Holodeck B2B internals.
+ * Describes the interface the Holodeck B2B Core exposes to create a new ebMS message unit for sending.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
+ * @since 2.1.0 ability to submit Pull Request messages
+ * @since 8.0.0 ability to submit Payload data before submitting the associated User Message
  */
 public interface IMessageSubmitter {
 
@@ -49,9 +48,39 @@ public interface IMessageSubmitter {
      * @return                      The ebMS message-id assigned to the user message.
      * @throws MessageSubmitException   When the user message can not be submitted successfully. Reasons for failure can
      *                                  be that no P-Mode can be found to handle the message or the given P-Mode
-     *                                  conflicts with supplied meta-data.
+     *                                  conflicts with supplied meta-data. When the submitted User Message refers to
+     *                                  pre-submitted payloads this could also indicate an issue with the payloads.
      */
-    public String submitMessage(IUserMessage submission) throws MessageSubmitException;
+    String submitMessage(IUserMessage submission) throws MessageSubmitException;
+
+    /**
+     * Submits the specified <b>Payload</b> to Holodeck B2B for inclusion in a User Message that will be submitted
+     * afterwards. This allows to store the payload data before submitting the associated User Message which can be
+     * useful when the User Message holds multiple payloads.
+     *
+     * @param payload	the payload to be submitted
+     * @param pmodeId	identifier of the P-Mode that governs the message exchange of the User Message the payload
+     * 					will be contained in
+     * @return a {@link IPayloadEntity} representing the submitted payload. This object MUST be included in the {@link
+     * 			IUserMessage} instance that represents the User Message the submitted payload should be included in and
+     * 			which will be passed as argument to {@link #submitMessage(IUserMessage)}
+     * @throws MessageSubmitException When the payload can not be submitted successfully, for example because the P-Mode
+     *                                with the specified identifier can not be found
+     * @since 8.0.0
+     */
+    IPayloadEntity submitPayload(IPayload payload, String pmodeId) throws MessageSubmitException;
+
+    /**
+     * Cancels the submission of the specified payload and removes the payload from the Core. This method should be used
+     * when the User Message that would contain the payload will not be submitted and therefore the payloads are not
+     * needed any more.
+     *
+     * @param submittedPayload	meta-data of the payload to be cancelled
+     * @throws MessageSubmitException When the payload can not be cancelled. Reasons can be an error that occurred in
+     * 								  provider or that the payload is already linked to a User Message
+     * @since 8.0.0
+     */
+    void cancelPayloadSubmission(IPayloadEntity submittedPayload) throws MessageSubmitException;
 
     /**
      * Submits the specified <b>Pull Request</b> to Holodeck B2B for sending.
@@ -68,5 +97,5 @@ public interface IMessageSubmitter {
      * @since  2.1.0
      * @since  4.1.0 Checks that the P-Mode specified can be used for pulling and use of default MPC when none specified
      */
-    public String submitMessage(IPullRequest pullRequest) throws MessageSubmitException;
+    String submitMessage(IPullRequest pullRequest) throws MessageSubmitException;
 }

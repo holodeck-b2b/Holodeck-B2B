@@ -19,13 +19,9 @@ package org.holodeckb2b.interfaces.storage;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.holodeckb2b.interfaces.storage.providers.IMetadataStorageProvider;
-import org.holodeckb2b.interfaces.storage.providers.IPayloadStorageProvider;
-import org.holodeckb2b.interfaces.storage.providers.StorageException;
-
 /**
  * Defines the interface of the object that is used by the Holodeck B2B Core to store the payload meta-data.
- * 
+ *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  7.0.0
  */
@@ -33,26 +29,40 @@ public interface IPayloadContent {
 
 	/**
 	 * Gets the <i>payloadId</i> that uniquely identifies this payload and which is used to link the payload's meta-data
-	 * managed by the {@link IMetadataStorageProvider} and its content as managed by the {@link IPayloadStorageProvider}. 
-	 * 
+	 * managed by the {@link IMetadataStorageProvider} and its content as managed by the {@link IPayloadStorageProvider}.
+	 *
 	 * @return	<i>payloadId</i> that identifies the oayload
 	 */
 	String	getPayloadId();
 
 	/**
+	 * Indicates whether the payload data is available.
+	 *
+	 * @return	<code>true</code> when the payload data is available,<br><code>false</code> otherwise
+	 * @since 8.0.0
+	 */
+	boolean isContentAvailable();
+
+	/**
 	 * Reads the payload content from storage.
-	 * 
+	 * <p>
+	 * NOTE: The caller of this method MUST ensure that the returned stream is closed when it has completed processing
+	 * the payload data.
+	 *
 	 * @return an {@link InputStream} to read the payload content or <code>null</code> when no content is available
 	 * @throws StorageException	when an error occurs accessing the stored payload content
 	 */
-	InputStream getContent() throws StorageException;
-	
+	 InputStream getContent() throws StorageException;
+
 	/**
-	 * Opens the payload storage for writing the content to it. 
-	 * 
+	 * Opens the payload storage for writing the content to it.
+	 * <p>
+	 * NOTE: The caller of this method MUST ensure that the returned stream is closed when it has completed writing
+	 * the payload data.
+	 *
 	 * @return	an {@link OutputStream} to write the payload content to storage.
-	 * @throws StorageException when an error occurs opening the stream to the payload storage or if the payload content 
-	 * 							has already been written to storage, i.e. the output stream returned by a previous call 
+	 * @throws StorageException when an error occurs opening the stream to the payload storage or if the payload content
+	 * 							has already been written to storage, i.e. the output stream returned by a previous call
 	 * 							to this method has been closed.
 	 */
 	OutputStream openStorage() throws StorageException;

@@ -28,7 +28,7 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.storage.IPayloadEntity;
 import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
-import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.holodeckb2b.interfaces.storage.StorageException;
 
 /**
  * Defines the interface the Holodeck B2B Core offers to both other Core and  "external" components for retrieving the
@@ -148,4 +148,13 @@ public interface IQueryManager {
      * @since 7.0.0
      */
     IMessageUnitEntity getMessageUnitWithCoreId(final String coreId) throws StorageException;
+
+    /**
+	 * Retrieves all the meta-data of all payloads that are not linked to any User Message message unit.
+	 *
+	 * @return Collection of {@link IPayloadEntity} objects representing the unbound payloads
+	 * @throws StorageException If an error occurs when executing this query
+	 * @since 8.0.0
+	 */
+	Collection<IPayloadEntity> getUnboundPayloads() throws StorageException;
 }

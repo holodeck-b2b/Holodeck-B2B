@@ -19,22 +19,24 @@
 
 This directory is used by the default Certificate Manager to store the Java
 key store files that hold the certificates that are used for processing signed
-and/or encrypted messages.
+and/or encrypted messages and during the TLS handshake.
 
 It contains three key stores:
 
 1) "privatekeys.jks" holding the key pairs Holodeck B2B uses to sign sent
-   messages and decrypt received messages.
+   messages and decrypt received messages and to present as client certificates
+   during the TLS handshake.
 
 2) "partnerkeys.jks" holding the public keys of trading partners. These are 
-   used to encrypt messages sent to the partner or to identify the partner
+   used to encrypt messages sent to the partner, to identify the partner
    in case of a Pull Request or to find the certificate of a signature when
    it is not included in the message.
 
 3) "trustedcerts.jks" holding trusted certificates used to the validate trust
-   in certificates used to sign received messages. As these certificates are
-   considered trusted they are not checked on validity. Therefore this key 
-   store should only contain certificates of trusted Certificate Authorities.
+   in certificates used to sign received messages or which are presented during 
+   the TLS handshake. As these certificates are considered trusted they are not 
+   checked on validity. Therefore this key store should only contain 
+   certificates of trusted Certificate Authorities.
 
 The distribution package by default includes empty key stores, with simple
 passwords: "secrets" for the private one, "nosecrets" for the public

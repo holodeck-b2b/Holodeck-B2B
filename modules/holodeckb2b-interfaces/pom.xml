@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.holodeckb2b</groupId>
         <artifactId>holodeckb2b</artifactId>
-        <version>7.1.0</version>
+        <version>8.1.0</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <artifactId>holodeckb2b-interfaces</artifactId>
@@ -87,6 +87,15 @@
 			<groupId>org.apache.axis2</groupId>
 			<artifactId>axis2-kernel</artifactId>
 		</dependency>
+		<!-- 
+			Although Log4j is not used by the interfaces themselves we include it as a dependency of this
+		 	project because it is the default logging framework used by Holodeck B2B and we encourage extension 
+		 	developers to also use it in their code. 
+		-->
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>				
+		</dependency>
 	</dependencies>
 
 	<profiles>
@@ -131,12 +140,6 @@
 								<goals>
 									<goal>jar</goal>
 								</goals>
-								<configuration>
-									<quiet>true</quiet>
-									<windowtitle>Holodeck B2B Interface Documentation</windowtitle>
-									<noindex>true</noindex>
-									<doctitle>Holodeck B2B ${project.version} Interfaces</doctitle>
-								</configuration>
 							</execution>
 						</executions>
 					</plugin>

@@ -54,7 +54,7 @@ import org.holodeckb2b.interfaces.messagemodel.IPayload.Containment;
 import org.holodeckb2b.interfaces.processingmodel.IMessageUnitProcessingState;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.storage.IPayloadEntity;
-import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.holodeckb2b.interfaces.storage.PayloadBindingException;
 import org.holodeckb2b.interfaces.submit.DuplicateMessageIdException;
 import org.holodeckb2b.storage.metadata.jpa.PayloadInfo;
 import org.holodeckb2b.storage.metadata.jpa.ReceiptTest;
@@ -196,9 +196,9 @@ public class StoreTests extends BaseProviderTest {
 		pl.setPayloadURI("cid:attachment");
 		um.addPayload(new PayloadEntity(pl));
 
-		StorageException exception = assertThrows(StorageException.class, () -> provider.storeMessageUnit(um));
+		PayloadBindingException exception = assertThrows(PayloadBindingException.class, () -> provider.storeMessageUnit(um));
 
-		assertTrue(exception.getMessage().contains("Unknown"));
+		assertNull(exception.getPayload());
 	}
 
 	@Test
@@ -216,9 +216,9 @@ public class StoreTests extends BaseProviderTest {
 		UserMessage um = new UserMessage();
 		um.addPayload(new PayloadEntity(pl));
 
-		StorageException exception = assertThrows(StorageException.class, () -> provider.storeMessageUnit(um));
+		PayloadBindingException exception = assertThrows(PayloadBindingException.class, () -> provider.storeMessageUnit(um));
 
-		assertTrue(exception.getMessage().contains(pl.getParentCoreId()));
+		assertEquals(pl.getPayloadId(), exception.getPayload().getPayloadId());
 	}
 
 	@Test
@@ -240,10 +240,9 @@ public class StoreTests extends BaseProviderTest {
 		um.setDirection(direction);
 		um.addPayload(new PayloadEntity(pl));
 
-		StorageException exception = assertThrows(StorageException.class, () -> provider.storeMessageUnit(um));
+		PayloadBindingException exception = assertThrows(PayloadBindingException.class, () -> provider.storeMessageUnit(um));
 
-		assertTrue(exception.getMessage().contains(pl.getPayloadId()));
-		assertTrue(exception.getMessage().contains(um.getMessageId()));
+		assertEquals(pl.getPayloadId(), exception.getPayload().getPayloadId());
 	}
 
 	@Test
@@ -265,10 +264,9 @@ public class StoreTests extends BaseProviderTest {
 		um.setDirection(Direction.IN);
 		um.addPayload(new PayloadEntity(pl));
 
-		StorageException exception = assertThrows(StorageException.class, () -> provider.storeMessageUnit(um));
+		PayloadBindingException exception = assertThrows(PayloadBindingException.class, () -> provider.storeMessageUnit(um));
 
-		assertTrue(exception.getMessage().contains(pl.getPayloadId()));
-		assertTrue(exception.getMessage().contains(um.getMessageId()));
+		assertEquals(pl.getPayloadId(), exception.getPayload().getPayloadId());
 	}
 
 	@Test

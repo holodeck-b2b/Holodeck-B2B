@@ -16,32 +16,46 @@
  */
 package org.holodeckb2b.core.pmode;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.atMost;
+import static org.mockito.Mockito.atMostOnce;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.lang.reflect.Field;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.List;
+import java.util.UUID;
 
 import org.holodeckb2b.common.pmode.Agreement;
 import org.holodeckb2b.common.pmode.InMemoryPModeSet;
-import org.holodeckb2b.common.pmode.Leg;
 import org.holodeckb2b.common.pmode.PMode;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.commons.testing.TestUtils;
+import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.core.config.InternalConfiguration;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
-import org.holodeckb2b.interfaces.pmode.IPModeSet;
+import org.holodeckb2b.interfaces.pmode.IPModeSetListener;
+import org.holodeckb2b.interfaces.pmode.PModeSetEvent;
 import org.holodeckb2b.interfaces.pmode.PModeSetException;
-import org.holodeckb2b.interfaces.pmode.validation.IPModeValidator;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.EnumSource.Mode;
+import org.mockito.ArgumentCaptor;
 
 /**
  * Created at 17:28 09.09.16
@@ -51,25 +65,34 @@ import org.junit.Test;
 public class PModeManagerTest {
 
 	private static InternalConfiguration config;
+	private static ClassLoader dcl;
+	private static ClassLoader ecl;
 
-	@BeforeClass
-	public static void setUpClass() throws Exception {
-		config = new InternalConfiguration(TestUtils.getTestResource("."));
-		HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore());
+
+	@BeforeAll
+	static void setUpClass() throws Exception {
+		HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore(TestUtils.getTestClassBasePath()));
+		config = HolodeckB2BCore.getConfiguration();
+		dcl = Thread.currentThread().getContextClassLoader();
+		ecl = new URLClassLoader(new URL[] { TestUtils.getTestClassBasePath().toUri().toURL() }, dcl);
 	}
 
-	@Before
-	public void setupTest() {
+	@BeforeEach
+	void setupTest() {
 		config.setAcceptNonValidablePMode(true);
-		TestNOpPModeSet.failOnInit = false;
+		TestPModeStorage.failOnInit = false;
+	}
+
+	@AfterEach
+	void resetClassLoader() {
+		Thread.currentThread().setContextClassLoader(dcl);
 	}
 
 	@Test
 	public void testDefaultConfig() {
 		try {
-			PModeManager manager = new PModeManager();
-			manager.init(config);
-			
+			PModeManager manager = new PModeManager(config);
+
 			Field pmodeStorage = PModeManager.class.getDeclaredField("deployedPModes");
 			pmodeStorage.setAccessible(true);
 			assertTrue(pmodeStorage.get(manager) instanceof InMemoryPModeSet);
@@ -81,200 +104,212 @@ public class PModeManagerTest {
 	}
 
 	@Test
-	public void testStorageLoading() {
-
-		ClassLoader ccl = this.getClass().getClassLoader();
-		URLClassLoader ecl = new URLClassLoader(new URL[] { ccl.getResource("pmodeManager/") }, ccl);
+	void testStorageLoading() {
 		Thread.currentThread().setContextClassLoader(ecl);
 
-		PModeManager manager = null;
-		try {
-			manager = new PModeManager();
-			manager.init(config);			
-		} catch (PModeSetException pse) {
-			fail();
-		}
+		assertDoesNotThrow(() -> new PModeManager(config));
 
-		try {
-			Field pmodeStorage = PModeManager.class.getDeclaredField("deployedPModes");
-			pmodeStorage.setAccessible(true);
-			IPModeSet storageComp = (IPModeSet) pmodeStorage.get(manager);
-
-			assertNotNull(storageComp);
-			assertEquals(TestNOpPModeSet.class, storageComp.getClass());
-		} catch (Throwable t) {
-			t.printStackTrace();
-			fail();
-		}
-
-		TestNOpPModeSet.failOnInit = true;
-		try {
-			manager = new PModeManager();
-			manager.init(config);
-			;
-			fail();
-		} catch (PModeSetException pse) {
-			// Correct
-		}
-
-		Thread.currentThread().setContextClassLoader(ccl);
+		assertTrue(TestPModeStorage.isLoaded());
 	}
 
 	@Test
-	public void testValidatorLoading() {
-
-		ClassLoader ccl = this.getClass().getClassLoader();
-		URLClassLoader ecl = new URLClassLoader(new URL[] { ccl.getResource("pmodeManager/") }, ccl);
+	void testStorageLoadingFailure() {
 		Thread.currentThread().setContextClassLoader(ecl);
 
-		PModeManager manager = null;
-		try {
-			manager = new PModeManager();
-			manager.init(config);			
-		} catch (PModeSetException pse) {
-			fail();
-		}
-
-		try {
-			Field pmodeValidators = PModeManager.class.getDeclaredField("validators");
-			pmodeValidators.setAccessible(true);
-			List<IPModeValidator> validators = (List<IPModeValidator>) pmodeValidators.get(manager);
-
-			assertNotNull(validators);
-			assertEquals(2, validators.size());
-			assertTrue(
-					validators.parallelStream().anyMatch(v -> v.getName().equals(new TestValidatorAllWrong().getName()))
-							&& validators.parallelStream()
-									.anyMatch(v -> v.getName().equals(new TestValidatorAllGood().getName())));
-		} catch (Throwable t) {
-			t.printStackTrace();
-			fail();
-		}
-
-		Thread.currentThread().setContextClassLoader(ccl);
+		TestPModeStorage.failOnInit = true;
+		assertThrows(PModeSetException.class, () -> new PModeManager(config));
 	}
 
 	@Test
-	public void testInvalidConfig() {
-		try {
-			config.setAcceptNonValidablePMode(false);
-			PModeManager manager = new PModeManager();
-			manager.init(config);			
-			fail();
-		} catch (PModeSetException correct) {
-		}
+	void testValidatorLoading() {
+		Thread.currentThread().setContextClassLoader(ecl);
+
+		assertDoesNotThrow(() -> new PModeManager(config));
+
+		assertTrue(TestValidatorAllGood.isLoaded());
+		assertTrue(TestValidatorRejectPull.isLoaded());
 	}
 
 	@Test
-	public void testPModeAddReplace() throws PModeSetException {
-		PModeManager manager = new PModeManager();
-		manager.init(config);
-		
+	void testInvalidConfig() {
+		config.setAcceptNonValidablePMode(false);
+		assertThrows(PModeSetException.class, () -> new PModeManager(config));
+	}
+
+	@Test
+	void testBasicAdd() {
+		PModeManager manager = assertDoesNotThrow(() -> new PModeManager(config));
+
 		PMode pmode = new PMode();
-		pmode.setId("valid-pmode-1");
-		pmode.setMep(EbMSConstants.ONE_WAY_MEP);
+		pmode.setId(UUID.randomUUID().toString());
 		pmode.setMepBinding(EbMSConstants.ONE_WAY_PUSH);
-		pmode.addLeg(new Leg());
 
-		try {
-			manager.add(pmode);
-		} catch (PModeSetException ex) {
-			System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
-			fail();
-		}
+		assertDoesNotThrow(() -> manager.add(pmode));
+
 		assertTrue(manager.containsId(pmode.getId()));
+	}
 
+	@Test
+	void testRejectAdd() {
+		Thread.currentThread().setContextClassLoader(ecl);
+		PModeManager manager = assertDoesNotThrow(() -> new PModeManager(config));
+
+		PMode pmode = new PMode();
+		pmode.setId(UUID.randomUUID().toString());
 		pmode.setMepBinding(EbMSConstants.ONE_WAY_PULL);
-		try {
-			manager.replace(pmode);
-		} catch (PModeSetException ex) {
-			System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
-			fail();
-		}
-		assertTrue(manager.containsId(pmode.getId()));
-		assertEquals(EbMSConstants.ONE_WAY_PULL, pmode.getMepBinding());
-	}
 
-	@Test
-	public void testPModeValidation() throws PModeSetException {
-		PModeManager manager = new PModeManager();
-		manager.init(config);
-		
-		final TestValidatorAllWrong vAllWrong = new TestValidatorAllWrong();
-		final TestValidatorAllGood vAllGood = new TestValidatorAllGood();
-		try {
-			Field pmodeValidators = PModeManager.class.getDeclaredField("validators");
-			pmodeValidators.setAccessible(true);
-			List<IPModeValidator> validators = (List<IPModeValidator>) pmodeValidators.get(manager);
-			validators.add(vAllWrong);
-			validators.add(vAllGood);
-		} catch (Throwable t) {
-			fail();
-		}
-		PMode pmode = new PMode();
-		pmode.setId("invalid-pmode");
-		try {
-			manager.add(pmode);
-		} catch (PModeSetException ex) {
-		}
+		assertThrows(PModeSetException.class, () -> manager.add(pmode));
 
-		assertTrue(vAllGood.isExecuted());
-		assertTrue(vAllWrong.isExecuted());
-	}
-
-	@Test
-	public void testPModeRejectInvalid() throws PModeSetException {
-		PModeManager manager = new PModeManager();
-		manager.init(config);
-		
-		try {
-			Field pmodeValidators = PModeManager.class.getDeclaredField("validators");
-			pmodeValidators.setAccessible(true);
-			List<IPModeValidator> validators = (List<IPModeValidator>) pmodeValidators.get(manager);
-			validators.add(new TestValidatorAllWrong());
-		} catch (Throwable t) {
-			fail();
-		}
-		PMode pmode = new PMode();
-		pmode.setId("invalid-pmode");
-		pmode.setMep(EbMSConstants.ONE_WAY_MEP);
-		pmode.setMepBinding(EbMSConstants.ONE_WAY_PUSH);
-		pmode.setAgreement(new Agreement());
-		pmode.addLeg(new Leg());
-
-		try {
-			manager.add(pmode);
-			fail();
-		} catch (PModeSetException ex) {
-		}
 		assertFalse(manager.containsId(pmode.getId()));
 	}
 
 	@Test
-	public void testPModeRemove() throws PModeSetException {
-		PModeManager manager = new PModeManager();
-		manager.init(config);
-	
-		PMode pmode = new PMode();
-		pmode.setId("valid-pmode-1");
-		pmode.setMep(EbMSConstants.ONE_WAY_MEP);
-		pmode.setMepBinding(EbMSConstants.ONE_WAY_PUSH);
-		pmode.addLeg(new Leg());
+	void testBasicReplace() {
+		PModeManager manager = assertDoesNotThrow(() -> new PModeManager(config));
 
-		try {
-			manager.add(pmode);
-		} catch (PModeSetException ex) {
-			System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
-			fail();
-		}
+		PMode pmode = new PMode();
+		pmode.setId(UUID.randomUUID().toString());
+		pmode.setMepBinding(EbMSConstants.ONE_WAY_PUSH);
+
+		assertDoesNotThrow(() -> manager.add(pmode));
+
 		assertTrue(manager.containsId(pmode.getId()));
 
-		try {
-			manager.remove(pmode.getId());
-		} catch (PModeSetException ex) {
-			System.out.println("Exception '" + ex.getLocalizedMessage() + "'");
-			fail();
-		}
+		PMode update = new PMode(pmode);
+		update.setAgreement(new Agreement("newAgreement"));
+
+		assertDoesNotThrow(() -> manager.replace(update));
+
+		assertTrue(manager.containsId(update.getId()));
+		assertEquals("newAgreement", manager.get(update.getId()).getAgreement().getName());
+	}
+
+	@Test
+	void testRejectReplace() {
+		Thread.currentThread().setContextClassLoader(ecl);
+		PModeManager manager = assertDoesNotThrow(() -> new PModeManager(config));
+
+		PMode pmode = new PMode();
+		pmode.setId(UUID.randomUUID().toString());
+		pmode.setMepBinding(EbMSConstants.ONE_WAY_PUSH);
+
+		assertDoesNotThrow(() -> manager.add(pmode));
+
+		assertTrue(manager.containsId(pmode.getId()));
+
+		PMode update = new PMode(pmode);
+		update.setMepBinding(EbMSConstants.ONE_WAY_PULL);
+
+		assertThrows(PModeSetException.class, () -> manager.replace(update));
+
+		assertTrue(manager.containsId(update.getId()));
+		assertEquals(EbMSConstants.ONE_WAY_PUSH, manager.get(update.getId()).getMepBinding());
+	}
+
+	@Test
+	void testBasicRemove() throws PModeSetException {
+		PModeManager manager = assertDoesNotThrow(() -> new PModeManager(config));
+
+		PMode pmode = new PMode();
+		pmode.setId(UUID.randomUUID().toString());
+
+		assertDoesNotThrow(() -> manager.add(pmode));
+		assertTrue(manager.containsId(pmode.getId()));
+
+		assertDoesNotThrow(() -> manager.remove(pmode.getId()));
+
 		assertFalse(manager.containsId(pmode.getId()));
+	}
+
+	@Test
+	void testAllEventsRegistration() {
+		PModeManager manager = assertDoesNotThrow(() -> new PModeManager(config));
+
+		IPModeSetListener listener = mock(IPModeSetListener.class);
+
+		manager.registerEventListener(listener);
+
+		ArgumentCaptor<PModeSetEvent> arg = ArgumentCaptor.forClass(PModeSetEvent.class);
+
+		PMode pmode = new PMode();
+		pmode.setId(UUID.randomUUID().toString());
+		assertDoesNotThrow(() -> manager.add(pmode));
+
+		verify(listener, times(1)).handleEvent(arg.capture());
+		assertEquals(PModeSetEvent.PModeSetAction.ADD, arg.getValue().getEventType());
+
+		pmode.setAgreement(new Agreement("newAgreement"));
+		assertDoesNotThrow(() -> manager.replace(pmode));
+
+		verify(listener, times(2)).handleEvent(arg.capture());
+		assertEquals(PModeSetEvent.PModeSetAction.UPDATE, arg.getValue().getEventType());
+
+		assertDoesNotThrow(() -> manager.remove(pmode.getId()));
+
+		verify(listener, times(3)).handleEvent(arg.capture());
+		assertEquals(PModeSetEvent.PModeSetAction.REMOVE, arg.getValue().getEventType());
+	}
+
+	@ParameterizedTest
+	@EnumSource(mode = Mode.MATCH_ALL, value = PModeSetEvent.PModeSetAction.class)
+	void testSingleEventRegistration(PModeSetEvent.PModeSetAction action) {
+		PModeManager manager = assertDoesNotThrow(() -> new PModeManager(config));
+
+		ArgumentCaptor<PModeSetEvent> arg = ArgumentCaptor.forClass(PModeSetEvent.class);
+		IPModeSetListener listener = mock(IPModeSetListener.class);
+
+		manager.registerEventListener(listener, action);
+
+		PMode pmode = new PMode();
+		pmode.setId(UUID.randomUUID().toString());
+		assertDoesNotThrow(() -> manager.add(pmode));
+		pmode.setAgreement(new Agreement("newAgreement"));
+		assertDoesNotThrow(() -> manager.replace(pmode));
+		assertDoesNotThrow(() -> manager.remove(pmode.getId()));
+
+		verify(listener, atMostOnce()).handleEvent(arg.capture());
+		assertEquals(action, arg.getValue().getEventType());
+	}
+
+	@Test
+	void testRemoveListenerCompletely() {
+		PModeManager manager = assertDoesNotThrow(() -> new PModeManager(config));
+
+		IPModeSetListener listener = mock(IPModeSetListener.class);
+
+		manager.registerEventListener(listener);
+
+		manager.unregisterEventListener(listener);
+
+		PMode pmode = new PMode();
+		pmode.setId(UUID.randomUUID().toString());
+		assertDoesNotThrow(() -> manager.add(pmode));
+		pmode.setAgreement(new Agreement("newAgreement"));
+		assertDoesNotThrow(() -> manager.replace(pmode));
+		assertDoesNotThrow(() -> manager.remove(pmode.getId()));
+
+		verify(listener, never()).handleEvent(any(PModeSetEvent.class));
+	}
+
+	@ParameterizedTest
+	@EnumSource(mode = Mode.MATCH_ALL, value = PModeSetEvent.PModeSetAction.class)
+	void testRemoveListenerPartially(PModeSetEvent.PModeSetAction action) {
+		PModeManager manager = assertDoesNotThrow(() -> new PModeManager(config));
+
+		IPModeSetListener listener = mock(IPModeSetListener.class);
+
+		manager.registerEventListener(listener);
+
+		manager.unregisterEventListener(listener, action);
+
+		PMode pmode = new PMode();
+		pmode.setId(UUID.randomUUID().toString());
+		assertDoesNotThrow(() -> manager.add(pmode));
+		pmode.setAgreement(new Agreement("newAgreement"));
+		assertDoesNotThrow(() -> manager.replace(pmode));
+		assertDoesNotThrow(() -> manager.remove(pmode.getId()));
+
+		verify(listener, atMost(2)).handleEvent(any(PModeSetEvent.class));
+		verify(listener, never()).handleEvent(argThat(ev -> ev.getEventType() == action));
 	}
 }

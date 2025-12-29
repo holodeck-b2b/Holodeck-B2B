@@ -21,19 +21,23 @@ import java.security.KeyStore;
 import java.security.MessageDigest;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
+import java.util.Collection;
 import java.util.List;
 
 import javax.security.auth.x500.X500Principal;
 
 import org.holodeckb2b.interfaces.config.IConfiguration;
-import org.holodeckb2b.interfaces.pmode.ISigningConfiguration;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 
 /**
  * Defines the interface of the Holodeck B2B <i>Certificate Manager</i> component which is responsible for providing the
  * private keys and X509v3 certificates to the components processing the messages and validating trust in certificates.
- * <p>The interface distinguishes between the key pairs used by Holodeck B2B for signing and decryption and certificates
- * of trading partners used for encryption and identification.
+ * <p>
+ * The interface distinguishes between the key pairs used by Holodeck B2B for signing and decryption and certificates
+ * of trading partners used for encryption and identification. Note that these key pairs and certificates can be used
+ * for both message (e.g. AS4) and transport level (TLS) security. Furthermore the <i>Certificate Manager</i> is
+ * responsible for validating the trust in certificates, again both for message and transport level security.
+ * <p>
  * The key pairs consist of the private key and at least the certificate containing the corresponding public key.
  * Sometimes however when signing a message the signature needs to include a certificate chain up to a common trusted
  * root. Therefore key pairs can contain the such a chain. Trading partner certificates relate directly to the trading
@@ -41,12 +45,17 @@ import org.holodeckb2b.interfaces.security.SecurityProcessingException;
  * All key pairs and trading partner certificates must have a unique "alias" that can be used in the security
  * configuration section of the P-Mode. How key pairs and partner certificates are registered with the Certificate
  * Manager is not defined by this interface and left up to the implementation.
- * <p>How the validation of trust in a certificate (path) is established is implementation dependent and therefore the
- * only defined methods are to validate the trust. Two versions of the validation method are defined, one for generic
- * validation of trust according to the Certificate Manager's trust policy and one that uses additional configuration
- * that applies to the signature for which the certificate (path) was used. The implementation of the latter is optional
- * and whether it is supported can be checked using the {@link #supportsConfigBasedValidation()} method.
- * <p>There can always be just one <i>Certificate Manager</i> active in an Holodeck B2B instance. The implementation to
+ * <p>
+ * This interface specifies separate methods for validating trust in message and transport level certificates. For the
+ * validation of a TLS certificate there is just one method, but for the validation of MLS certificate there are two,
+ * one for generic validation of trust according to the Certificate Manager's trust policy and one that uses additional
+ * configuration that applies to the signature for which the certificate (path) was used. The implementation of the
+ * latter is optional and whether it is supported can be checked using the {@link #supportsConfigBasedValidation()}
+ * method.<br/>
+ * How the validation of trust in a certificate (path) is established is implementation dependent and therefore the
+ * only defined methods are to validate the trust.
+ * <p>
+ * There can always be just one <i>Certificate Manager</i> active in an Holodeck B2B instance. The implementation to
  * use is loaded using the Java <i>Service Prover Interface</i> mechanism.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
@@ -54,6 +63,7 @@ import org.holodeckb2b.interfaces.security.SecurityProcessingException;
  * 		Provider</i>. Its functionality however is more generic and therefore it has been decoupled and split off into
  * 		a stand alone component. As trust validation and management have been left to the implementation the related
  * 		methods from the 4.x version have been removed.
+ * @since 8.0.0 Added support for handling transport level certificate validation.
  */
 public interface ICertificateManager {
 
@@ -148,7 +158,7 @@ public interface ICertificateManager {
      * @throws SecurityProcessingException When there is a problem in searching the key pairs
      * @since 6.0.0
      */
-    String findKeyPair(final byte[] hash, MessageDigest digester) throws SecurityProcessingException;
+    String findKeyPair(final byte[] hash, final MessageDigest digester) throws SecurityProcessingException;
 
     /**
      * Gets the key pair registered under the given alias.
@@ -230,46 +240,49 @@ public interface ICertificateManager {
      * @throws SecurityProcessingException When there is a problem in searching for the certificate.
      * @since 6.0.0
      */
-    X509Certificate findCertificate(final byte[] hash, MessageDigest digester) throws SecurityProcessingException;
+    X509Certificate findCertificate(final byte[] hash, final MessageDigest digester) throws SecurityProcessingException;
 
     /**
-     * Checks if the given certificate path is trusted for the validation of signatures. The Certificate Manager may
-     * extend the given path with already registered trusted certificates to perform the actual trust validation.
+     * Checks if the given certificate path is trusted for the validation of signatures on the given security level.
+     * The Certificate Manager may extend the given path with already registered trusted certificates to perform the
+     * actual trust validation.
      *
      * @param certs	List of certificates that form the path to validate trust in. Must be in forward order.
+     * @param secLevel	Security level on which the certificate (path) to validate is used
      * @return		An instance of {@link IValidationResult} describing the validation result
      * @throws SecurityProcessingException 	When the trust cannot be validated due to some error. NOTE: This exception
      * 										MUST only be used to indicate errors that prevent checking the trust. When
      * 										thrown it indicates only that the trust could not be checked, i.e. the trust
      * 										in the certificate is undetermined.
-     * @since 5.0.0
+     * @since 8.0.0 this method was previously named <code>validateTrust()</code>
      */
-    IValidationResult validateTrust(final List<X509Certificate> certs) throws SecurityProcessingException;
+    default IValidationResult validateCertificate(final List<X509Certificate> certs, final SecurityLevel secLevel)
+    																				throws SecurityProcessingException {
+    	return validateCertificate(certs, null, secLevel);
+    }
 
     /**
-     * Checks if the given certificate path is trusted for the validation of a signature given the specific signing
-     * configuration. The Certificate Manager may extend the given path with already registered trusted certificates to
-     * perform the actual trust validation.
-     * <p>NOTE: This is an optional function of the <i>Certificate Manager</i> which by default returns the generic
-     * trust in the given certificate. The {@link #supportsConfigBasedValidation()} method can be used to determine
-     * whether the message based check is supported.
+     * Checks if the given certificate path is trusted for the validation of a signature on the given security level and
+     * taking into account the specified validation parameters. The Certificate Manager may extend the given path with
+     * already registered trusted certificates to perform the actual trust validation.
      *
      * @param certs		List of certificates that form the path to validate trust in. Must be in forward order.
-     * @param sigCfg	Configuration that applies to signature for which the certificate (path) to validate applies
+     * @param parameters	Validation parameters that should be used to validate the trust. May be <code>null</code> if 
+     * 						there are no parameters to take into account.
+     * @param secLevel	Security level on which the certificate (path) to validate is used
      * @return			An instance of {@link IValidationResult} describing the validation result
      * @throws SecurityProcessingException 	When the trust cannot be validated due to some error. NOTE: This exception
      * 										MUST only be used to indicate errors that prevent checking the trust. When
      * 										thrown it indicates only that the trust could not be checked, i.e. the trust
      * 										in the certificate is undetermined.
-     * @since 5.0.0
+     * @since 8.0.0 this method was previously named <code>validateTrust()</code>
      */
-    default IValidationResult validateTrust(final List<X509Certificate> certs, final ISigningConfiguration sigCfg)
-    																				throws SecurityProcessingException {
-    	return validateTrust(certs);
-    }
+    IValidationResult validateCertificate(final List<X509Certificate> certs, final IValidationParameters parameters,
+    									  final SecurityLevel secLevel) throws SecurityProcessingException;
 
     /**
-     * Indicates whether the <i>Certificate Manager</i> implementation supports configuration based trust validation.
+     * Indicates whether the <i>Certificate Manager</i> implementation supports configuration based trust validation,
+     * i.e. accepts {@link IValidationParameters validation parameters}.
      *
      * @return	<code>true</code> if supported, <code>false</code> if not.
      * 			Since this is an optional feature <code>false</code> is default.
@@ -278,4 +291,36 @@ public interface ICertificateManager {
     default boolean supportsConfigBasedValidation() {
     	return false;
     }
+
+    /**
+     * Gets the certificates of all <i>Certificate Authorities</i> that are trusted to issue certificates for use on the
+     * indicated security level, e.g. for transport level security. Note that the returned CA's not necessarily issue
+     * the certificates of end users but could just be the root CA's.
+     *
+     * @param secLevel	Security level for which the CA certificates are required
+     * @return collection containing the X509 certificates of all trusted CA's
+     * @throws SecurityProcessingException when the CA certificates cannot be retrieved
+     * @since 8.0.0
+     */
+    default Collection<X509Certificate> getAllTrustedCertificates(final SecurityLevel secLevel)
+    																				throws SecurityProcessingException {
+    	return getAllTrustedCertificates(secLevel, null);
+    }
+
+    /**
+     * Gets the certificates of all <i>Certificate Authorities</i> that are trusted to issue certificates for use on the
+     * indicated security level and taking into account the specified validation parameters. Note that the returned CA's
+     * not necessarily issue the certificates of end users but could just be the root CA's.
+     *
+     * @param secLevel		Security level for which the CA certificates are required
+     * @param parameters	Validation parameters that should be used to determine the trusted CA's. May be 
+     * 						<code>null</code> if there are no parameters to take into account.
+     * @return collection containing the X509 certificates of all trusted CA's
+     * @throws SecurityProcessingException when the CA certificates cannot be retrieved
+     * @since 8.0.0
+     */
+    Collection<X509Certificate> getAllTrustedCertificates(final SecurityLevel secLevel,
+    													  final IValidationParameters parameters)
+    																				throws SecurityProcessingException;
+    
 }

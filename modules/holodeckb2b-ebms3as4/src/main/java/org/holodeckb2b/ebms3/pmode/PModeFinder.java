@@ -96,8 +96,25 @@ public class PModeFinder {
     }
 
     /**
-     * Finds the P-Mode for a received <i>User Message</i> message unit.
-     * <p>The ebMS specifications do not describe or recommend how the P-Mode for a user message should be determined,
+     * Finds the P-Mode for a received <i>User Message</i> message unit in the set of all configured P-Mode on the
+     * Holodeck B2B instance.
+     * <p>
+     * See the documentation of the {@link #forReceivedUserMessage(IUserMessage, Collection)} method for more
+     * information on the method how the P-Mode is selected from the P-Mode set.
+     *
+     * @param mu        The user message message unit to find the P-Mode for
+     * @return          The P-Mode for the message unit if the message unit can be matched to a <b>single</b> P-Mode,
+     *                  <code>null</code> if no P-Mode could be found for the user message message unit.
+     */
+    public static IPMode forReceivedUserMessage(final IUserMessage mu) {
+    	 IPModeSet pmSet = HolodeckB2BCoreInterface.getPModeSet();
+    	 return forReceivedUserMessage(pmSet != null ? pmSet.getAll() : null, mu);
+    }
+
+    /**
+     * Finds the P-Mode for a received <i>User Message</i> message unit in the given set of P-Modes.
+     * <p>
+     * The ebMS specifications do not describe or recommend how the P-Mode for a user message should be determined,
      * see also <a href="https://issues.oasis-open.org/browse/EBXMLMSG-48">issue 48 in the OASIS TC issue tracker</a>.
      * In the issue two suggestions for matching the P-Mode are given. Based on these we compare the meta-data from the
      * message with all P-Modes and return the best matching P-Mode.
@@ -123,13 +140,14 @@ public class PModeFinder {
      * only find one matching P-Mode. This means that when multiple P-Modes with the highest match score are found none
      * is returned.
      *
+     * @param pmodes	Set of P-Modes to evaluate
      * @param mu        The user message message unit to find the P-Mode for
      * @return          The P-Mode for the message unit if the message unit can be matched to a <b>single</b> P-Mode,
      *                  <code>null</code> if no P-Mode could be found for the user message message unit.
+     * @since 8.0.0
      */
-    public static IPMode forReceivedUserMessage(final IUserMessage mu) {
-    	final IPModeSet pmodes = HolodeckB2BCoreInterface.getPModeSet();
-        if (pmodes == null)
+	public static IPMode forReceivedUserMessage(final Collection<IPMode> pmodes, final IUserMessage mu) {
+	    if (Utils.isNullOrEmpty(pmodes))
             return null;
 
         IPMode    hPMode = null;
@@ -137,7 +155,7 @@ public class PModeFinder {
         boolean   multiple = false;
 
         log.debug("Finding P-Mode for User Message (msgId={})", mu.getMessageId());
-        for (final IPMode p : pmodes.getAll()) {
+        for (final IPMode p : pmodes) {
         	if (log.isDebugEnabled())
         		log.debug("Checking P-Mode : {}", p.getId());
 
@@ -391,22 +409,44 @@ public class PModeFinder {
         return !multiple ? hPMode : null;
     }
 
+	/**
+	 * Gets the list of P-Modes for which Holodeck B2B is the responder in a pull operation for the given MPC and
+	 * authentication info which can consist of the signature and the username tokens in the security header targeted to
+	 * the <i>default</i> and <i>ebms</i> role/actor.
+	 *
+	 * @param authInfo  The authentication info included in the message.
+	 * @param mpc       The <i>MPC</i> that the message are exchanged on
+	 * @return          Collection of P-Modes for which Holodeck B2B is the responder in a pull operation for the given
+	 *                  MPC and authentication info
+	 * @throws SecurityProcessingException when an error occurs in the processing of the provided authentication data
+	 */
+	public static Collection<IPMode> findForPulling(final Collection<ISecurityProcessingResult> authInfo,
+													final String mpc) throws SecurityProcessingException {
+		IPModeSet pmSet = HolodeckB2BCoreInterface.getPModeSet();
+		return findForPulling(pmSet != null ? pmSet.getAll() : null, authInfo, mpc);
+	}
+
     /**
-     * Gets the list of P-Modes for which Holodeck B2B is the responder in a pull operation for the given MPC and
-     * authentication info which can consist of the signature and the username tokens in the security header targeted to
-     * the <i>default</i> and <i>ebms</i> role/actor.
+     * Gets from the given collection of P-Modes, the ones for which Holodeck B2B is the responder in a pull operation
+     * for the given MPC and authentication info which can consist of the signature and the username tokens in the
+     * security header targeted to the <i>default</i> and <i>ebms</i> role/actor.
      *
+     * @param pmodes	Collections of P-Modes to select the pull P-Modes from
      * @param authInfo  The authentication info included in the message.
      * @param mpc       The <i>MPC</i> that the message are exchanged on
      * @return          Collection of P-Modes for which Holodeck B2B is the responder in a pull operation for the given
      *                  MPC and authentication info
-     * @throws SecurityProcessingException
+     * @throws SecurityProcessingException when an error occurs in the processing of the provided authentication data
+     * @since 8.0.0
      */
-    public static Collection<IPMode> findForPulling(final Collection<ISecurityProcessingResult> authInfo,
+    public static Collection<IPMode> findForPulling(final Collection<IPMode> pmodes,
+    												final Collection<ISecurityProcessingResult> authInfo,
                                                     final String mpc) throws SecurityProcessingException {
-        final ArrayList<IPMode> pmodesForPulling = new ArrayList<>();
+    	if (Utils.isNullOrEmpty(pmodes))
+    		return Collections.emptySet();
 
-        for(final IPMode p : HolodeckB2BCoreInterface.getPModeSet().getAll()) {
+        final ArrayList<IPMode> pmodesForPulling = new ArrayList<>();
+        for(final IPMode p : pmodes) {
             // Check if this P-Mode uses pulling with Holodeck B2B being the responder
             final ILeg leg = PModeUtils.getInPullRequestLeg(p);
             if (leg != null) {
@@ -518,6 +558,7 @@ public class PModeFinder {
      * @return              <code>true</code> if the received message satisfies the authentication requirements defined
      *                      in the flow, <br>
      *                      <code>false</code> otherwise.
+     * @throws SecurityProcessingException when an error occurs in the processing of the provided authentication data
      */
     private static boolean verifyPullRequestAuthorization(final ISecurityConfiguration pullSecCfg,
                                                           final ISecurityConfiguration tpSecCfg,

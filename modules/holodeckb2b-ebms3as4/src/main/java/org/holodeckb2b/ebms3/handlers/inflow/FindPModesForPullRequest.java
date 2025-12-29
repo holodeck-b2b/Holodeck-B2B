@@ -35,7 +35,9 @@ import org.holodeckb2b.interfaces.storage.IPullRequestEntity;
  * FindPModes}) as it requires knowledge of information contained in the WS-Security header.
  * <p>Based on only the MPC and authentication info it may not be possible to uniquely identify a P-Mode, so the result
  * of P-Mode finding for a Pull Request is a collection of P-Modes that a User Message may be pulled from. Finding the
- * P-Mode for a User Message is done by the {@link PModeFinder} utility class.
+ * P-Mode(s) for a Pul Request is done by the {@link PModeFinder} utility class. Since version 8.0.0 the set of P-Modes
+ * to evaluate to find a match can be specified in the Message Processing Context property <i>ebms3as4-pmodeset</i>.
+ * This could for example be done by a "dispatch" handler.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
@@ -44,7 +46,7 @@ public class FindPModesForPullRequest extends AbstractBaseHandler {
 	 * Name of the message processing context property that will hold the found P-Modes for the received Pull Request
 	 */
 	static final String FOUND_PULL_PMODES = "found-pull-pmodes";
-	
+
     @Override
     protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log) throws Exception {
         final IPullRequestEntity pullRequest = procCtx.getReceivedPullRequest();
@@ -54,23 +56,33 @@ public class FindPModesForPullRequest extends AbstractBaseHandler {
              * MPC and given authentication info are used.
              */
             log.trace("Find P-Modes matching the pull request");
-            final Collection<IPMode> pmodes = PModeFinder.findForPulling(procCtx.getSecurityProcessingResults(),
-            															 pullRequest.getMPC());
-            if (Utils.isNullOrEmpty(pmodes)) {
+            Collection<IPMode> pullPModes;
+            @SuppressWarnings("unchecked")
+			Collection<IPMode> pmodeSet = (Collection<IPMode>) procCtx.getProperty(FindPModes.CTX_APPL_PMODESET);
+            if (pmodeSet != null) {
+            	log.debug("Using restricted P-Mode set specified in Message Processing Context");
+				pullPModes = PModeFinder.findForPulling(pmodeSet,
+													procCtx.getSecurityProcessingResults(), pullRequest.getMPC());
+			} else {
+				pullPModes = PModeFinder.findForPulling(procCtx.getSecurityProcessingResults(), pullRequest.getMPC());
+            }
+
+
+            if (Utils.isNullOrEmpty(pullPModes)) {
                 // No P-Modes found for the MPC and authentication info provided in pull request
                 log.info("No P-Mode found for PullRequest [" + pullRequest.getMessageId() + "]");
-                                              
+
                 procCtx.addGeneratedError(new ProcessingModeMismatch(
-                										"Can not process pull request because no P-Mode was found!", 
+                										"Can not process pull request because no P-Mode was found!",
                 										pullRequest.getMessageId()));
                 log.trace("Set the processing state of this PullRequest to failure");
                 HolodeckB2BCore.getStorageManager().setProcessingState(pullRequest, ProcessingState.FAILURE);
             } else {
-                log.debug("Store the list of " + pmodes.size()
+                log.debug("Store the list of " + pullPModes.size()
                             + " authorized PModes so next handler can retrieve message unit to return");
-                procCtx.setProperty(FOUND_PULL_PMODES, pmodes);
+                procCtx.setProperty(FOUND_PULL_PMODES, pullPModes);
             }
-        } 
+        }
 
         return InvocationResponse.CONTINUE;
     }

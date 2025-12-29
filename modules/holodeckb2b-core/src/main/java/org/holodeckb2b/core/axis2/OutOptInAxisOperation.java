@@ -48,8 +48,8 @@ import org.holodeckb2b.core.MessageProcessingContext;
 
 /**
  * Is a special Axis2 {@link AxisOperation} implementation that supports the Out In MEP but does not require a response
- * message and which allows to specify  
- * 
+ * message and which allows to specify
+ *
  * <p>This class extends {@link OutInAxisOperation} to return a different {@link OperationClient} implementation.
  * Although there is just one method that changes in the <code>OperationClient</code> it must be copied from the super
  * class a an inner class can not be extended.
@@ -89,7 +89,7 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
 
         private final Log log = LogFactory.getLog(OutOptInAxisOperationClient.class);
 
-        public OutOptInAxisOperationClient(final OutInAxisOperation axisOp, final ServiceContext sc, 
+        public OutOptInAxisOperationClient(final OutInAxisOperation axisOp, final ServiceContext sc,
         								   final Options options) {
             super(axisOp, sc, options);
         }
@@ -123,7 +123,7 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
         }
 
         /**
-         * Executes the MEP. 
+         * Executes the MEP.
          *
          * @param block 		IGNORED BY THIS MEP CLIENT.
          * @throws AxisFault 	if something goes wrong during the execution of the MEP.
@@ -148,10 +148,15 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
                 mc.setTransportIn(options.getTransportIn());
             }
 
-            // Send the SOAP Message and receive a response
-            MessageContext responseMessageContext = send(mc);
-            handleResponse(responseMessageContext);
-            completed = true;
+            try {
+	            // Send the SOAP Message and receive a response
+	            MessageContext responseMessageContext = send(mc);
+	            handleResponse(responseMessageContext);
+            } finally {
+            	// Ensure that context is always cleaned up
+            	completed = true;
+            	complete(mc);
+			}
         }
 
         /**
@@ -180,13 +185,13 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
             AxisEngine.send(msgContext);
 
             responseMessageContext.setDoingREST(msgContext.isDoingREST());
-            
+
             // Copy RESPONSE properties which the transport set onto the request message context when it processed
             // the incoming response received in reply to an outgoing request.
             MessageProcessingContext.getFromMessageContext(msgContext).setParentContext(responseMessageContext);
             // We convert the http headers to lowercase for unambigious processing
             @SuppressWarnings("unchecked")
-			final Map<String, String> httpHeaders = (Map<String, String>) 
+			final Map<String, String> httpHeaders = (Map<String, String>)
             												msgContext.getProperty(MessageContext.TRANSPORT_HEADERS);
             if (!Utils.isNullOrEmpty(httpHeaders)) {
             		final Map<String, String> lcHeaders = new HashMap<>(httpHeaders.size());
@@ -194,39 +199,39 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
             		responseMessageContext.setProperty(MessageContext.TRANSPORT_HEADERS, lcHeaders);
             } else
             	responseMessageContext.setProperty(MessageContext.TRANSPORT_HEADERS, httpHeaders);
-            
-            responseMessageContext.setProperty(HTTPConstants.MC_HTTP_STATUS_CODE, 
-            									(Integer) msgContext.getProperty(HTTPConstants.MC_HTTP_STATUS_CODE));
+
+            responseMessageContext.setProperty(HTTPConstants.MC_HTTP_STATUS_CODE,
+            									msgContext.getProperty(HTTPConstants.MC_HTTP_STATUS_CODE));
 
             responseMessageContext.setProperty(MessageContext.TRANSPORT_IN, msgContext
                     .getProperty(MessageContext.TRANSPORT_IN));
             responseMessageContext.setTransportIn(msgContext.getTransportIn());
             responseMessageContext.setTransportOut(msgContext.getTransportOut());
-            
+
             return responseMessageContext;
         }
-        
+
         /**
          * Handles the (optional) response.
          *
          * @param responseMessageContext the active response MessageContext
          * @throws AxisFault if something went wrong
          */
-        protected void handleResponse(final MessageContext responseMessageContext) throws AxisFault {  
-        	SOAPEnvelope resenvelope = responseMessageContext.getEnvelope(); 
+        protected void handleResponse(final MessageContext responseMessageContext) throws AxisFault {
+        	SOAPEnvelope resenvelope = responseMessageContext.getEnvelope();
     		final InputStream is = (InputStream) responseMessageContext.getProperty(MessageContext.TRANSPORT_IN);
-        	if (resenvelope == null && is != null) {        		
+        	if (resenvelope == null && is != null) {
             	@SuppressWarnings("unchecked")
-				Map<String, String> httpHeaders = (Map<String, String>) 
+				Map<String, String> httpHeaders = (Map<String, String>)
          										 responseMessageContext.getProperty(MessageContext.TRANSPORT_HEADERS);
-            	final String contentType = httpHeaders.get(HTTPConstants.CONTENT_TYPE.toLowerCase());            	
-        		
+            	final String contentType = httpHeaders.get(HTTPConstants.CONTENT_TYPE.toLowerCase());
+
         		// Check if the Service specifies its own Message Builder
             	final Builder msgBuilder = Axis2Utils.getBuilderFromService(responseMessageContext.getAxisService());
             	try {
 					if (msgBuilder != null) {
-						log.debug("Using " + msgBuilder.getClass().getSimpleName() 
-																		+ " Builder to prepare messaging processing");					
+						log.debug("Using " + msgBuilder.getClass().getSimpleName()
+																		+ " Builder to prepare messaging processing");
 						// The builder SHOULD return a SOAP info-set, but for safety we do an extra check
 						final OMElement response = msgBuilder.processDocument(is, contentType, responseMessageContext);
 						if (response != null)
@@ -250,7 +255,7 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
                 }
             }
         }
-        
-    }        	    
+
+    }
 }
 

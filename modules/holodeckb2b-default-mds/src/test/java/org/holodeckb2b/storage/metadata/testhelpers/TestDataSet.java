@@ -26,12 +26,15 @@ import org.holodeckb2b.common.messagemodel.MessageProcessingState;
 import org.holodeckb2b.common.messagemodel.PartyId;
 import org.holodeckb2b.common.messagemodel.TradingPartner;
 import org.holodeckb2b.interfaces.messagemodel.Direction;
+import org.holodeckb2b.interfaces.messagemodel.IPayload.Containment;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.storage.IErrorMessageEntity;
+import org.holodeckb2b.interfaces.storage.IPayloadEntity;
 import org.holodeckb2b.interfaces.storage.IPullRequestEntity;
 import org.holodeckb2b.interfaces.storage.IReceiptEntity;
 import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
 import org.holodeckb2b.storage.metadata.ErrorMessageEntity;
+import org.holodeckb2b.storage.metadata.PayloadEntity;
 import org.holodeckb2b.storage.metadata.PullRequestEntity;
 import org.holodeckb2b.storage.metadata.ReceiptEntity;
 import org.holodeckb2b.storage.metadata.UserMessageEntity;
@@ -64,6 +67,8 @@ public class TestDataSet {
 	public static IReceiptEntity 		T_RECEIPT_2;
 
 	public static IErrorMessageEntity 	T_ERROR_1;
+
+	public static IPayloadEntity		T_PAYLOAD_1;
 
 	private static boolean created = false;
 
@@ -217,6 +222,14 @@ public class TestDataSet {
 		err.setProcessingState(createState(ProcessingState.READY_TO_PUSH, 1));
 		EntityManagerUtil.save(err);
 		T_ERROR_1 = new ErrorMessageEntity(err);
+
+		pl = new PayloadInfo();
+		pl.setPayloadId(UUID.randomUUID().toString());
+		pl.setPModeId(T_PMODE_3);
+		pl.setDirection(Direction.OUT);
+		pl.setContainment(Containment.ATTACHMENT);
+		EntityManagerUtil.save(pl);
+		T_PAYLOAD_1 = new PayloadEntity(pl);
 
 		created = true;
 	}

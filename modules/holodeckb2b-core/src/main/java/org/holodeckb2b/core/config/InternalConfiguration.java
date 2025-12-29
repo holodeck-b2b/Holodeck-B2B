@@ -17,8 +17,13 @@
 package org.holodeckb2b.core.config;
 
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.axis2.context.ConfigurationContext;
+import org.apache.axis2.description.AxisModule;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.pmode.validation.IPModeValidator;
@@ -30,7 +35,7 @@ import org.holodeckb2b.interfaces.pmode.validation.IPModeValidator;
  * of the Holodeck B2B gateway.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since 5.0.0 
+ * @since 5.0.0
  */
 public class InternalConfiguration extends AxisConfiguration implements IConfiguration {
 
@@ -68,17 +73,17 @@ public class InternalConfiguration extends AxisConfiguration implements IConfigu
      * The Axis2 configuration context that is used to process the messages
      */
     private ConfigurationContext    axisCfgCtx = null;
-    
+
     /**
-     * The indicator whether the Core should fall back to the default event processor implementation in case the 
+     * The indicator whether the Core should fall back to the default event processor implementation in case the
      * configured implementation cannot be loaded.
      * @since 5.0.0
      */
     private boolean eventProcessorFallback = true;
-        
+
     /**
-     * The indicator whether P-Modes for which no {@link IPModeValidator} implementation is available should be rejected 
-     * or still be loaded. 
+     * The indicator whether P-Modes for which no {@link IPModeValidator} implementation is available should be rejected
+     * or still be loaded.
      * @since 5.0.0
      */
     private boolean acceptNonValidablePModes = false;
@@ -91,7 +96,7 @@ public class InternalConfiguration extends AxisConfiguration implements IConfigu
 
     /**
      * Creates a new Holodeck B2B configuration instance that uses the given path as its home directory.
-     * 
+     *
      * @param hb2bHomePath	path of the HB2B home directory
      */
     public InternalConfiguration(final Path hb2bHomePath) {
@@ -107,21 +112,21 @@ public class InternalConfiguration extends AxisConfiguration implements IConfigu
     public Path getWorkerPoolCfgFile() {
     	return workerConfigFile;
     }
-    
+
     /**
      * Sets the location of the worker pool configuration file.
-     * 
+     *
      * @param path location of the worker pool config file
      */
     public void setWorkerPoolCfgFile(final Path path) {
     	workerConfigFile = path;
     }
-    
+
     /**
      * Indicates whether Holodeck B2B Core should not fall back to the default event processor in case the configured
      * event processor fails to load. The default behaviour is to fall back but in certain deployment it may be required
-     * to use the configured implementation.   
-     *  
+     * to use the configured implementation.
+     *
      * @return	<code>true</code> if Core should fall back to default implementation,<br>
      * 			<code>false</code> if startup of the gateway should be aborted in case the configured event processor
      * 							   cannot be loaded
@@ -130,23 +135,23 @@ public class InternalConfiguration extends AxisConfiguration implements IConfigu
     public boolean eventProcessorFallback() {
     	return eventProcessorFallback;
     }
-    
+
     /**
-     * Sets whether Holodeck B2B Core should not fall back to the default event processor in case the configured event 
+     * Sets whether Holodeck B2B Core should not fall back to the default event processor in case the configured event
      * processor fails to load.
-     * 
+     *
      * @param fallback	<code>true</code> if Core should fall back to default implementation,<br>
-     * 					<code>false</code> if startup of the gateway should be aborted in case the configured event 
+     * 					<code>false</code> if startup of the gateway should be aborted in case the configured event
      * 					processor cannot be loaded
      */
     public void setEventProcessorFallback(final boolean fallback) {
     	eventProcessorFallback = fallback;
     }
-    
+
     /**
      * Indicates whether a P-Mode for which no {@link IPModeValidator} implementation is available to check it before
-     * loading it should be rejected or still be loaded.   
-     * 
+     * loading it should be rejected or still be loaded.
+     *
      * @return <code>true</code> if the P-Mode should still be loaded,<br><code>false</code> if it should be rejected
      * @since 5.0.0
      */
@@ -156,15 +161,15 @@ public class InternalConfiguration extends AxisConfiguration implements IConfigu
 
     /**
      * Sets whether a P-Mode for which no {@link IPModeValidator} implementation is available to check it before
-     * loading it should be rejected or still be loaded.   
-     * 
+     * loading it should be rejected or still be loaded.
+     *
      * @param accept <code>true</code> if the P-Mode should still be loaded,<br>
      * 				 <code>false</code> if it should be rejected
      */
     public void setAcceptNonValidablePMode(final boolean accept) {
     	acceptNonValidablePModes = accept;
     }
-    
+
 	@Override
 	public String getHostName() {
 		return hostName;
@@ -172,21 +177,21 @@ public class InternalConfiguration extends AxisConfiguration implements IConfigu
 
 	/**
 	 * Sets the host name.
-	 * 	
+	 *
 	 * @param host	Host name to use
 	 */
 	public void setHostName(final String host) {
 		hostName = host;
 	}
-	
+
 	@Override
 	public Path getHolodeckB2BHome() {
 		return holodeckHome;
 	}
-	
+
 	/**
 	 * Sets the Holodeck B2B home directory.
-	 * 
+	 *
 	 * @param homedir	Path to the Holodeck B2B home directory
 	 */
 	public void setHolodeckB2BHome(final Path homedir) {
@@ -200,7 +205,7 @@ public class InternalConfiguration extends AxisConfiguration implements IConfigu
 
 	/**
 	 * Sets the Holodeck B2B temp directory.
-	 * 
+	 *
 	 * @param tempdir	Path to the Holodeck B2B temp directory
 	 */
 	public void setTempDirectory(final Path tempdir) {
@@ -214,14 +219,14 @@ public class InternalConfiguration extends AxisConfiguration implements IConfigu
 
 	/**
 	 * Sets the default whether Errors on Errors should be reported to the sender of the faulty error.
-	 * 
+	 *
 	 * @param report <code>true</code> if generated errors on errors should by default be reported to the sender,<br>
-     *        		 <code>false</code> otherwise	
+     *        		 <code>false</code> otherwise
 	 */
 	public void setReportErrorOnError(final boolean report) {
 		defaultReportErrorOnError = report;
 	}
-	
+
 	@Override
 	public boolean shouldReportErrorOnReceipt() {
 		return defaultReportErrorOnReceipt;
@@ -229,27 +234,37 @@ public class InternalConfiguration extends AxisConfiguration implements IConfigu
 
 	/**
 	 * Sets the default whether Errors on Receipts should be reported to the sender of the faulty error.
-	 * 
+	 *
 	 * @param report <code>true</code> if generated errors on receipts should by default be reported to the sender,<br>
-     *        		 <code>false</code> otherwise	
+     *        		 <code>false</code> otherwise
 	 */
 	public void setReportErrorOnReceipts(final boolean report) {
 		defaultReportErrorOnReceipt = report;
 	}
-	
+
 	@Override
 	public boolean useStrictHeaderValidation() {
 		return useStrictHeaderValidation;
 	}
-	
+
 	/**
-	 * Sets the global setting for whether Holodeck B2B should perform a strict validation of the message unit header 
+	 * Sets the global setting for whether Holodeck B2B should perform a strict validation of the message unit header
 	 * meta-data.
-	 * 
+	 *
 	 * @param strict 	<code>true</code> if strict validation should be performed,<br>
 	 * 					<code>false</code> if a basic validation is enough
 	 */
 	public void setStrictHeaderValidation(final boolean strict) {
 		useStrictHeaderValidation = strict;
+	}
+
+	@Override
+	public HashMap<String, AxisModule> getModules() {
+		Set<Entry<String, AxisModule>> cfgdModules = super.getModules().entrySet();
+		HashMap<String, AxisModule> allModules = new LinkedHashMap<>(cfgdModules.size());
+		cfgdModules.stream().filter(e -> isGlobalModulesRegistered(e.getValue().getName()))
+							.forEach(e -> allModules.put(e.getKey(), e.getValue()));
+		cfgdModules.parallelStream().forEach(e -> allModules.putIfAbsent(e.getKey(), e.getValue()));
+		return allModules;
 	}
 }

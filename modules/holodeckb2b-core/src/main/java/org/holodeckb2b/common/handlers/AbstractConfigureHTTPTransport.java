@@ -17,50 +17,35 @@
 package org.holodeckb2b.common.handlers;
 
 import org.apache.axis2.Constants;
-import org.apache.axis2.client.Options;
-import org.apache.axis2.kernel.http.HTTPConstants;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.events.impl.MessageTransferFailure;
 import org.holodeckb2b.common.util.MessageUnitUtils;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
-import org.holodeckb2b.core.pmode.PModeUtils;
+import org.holodeckb2b.core.axis2.HTTPTransportSender;
 import org.holodeckb2b.core.storage.StorageManager;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
-import org.holodeckb2b.interfaces.messagemodel.ISignalMessage;
 import org.holodeckb2b.interfaces.pmode.ILeg;
-import org.holodeckb2b.interfaces.pmode.IProtocol;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
-import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.holodeckb2b.interfaces.storage.StorageException;
 
 /**
- * Is a base class for that implements the <i>out_flow</i> handler that configures the actual message transport over the
- * HTTP protocol. Based on the P-Mode [settings in <b>PMode[1].Protocol</b>] of the primary message unit it will enable
- * <i>HTTP gzip compression</i> and <i>HTTP chunking</i>.
- * <p>As the determination of where the message should be send to is protocol dependent implementation must implement
+ * Is a base class for that implements the <i>out_flow</i> handler that is used to set the URL of the other MSH in case
+ * of outgoing messages and perform additional configuration of the actual message transport over the HTTP protocol
+ * required by the messaging protocol.
+ * <p>
+ * As the determination of where the message should be send to is protocol dependent implementation must implement
  * the {@link #getDestinationURL(IMessageUnitEntity, ILeg, IMessageProcessingContext)} method to provide the target URL.
- * <p>The actual configuration is done by setting specific {@link Options} which define the:<ul>
- * <li>Transfer-encoding : When sending messages with large payloads included in the SOAP Body it is useful to compress
- *      the messages during transport. This is done by the standard compression feature of HTTP/1.1 by using the
- *      <i>gzip</i> Transfer-Encoding.<br>
- *      Whether compression should be enabled is configured in the P-Mode that controls the message transfer. Only if
- *      parameter <code>PMode.Protocol.HTTP.Compression</code> has value <code>true</code> compression is enabled.<br>
- *      When compression is enable two options are set to "true": {@see HTTPConstants.#CHUNKED} and
- *      {@see HTTPConstants#MC_GZIP_REQUEST} or {@see HTTPConstants#MC_GZIP_RESPONSE} depending on whether Holodeck B2B
- *      is the initiator or responder in the current message transfer.<br>
- *      That both the chunked and gzip encodings are enabled is a requirement from HTTP
- *      (see <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.6">http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.6</a>).</li>
- * <li>EndpointReference : Defines where the message must be delivered. Only relevant when Holodeck B2B is initiator
- * 		of the message transfer, if Holodeck B2B is responding to a request received from another MSH, the message is
- * 		just added in the response. When the message unit to be send is a <i>Receipt</i> or <i>Error</i> the
- * 		destination URL can beside in the P-Mode also be provided by the Sender of the message in the MDN request.
- * 		If the Sender supplied a URL it will take precedence over the one set in the P-Mode.</li>
- * </ul>
+ * <p>
+ * Additionally implementations can override the {@link #prepareHttp(IMessageUnitEntity, IMessageProcessingContext)}
+ * method to perform additional configuration of the HTTP transport specific to the messaging protocol. Note that most
+ * HTTP configuration is already handled by the Holodeck B2B Core and does not need to be done in message handlers.
  *
  * @author Sander Fieten (sander at chasquis-consulting.com)
  * @since 6.0.0
+ * @see HTTPTransportSender
  */
 public abstract class AbstractConfigureHTTPTransport extends AbstractBaseHandler {
 
@@ -73,26 +58,12 @@ public abstract class AbstractConfigureHTTPTransport extends AbstractBaseHandler
         	return InvocationResponse.CONTINUE;
         }
 
-        log.debug("Get P-Mode Leg for primary MU (msgID={})", primaryMU.getPModeId(), primaryMU.getMessageId());
-        final ILeg leg = getLeg(primaryMU);
-
-        /* For sending the request we need the P-Mode to provide the URL, so the process cannot if we didn't find a
-         Leg for requests, but for response Signal Messages there may not be a specific out leg defined and we can just
-         use default values and use the HTTP response
-        */
-        if (leg == null && !(primaryMU instanceof ISignalMessage) && procCtx.isHB2BInitiated()) {
-    		log.error("P-Mode configuration not available for primary message unit [msgId={}]!",
-    				  primaryMU.getMessageId());
-    		setMessagesToFailed(procCtx, log);
-    		return InvocationResponse.ABORT;
-    	}
-
         // If Holodeck B2B is initiator the destination URL must be set
         if (procCtx.isHB2BInitiated()) {
             // Get the destination URL via the P-Mode of this message unit
             String destURL = null;
             try {
-            	destURL = getDestinationURL(primaryMU, leg, procCtx);
+            	destURL = getDestinationURL(primaryMU, procCtx);
             } catch (Throwable t) {
             	log.error("Error in determination of target URL for message (msgID={}) : {}",
             				primaryMU.getMessageId(), t.getMessage());
@@ -101,94 +72,47 @@ public abstract class AbstractConfigureHTTPTransport extends AbstractBaseHandler
             	// No destination URL available, unable to sent this message!
                 log.error("No destination URL availabel for " + MessageUnitUtils.getMessageUnitName(primaryMU)
                 			+ " with msgId: " + primaryMU.getMessageId());
-                setMessagesToFailed(procCtx, log);
+                final StorageManager updManager = HolodeckB2BCore.getStorageManager();
+            	final IMessageProcessingEventProcessor eventProcessor = HolodeckB2BCore.getEventProcessor();
+            	for(IMessageUnitEntity mu : procCtx.getSendingMessageUnits()) {
+        			log.debug("Updating processing state to FAILURE for message unit [msgId="
+        						+ mu.getMessageId() + "]");
+        			updManager.setProcessingState(mu, ProcessingState.FAILURE);
+        			eventProcessor.raiseEvent(new MessageTransferFailure(mu,
+        														new Exception("Unable to configure HTTP Connection")));
+        		}
                 return InvocationResponse.ABORT;
             }
             log.debug("Destination URL=" + destURL);
             procCtx.getParentContext().setProperty(Constants.Configuration.TRANSPORT_URL, destURL);
         }
-
-        // Get current set of options
-        final Options options = procCtx.getParentContext().getOptions();
-        // Check if HTTP compression and/or chunking should be used and set options accordingly
-        final IProtocol protocolCfg = leg != null ? leg.getProtocol() : null;
-        final boolean compress = (protocolCfg != null ? protocolCfg.useHTTPCompression() : false);
-        log.debug("{} HTTP compression using gzip Content-Encoding", compress ? "Enable" : "Disable");
-        if (procCtx.isHB2BInitiated())
-            // Holodeck B2B is sending the message, so request has to be compressed
-            options.setProperty(HTTPConstants.MC_GZIP_REQUEST, compress);
-        else
-            // Holodeck B2B is responding the message, so request has to be compressed
-            options.setProperty(HTTPConstants.MC_GZIP_RESPONSE, compress);
-
-        // Check if HTTP "chunking" should be used. In case of gzip CE, chunked TE is required. But as Axis2 does
-        // not automaticly enable this we also enable chunking here when compression is used
-        if (compress || (protocolCfg != null ? protocolCfg.useChunking() : false)) {
-            log.debug("Enable chunked transfer-encoding");
-            options.setProperty(HTTPConstants.CHUNKED, Boolean.TRUE);
-        } else {
-            log.debug("Disable chunked transfer-encoding");
-            options.setProperty(HTTPConstants.CHUNKED, Boolean.FALSE);
-        }
-
-        // If the message does not contain any attachments we can disable SwA
-        boolean hasAttachments = !procCtx.getParentContext().getAttachmentMap().getContentIDSet().isEmpty();
-        log.debug("{} SwA as message does{} contain attachments", hasAttachments ? "Enable" : "Disable",
-        		  hasAttachments ? "" : " not");
-        options.setProperty(Constants.Configuration.ENABLE_SWA, hasAttachments);
-
-        // Disable use of SOAP Action (=> will result in empty SOAPAction http header for SOAP 1.1)
-    	options.setProperty(Constants.Configuration.DISABLE_SOAP_ACTION, "true");
-
+        prepareHttp(primaryMU, procCtx);
         log.debug("HTTP configuration done");
 
         return InvocationResponse.CONTINUE;
     }
 
-    /**
-     * Gets the Leg of the P-Mode that configures the sending of the given message. Normally the Leg found by
-     * {@linkplain PModeUtils#getLeg()} will work, but for some messages and protocols the leg may need to be determined
-     * differently. This can be done by overriding this method.
-     *
-     * @param msgToSend		the message for which to get the Leg
-     * @return	the Leg that configures the sending of the message if found, <code>null</code> otherwise
-     */
-    protected ILeg getLeg(IMessageUnitEntity msgToSend) {
-        try {
-        	return PModeUtils.getLeg(msgToSend);
-        } catch (IllegalStateException pmodeNotAvailable) {
-        	return null;
-        }
-    }
-
 	/**
 	 * Gets the destination URL for the given message unit.
 	 *
-	 * @param msgToSend		The message unit being send
-	 * @param leg			The P-Mode configuration parameters for this leg
-	 * @param mc			The message processing context
+	 * @param msgToSend		The primary message unit being send
+	 * @param procCtx		The message processing context
 	 * @return				The destination URL, <code>null</code> if URL cannot be determined
+	 * @since 8.0.0 Removed the <code>leg</code> parameter
 	 */
-	protected abstract String getDestinationURL(IMessageUnitEntity msgToSend, ILeg leg,
-												IMessageProcessingContext procCtx);
+	protected abstract String getDestinationURL(IMessageUnitEntity msgToSend, IMessageProcessingContext procCtx);
 
-	 /**
-     * Sets the processing state of all message units in the message to FAILURE and raises a {@link MessageTransferFailure}
-     * event.
-     *
-     * @param mc	The message processing context
-     * @param log	The Log to be used
-     * @throws StorageException  When the processing state cannot be saved in the database
-     */
-    private void setMessagesToFailed(final IMessageProcessingContext procCtx, final Logger log) throws StorageException {
-    	final StorageManager updManager = HolodeckB2BCore.getStorageManager();
-    	final IMessageProcessingEventProcessor eventProcessor = HolodeckB2BCore.getEventProcessor();
-    	for(IMessageUnitEntity mu : procCtx.getSendingMessageUnits()) {
-			log.debug("Updating processing state to FAILURE for message unit [msgId="
-						+ mu.getMessageId() + "]");
-			updManager.setProcessingState(mu, ProcessingState.FAILURE);
-			eventProcessor.raiseEvent(new MessageTransferFailure(mu, new Exception("Unable to configure HTTP Connection")));
-		}
-    }
-
+	/**
+	 * Sets the messaging protocol specific HTTP configuration.
+	 * <p>
+	 * NOTE: Most HTTP configuration is already handled by the Holodeck B2B Core and does not need to be done in message
+	 * handlers.
+	 *
+	 * @param msgToSend		The primary message unit being send
+	 * @param procCtx		The message processing context
+	 * @since 8.0.0
+	 * @see HTTPTransportSender
+	 */
+	protected void prepareHttp(IMessageUnitEntity msgToSend, IMessageProcessingContext procCtx) {
+	}
 }

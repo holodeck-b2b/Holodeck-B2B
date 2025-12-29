@@ -19,10 +19,8 @@ package org.holodeckb2b.interfaces.storage;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 
 /**
- * Defines the interface of the stored object that is used by the Holodeck B2B to store the Pull Request 
- * message unit meta-data.
- * <p>Beside the generic meta-data fields that may be <i>lazily loaded</i> there are no fields specific to the pull
- * request signal that can be <i>lazily loaded</i>.
+ * Defines the interface of the stored object that is used by the Holodeck B2B to store the Pull Request message unit
+ * meta-data.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  3.0.0

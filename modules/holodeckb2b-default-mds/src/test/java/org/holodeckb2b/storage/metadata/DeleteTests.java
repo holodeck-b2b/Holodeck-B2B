@@ -25,7 +25,7 @@ import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.interfaces.messagemodel.IPayload.Containment;
 import org.holodeckb2b.interfaces.storage.IPayloadEntity;
-import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.holodeckb2b.interfaces.storage.PayloadBindingException;
 import org.holodeckb2b.storage.metadata.jpa.PayloadInfo;
 import org.holodeckb2b.storage.metadata.testhelpers.EntityManagerUtil;
 import org.junit.jupiter.api.Test;
@@ -67,7 +67,7 @@ public class DeleteTests extends BaseProviderTest {
 
 		UserMessageEntity stored = assertDoesNotThrow(() -> provider.storeMessageUnit(um));
 
-		assertThrows(StorageException.class,
+		assertThrows(PayloadBindingException.class,
 						() -> provider.deletePayloadMetadata(stored.getPayloads().iterator().next()));
 
 		assertNotNull(EntityManagerUtil.getEntityManager().find(PayloadInfo.class,

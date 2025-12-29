@@ -179,7 +179,15 @@ public class QueryTests extends BaseProviderTest {
 			else
 				assertFalse(assertDoesNotThrow(() -> provider.isAlreadyProcessed(entity)));
 		}
+		em.getTransaction().begin();
+		em.remove(um);
+		em.getTransaction().commit();
 		em.close();
+	}
+
+	@Test
+	void testGetUnboundPayloads() {
+		assertEquals(1, assertDoesNotThrow(() -> provider.getUnboundPayloads()).size());
 	}
 
 	@Test

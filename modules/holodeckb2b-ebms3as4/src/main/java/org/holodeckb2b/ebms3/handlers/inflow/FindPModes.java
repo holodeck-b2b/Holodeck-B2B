@@ -25,6 +25,7 @@ import org.holodeckb2b.common.util.MessageUnitUtils;
 import org.holodeckb2b.commons.Pair;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
+import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.core.pmode.PModeUtils;
 import org.holodeckb2b.core.storage.StorageManager;
 import org.holodeckb2b.ebms3.pmode.PModeFinder;
@@ -39,7 +40,7 @@ import org.holodeckb2b.interfaces.storage.IErrorMessageEntity;
 import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.storage.IReceiptEntity;
 import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
-import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.holodeckb2b.interfaces.storage.StorageException;
 
 /**
  * Is the <i>IN_FLOW</i> handler responsible for determining the P-Modes that define how the received message units
@@ -54,9 +55,10 @@ import org.holodeckb2b.interfaces.storage.providers.StorageException;
  * <p>For Pull Request message units finding the P-Mode is dependent on the information supplied in the WS-Security
  * header. As we have not read the WSS header at this point the P-Mode can not be determined for Pull Request signals.
  * <p>Finding the P-Mode for a User Message is done by the {@link PModeFinder} utility class by matching the meta-data
- * from the received message to the P-Mode configuration data. Since version 4.1.0 this handler will check if the User
- * Message was received as result of a Pull Request and if no P-Mode was found, assign the P-Mode used by the
- * Pull Request to the User Message.
+ * from the received message to the P-Mode configuration data. Since version 8.0.0 the set of P-Mode to evaluate to find
+ * a match can be specified in the Message Processing Context property <i>ebms3as4-pmodeset</i>. This could for example
+ * be done by a "dispatch" handler. Since version 4.1.0 this handler will check if the User Message was received as
+ * result of a Pull Request and if no P-Mode was found, assign the P-Mode used by the Pull Request to the User Message.
  * <p><b>NOTE:</b> The Error generated in case the P-Mode can not be determined is <i>ProcessingModeMismatch</i>. The
  * ebMS specification is not very clear if a specific error must be used. Current choice is based on discussion on <a
  * href="https://issues.oasis-open.org/browse/EBXMLMSG-67">issue 67 of ebMS TC</a>.
@@ -64,7 +66,11 @@ import org.holodeckb2b.interfaces.storage.providers.StorageException;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class FindPModes extends AbstractBaseHandler {
-
+	/**
+	 * Name of the {@link MessageProcessingContext Message Processing Context} property that can be used to restrict
+	 * the collection of P-Modes that should be checked to find the P-Mode for the User Message.
+	 */
+	public static final String CTX_APPL_PMODESET = "ebms3as4-pmodeset";
 
     @Override
     protected InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log)
@@ -73,7 +79,15 @@ public class FindPModes extends AbstractBaseHandler {
         final IUserMessageEntity userMsg = procCtx.getReceivedUserMessage();
         if (userMsg != null) {
             log.debug("Finding P-Mode for User Message [" + userMsg.getMessageId() + "]");
-            IPMode pmode = PModeFinder.forReceivedUserMessage(userMsg);
+            @SuppressWarnings("unchecked")
+			Collection<IPMode> pmodeSet = (Collection<IPMode>) procCtx.getProperty(CTX_APPL_PMODESET);
+            IPMode pmode;
+            if (pmodeSet != null) {
+            	log.debug("Using restricted P-Mode set specified in Message Processing Context");
+				pmode = PModeFinder.forReceivedUserMessage(pmodeSet, userMsg);
+			} else {
+				pmode = PModeFinder.forReceivedUserMessage(userMsg);
+            }
             if (pmode == null && procCtx.isHB2BInitiated()) {
             	final IPullRequest pullRequest = procCtx.getSendingPullRequest();
             	if (pullRequest != null) {

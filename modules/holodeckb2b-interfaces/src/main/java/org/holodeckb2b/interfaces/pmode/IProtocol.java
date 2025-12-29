@@ -36,7 +36,15 @@ public interface IProtocol {
      *
      * @return The destination address
      */
-    public String getAddress();
+    String getAddress();
+
+    /**
+     * Gets the parameters for establishing a secure connection to the communication partner.
+     *
+     * @return The TLS configuration
+     * @since 8.0.0
+     */
+    ITLSConfiguration getTLSConfiguration();
 
     /**
      * Indicates whether the ebMS message header, i.e. the <code>eb:Messaging</code> element, must be targeted to the
@@ -45,7 +53,7 @@ public interface IProtocol {
      * @return  <code>true</code> if the SOAP target role/actor must be added to the ebMS message header,<br>
      *          <code>false</code> if the default target should be used.
      */
-    public boolean shouldAddActorOrRoleAttribute();
+    boolean shouldAddActorOrRoleAttribute();
 
     /**
      * Gets the SOAP version to use for packaging the ebMS message.
@@ -53,7 +61,7 @@ public interface IProtocol {
      * @return  "1.1" when SOAP 1.1 should be used, "1.2" for SOAP 1.2
      * todo: Consider using enum?
      */
-    public String getSOAPVersion();
+    String getSOAPVersion();
 
     /**
      * Indicates whether the HTTP <i>"chunked"</i> transfer encoding should be used. See section 3.6 of the HTTP/1.1
@@ -65,7 +73,7 @@ public interface IProtocol {
      *          <code>false</code> otherwise
      * @see #useHTTPCompression()
      */
-    public boolean useChunking();
+    boolean useChunking();
 
     /**
      * Indicates whether the HTTP <i>"gzip"</i> compression content encoding should be used. See section 3.5 of the
@@ -74,6 +82,23 @@ public interface IProtocol {
      * @return  <code>true</code> when the <i>"gzip"</i> content encoding should be used,<br>
      *          <code>false</code> otherwise
      */
-    public boolean useHTTPCompression();
+    boolean useHTTPCompression();
 
+    /**
+     * Gets the connection timeout in milliseconds that should be used to establish a connection to the other MSH. If
+     * not specified the default timeout as specified in the Holodeck B2B configuration will be used.
+     *
+     * @return	the connection timeout in milliseconds or <code>null</code> if the default timeout should be used
+     * @since 8.0.0
+     */
+    Integer getConnectionTimeout();
+
+	/**
+	 * Gets the read timeout in milliseconds that should be used to read data from the other MSH. If not specified the
+	 * default timeout as specified in the Holodeck B2B configuration will be used.
+	 *
+	 * @return	the read timeout in milliseconds or <code>null</code> if the default timeout should be used
+	 * @since 8.0.0
+	 */
+	Integer getReadTimeout();
 }

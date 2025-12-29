@@ -23,8 +23,8 @@ import java.util.Set;
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.storage.IPayloadContent;
 import org.holodeckb2b.interfaces.storage.IPayloadEntity;
-import org.holodeckb2b.interfaces.storage.providers.IPayloadStorageProvider;
-import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.holodeckb2b.interfaces.storage.IPayloadStorageProvider;
+import org.holodeckb2b.interfaces.storage.StorageException;
 
 public class InMemoryPSProvider implements IPayloadStorageProvider {
 

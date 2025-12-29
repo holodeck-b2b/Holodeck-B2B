@@ -26,11 +26,11 @@ import java.util.Map;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.modules.Module;
 import org.holodeckb2b.common.VersionInfo;
-import org.holodeckb2b.common.pmode.InMemoryPModeSet;
 import org.holodeckb2b.commons.testing.TestUtils;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCoreImpl;
 import org.holodeckb2b.core.config.InternalConfiguration;
+import org.holodeckb2b.core.pmode.PModeManager;
 import org.holodeckb2b.core.storage.QueryManager;
 import org.holodeckb2b.core.storage.StorageManager;
 import org.holodeckb2b.core.validation.DefaultValidationExecutor;
@@ -43,11 +43,12 @@ import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcess
 import org.holodeckb2b.interfaces.eventprocessing.MessageProccesingEventHandlingException;
 import org.holodeckb2b.interfaces.general.IVersionInfo;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
+import org.holodeckb2b.interfaces.pmode.PModeSetException;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
-import org.holodeckb2b.interfaces.storage.providers.IMetadataStorageProvider;
-import org.holodeckb2b.interfaces.storage.providers.IPayloadStorageProvider;
-import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.holodeckb2b.interfaces.storage.IMetadataStorageProvider;
+import org.holodeckb2b.interfaces.storage.IPayloadStorageProvider;
+import org.holodeckb2b.interfaces.storage.StorageException;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
 import org.holodeckb2b.test.storage.InMemoryMDSProvider;
 import org.holodeckb2b.test.storage.InMemoryPSProvider;
@@ -61,7 +62,7 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl implements IHolodec
 
 	private InternalConfiguration		configuration;
 	private IMessageSubmitter	messageSubmitter;
-	private IPModeSet			pmodes;
+	private IPModeSet		pmodes;
 	private IMessageProcessingEventProcessor eventProcessor;
 	private IValidationExecutor validationExec;
 	private ICertificateManager certManager;
@@ -79,6 +80,7 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl implements IHolodec
 		this.configuration = new InternalConfiguration(homeDir);
 		this.configuration.setHostName("local.test");
 		this.configuration.setTempDirectory(homeDir.resolve("temp_t"));
+		this.configuration.setAcceptNonValidablePMode(true);
 	}
 
 	public void cleanTemp() {
@@ -149,18 +151,18 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl implements IHolodec
 		return messageSubmitter;
 	}
 
-	public void setPModeSet(final IPModeSet pmodeSet) {
-		this.pmodes = pmodeSet;
-	}
-
 	/* (non-Javadoc)
 	 * @see org.holodeckb2b.interfaces.core.IHolodeckB2BCore#getPModeSet()
 	 */
 	@Override
 	public IPModeSet getPModeSet() {
 		if (pmodes == null)
-			pmodes = new InMemoryPModeSet();
+			pmodes = new TestPModeManager();
 		return pmodes;
+	}
+	
+	public void setPModeManager(final IPModeSet manager) {
+		this.pmodes = manager;
 	}
 
 	public void setMessageProcessingEventProcessor(final IMessageProcessingEventProcessor processor) {
@@ -243,7 +245,7 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl implements IHolodec
     	for(i = 0; i < eventConfig.size() && !exists; i++)
     		exists = eventConfig.get(i).getId().equals(id);
     	if (exists)
-    		eventConfig.set(i, eventConfiguration);
+    		eventConfig.set(i - 1, eventConfiguration);
     	else
     		eventConfig.add(eventConfiguration);
     	return exists;

@@ -23,7 +23,7 @@ package org.holodeckb2b.interfaces.processingmodel;
  * @since  3.0.0
  */
 public enum ProcessingState {
-
+	
     /**
      * Is the first processing state of message units that are submitted to the Holodeck B2B Core for sending. Therefore
      * only applies to <i>User Message</i> and <i>Pull Request</i> message units as only these can be submitted to the
@@ -56,7 +56,7 @@ public enum ProcessingState {
     /**
      * The message unit is currently being processed by Holodeck B2B.
      */
-    PROCESSING(false, AWAITING_PULL, READY_TO_PUSH, RECEIVED, CREATED),
+    PROCESSING(false),
 
     /**
      * The message unit is currently being transferred to the other MSH. Note that this state also applies to messages
@@ -67,12 +67,12 @@ public enum ProcessingState {
     /**
      * A problem occurred while the message unit was being in transfer to the other MSH.
      */
-    TRANSPORT_FAILURE(false, SENDING),
+    TRANSPORT_FAILURE(false),
 
     /**
      * The User Message is waiting for a Receipt.
      */
-    AWAITING_RECEIPT(false, SENDING),
+    AWAITING_RECEIPT(false),
 
     /**
      * The message unit is ready to be delivered (User Message) / notified (Signal Message) to the business application.
@@ -82,12 +82,12 @@ public enum ProcessingState {
     /**
      * The message unit is being delivered (User Message) / notified (Signal Message) to the business application.
      */
-    OUT_FOR_DELIVERY(false, READY_FOR_DELIVERY),
+    OUT_FOR_DELIVERY(false),
 
     /**
      * The attempt to deliver the message unit to the business application has failed.
      */
-    DELIVERY_FAILED(false, READY_FOR_DELIVERY, OUT_FOR_DELIVERY),
+    DELIVERY_FAILED(false),
 
     /**
      * Indicates that an ebMS Error with severity <i>warning</i> was reported for the message unit. Because processing
@@ -102,7 +102,7 @@ public enum ProcessingState {
      *
      * @since 5.3.0
      */
-    SUSPENDED(false, READY_TO_PUSH, AWAITING_PULL),
+    SUSPENDED(false),
 
 	/**
 	 * This state is used to indicate that an [unexpected] error occurred during the processing of an incoming Message
@@ -117,7 +117,7 @@ public enum ProcessingState {
      * This final state indicates that a <i>User Message</i> message unit is successfully delivered either to the other
      * MSH or to the business application.
      */
-    DELIVERED(true, SENDING, AWAITING_RECEIPT, OUT_FOR_DELIVERY),
+    DELIVERED(true),
 
     /**
      * This final state indicates that processing of a <i>Signal Message</i> message unit has completed successfully,
@@ -144,19 +144,18 @@ public enum ProcessingState {
     private boolean isFinal;
 
     /**
-     * The set of processing states a message unit must be in before it can enter this processing state. If the set is
-     * empty, this state can be entered from any other state.
-     */
-    private ProcessingState[]  prevStates;
-
-    /**
      * Initializes a processing state
      *
      * @param isFinal           Indicator whether this state is final
-     * @param previousStates    The set of allowed previous states
      */
-    ProcessingState(final boolean isFinal, final ProcessingState... previousStates) {
+    ProcessingState(final boolean isFinal) {
         this.isFinal = isFinal;
-        this.prevStates = previousStates;
     }
+
+    /**
+     * @return indication whether this processing state is a <i>final</i> state, i.e. no further updates will occur.
+     */
+    public boolean isFinal() {
+		return isFinal;
+	}
 }

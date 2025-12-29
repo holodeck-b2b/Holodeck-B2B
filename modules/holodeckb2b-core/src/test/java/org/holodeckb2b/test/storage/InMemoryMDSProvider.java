@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
@@ -35,12 +36,12 @@ import org.holodeckb2b.interfaces.messagemodel.IReceipt;
 import org.holodeckb2b.interfaces.messagemodel.ISelectivePullRequest;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.AlreadyChangedException;
 import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
+import org.holodeckb2b.interfaces.storage.IMetadataStorageProvider;
 import org.holodeckb2b.interfaces.storage.IPayloadEntity;
 import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
-import org.holodeckb2b.interfaces.storage.providers.AlreadyChangedException;
-import org.holodeckb2b.interfaces.storage.providers.IMetadataStorageProvider;
-import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.holodeckb2b.interfaces.storage.StorageException;
 
 /**
  * Is a {@link IPersistencyProvider} implementation for testing that stores the message units in-memory.
@@ -99,9 +100,25 @@ public class InMemoryMDSProvider implements IMetadataStorageProvider {
 	public <T extends IMessageUnit, V extends IMessageUnitEntity> V storeMessageUnit(T messageUnit)
 																							throws StorageException {
 		IMessageUnitEntity dto;
-		if (messageUnit instanceof IUserMessage)
+		if (messageUnit instanceof IUserMessage) {
 			dto = new UserMessageEntity((IUserMessage) messageUnit);
-		else if (messageUnit instanceof ISelectivePullRequest)
+			if (!Utils.isNullOrEmpty(((IUserMessage) messageUnit).getPayloads()))
+				for(IPayload p : ((IUserMessage) messageUnit).getPayloads()) {
+					if (!(p instanceof PayloadEntity)) {
+						PayloadEntity payload = new PayloadEntity((UserMessageEntity) dto, p);
+						payloadInfoStore.add(payload);
+						((UserMessageEntity) dto).addPayload(payload);
+					} else {
+						PayloadEntity ple = (PayloadEntity) p;
+						if (!Utils.isNullOrEmpty(ple.getParentCoreId()))
+							throw new IllegalStateException("Payload already bound to another User Message");
+						else {
+							ple.setParentCoreId(dto.getCoreId());
+							((UserMessageEntity) dto).addPayload(ple);
+						}
+					}
+				}
+		} else if (messageUnit instanceof ISelectivePullRequest)
 			dto = new SelectivePullRequestEntity((ISelectivePullRequest) messageUnit);
 		else if (messageUnit instanceof IPullRequest)
 			dto = new PullRequestEntity((IPullRequest) messageUnit);
@@ -113,11 +130,6 @@ public class InMemoryMDSProvider implements IMetadataStorageProvider {
 			throw new IllegalArgumentException("Unknown message unit type");
 
 		msgUnitStore.add(dto);
-		if (dto instanceof UserMessageEntity)
-			((UserMessageEntity) dto).getPayloads().stream()
-									 .filter(p -> !existsPayloadId(p.getPayloadId()))
-									 .forEach(p -> payloadInfoStore.add(p));
-
 		return (V) ((MessageUnitEntity) dto).clone();
 	}
 
@@ -128,7 +140,7 @@ public class InMemoryMDSProvider implements IMetadataStorageProvider {
 
 		MessageUnitEntity update = ((MessageUnitEntity) messageUnit);
 		MessageUnitEntity stored = (MessageUnitEntity) msgUnitStore.stream()
-									.filter(m -> messageUnit.getCoreId().equals(m.getCoreId())).findFirst().orElse(null);
+								.filter(m -> messageUnit.getCoreId().equals(m.getCoreId())).findFirst().orElse(null);
 		if (stored == null)
 			throw new StorageException("Entity not managed");
 
@@ -186,13 +198,19 @@ public class InMemoryMDSProvider implements IMetadataStorageProvider {
 	public void deleteMessageUnit(IMessageUnitEntity messageUnit) throws StorageException {
 		if (messageUnit instanceof IUserMessageEntity)
 			for (IPayloadEntity p : ((IUserMessageEntity) messageUnit).getPayloads())
-				deletePayloadMetadata(p);
+				payloadInfoStore.removeIf(sp -> p.getPayloadId().equals(sp.getPayloadId()));
 		msgUnitStore.removeIf(m -> m.getCoreId().equals(messageUnit.getCoreId()));
 	}
 
     @Override
    	public void deletePayloadMetadata(IPayloadEntity payload) throws StorageException {
-    	payloadInfoStore.removeIf(p -> p.getPayloadId().equals(payload.getPayloadId()));
+    	IPayloadEntity pl2rm = payloadInfoStore.stream().filter(p -> p.getPayloadId().equals(payload.getPayloadId()))
+    													.findFirst().orElse(null);
+    	if (pl2rm != null)
+    		if (!Utils.isNullOrEmpty(pl2rm.getParentCoreId()))
+				throw new IllegalStateException("Payload not managed");
+			else
+				payloadInfoStore.remove(pl2rm);
    	}
 
 	@SuppressWarnings("unchecked")
@@ -257,5 +275,11 @@ public class InMemoryMDSProvider implements IMetadataStorageProvider {
 	@Override
 	public IMessageUnitEntity getMessageUnitWithCoreId(String coreId) throws StorageException {
 		return msgUnitStore.stream().filter(m -> m.getCoreId().equals(coreId)).findFirst().orElse(null);
+	}
+
+	@Override
+	public Collection<IPayloadEntity> getUnboundPayloads() throws StorageException {
+		return payloadInfoStore.stream().filter(p -> Utils.isNullOrEmpty(p.getParentCoreId()))
+										.collect(Collectors.toList());
 	}
 }

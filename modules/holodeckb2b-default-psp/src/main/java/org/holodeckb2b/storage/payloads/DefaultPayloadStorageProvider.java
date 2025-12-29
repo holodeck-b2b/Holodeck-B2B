@@ -28,8 +28,8 @@ import org.holodeckb2b.commons.util.FileUtils;
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.storage.IPayloadContent;
 import org.holodeckb2b.interfaces.storage.IPayloadEntity;
-import org.holodeckb2b.interfaces.storage.providers.IPayloadStorageProvider;
-import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.holodeckb2b.interfaces.storage.IPayloadStorageProvider;
+import org.holodeckb2b.interfaces.storage.StorageException;
 
 /**
  * Is the default implementation of the Holodeck B2B <i>Payload Storage Provider</i>. It stores the payload content on
@@ -63,7 +63,7 @@ public class DefaultPayloadStorageProvider implements IPayloadStorageProvider {
 			directory = config.getTempDirectory().resolve("pldata");
 			if (!Files.exists(directory))
 				try {
-					Files.createDirectory(directory);
+					Files.createDirectories(directory);
 				} catch (IOException ioError) {
 					throw new StorageException("Could not create payload directory", ioError);
 				}

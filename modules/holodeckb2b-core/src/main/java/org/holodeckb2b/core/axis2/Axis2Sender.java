@@ -18,12 +18,7 @@ package org.holodeckb2b.core.axis2;
 
 import static org.apache.axis2.client.ServiceClient.ANON_OUT_IN_OP;
 
-import java.security.NoSuchAlgorithmException;
-
-import javax.net.ssl.SSLContext;
-
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.client.OperationClient;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.context.ConfigurationContext;
@@ -56,7 +51,7 @@ import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.storage.IPullRequestEntity;
 import org.holodeckb2b.interfaces.storage.IReceiptEntity;
 import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
-import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.holodeckb2b.interfaces.storage.StorageException;
 
 /**
  * Is responsible for sending the message unit using the Axis2 framework. Depending on the messaging protocol the
@@ -127,11 +122,8 @@ public class Axis2Sender {
 	        ServiceGroupContext sgc = configContext.createServiceGroupContext(axisServiceGroup);
 	        ServiceContext svcCtx = sgc.getServiceContext(service);
 
-	        // This dummy EPR has to be provided to be able to trigger message sending. It will be replaced later
-	        // with the correct URL defined in the P-Mode
-	        final EndpointReference targetEPR = new EndpointReference("http://holodeck-b2b.org/transport/dummy");
 	        final Options options = new Options();
-	        options.setTo(targetEPR);
+	        options.setTransportOut(axisConfig.getTransportOut("http"));
 	        options.setExceptionToBeThrownOnSOAPFault(false);
 	        options.setProperty(HTTPConstants.USER_AGENT, Axis2Utils.HTTP_PRODID_HEADER);
 	        OutInAxisOperation sendOp = new OutOptInAxisOperation(ANON_OUT_IN_OP);
@@ -145,22 +137,6 @@ public class Axis2Sender {
 	        }
 	        oc = sendOp.createClient(svcCtx, options);
 	        oc.addMessageContext(msgCtx);
-
-	        /*
-	         * TODO: Check if this is really best place to configure the SSLContext or whether this is better done
-	         * in message processing pipeline.
-	         */
-	        log.trace("Prepare SSLContext");
-	        try {
-	            configContext.setProperty(SSLContext.class.getName(), SSLContext.getDefault());
-	        } catch (final NoSuchAlgorithmException ex) {
-	            log.error("Error setting up SSLContext : {}", Utils.getExceptionTrace(ex));
-	            throw new AxisFault("Could not initialise SSLContext", ex);
-	        }
-
-//	        final HttpClient httpClient = new HttpClient();
-//	        httpClient.getParams().setIntParameter(HttpConnectionParams.CONNECTION_TIMEOUT, 5000);
-//	        msgCtx.setProperty(HTTPConstants.CACHED_HTTP_CLIENT, httpClient);
 
 	        log.trace("Create an empty IMessageProcessingContext for message with current configuration");
             final IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(msgCtx);

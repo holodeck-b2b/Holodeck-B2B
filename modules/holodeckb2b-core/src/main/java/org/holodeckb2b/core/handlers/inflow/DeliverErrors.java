@@ -27,7 +27,7 @@ import org.holodeckb2b.interfaces.delivery.IDeliveryManager;
 import org.holodeckb2b.interfaces.delivery.MessageDeliveryException;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.storage.IErrorMessageEntity;
-import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.holodeckb2b.interfaces.storage.StorageException;
 
 /**
  * Is the handler that hands over the Receipts that are ready for delivery to the back-end application to the 

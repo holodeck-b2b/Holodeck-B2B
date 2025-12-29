@@ -18,6 +18,7 @@ package org.holodeckb2b.common.pmode;
 
 import java.io.Serializable;
 
+import org.holodeckb2b.commons.util.Utils;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Text;
 
@@ -36,4 +37,14 @@ class KeystoreAlias implements Serializable {
 
     @Attribute(required = false)
     String  password;
+
+    @Override
+    public boolean equals(Object obj) {
+    	if (this == obj)
+	    	return true;
+    	if (!(obj instanceof KeystoreAlias))
+    		return false;
+		KeystoreAlias that = (KeystoreAlias) obj;
+    	return Utils.nullSafeEqual(this.name, that.name) && Utils.nullSafeEqual(this.password, that.password);
+    }
 }

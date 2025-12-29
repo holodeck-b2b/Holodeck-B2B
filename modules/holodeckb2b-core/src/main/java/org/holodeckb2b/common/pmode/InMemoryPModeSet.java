@@ -24,15 +24,15 @@ import java.util.HashMap;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.pmode.IPMode;
-import org.holodeckb2b.interfaces.pmode.IPModeSet;
+import org.holodeckb2b.interfaces.pmode.IPModeStorage;
 import org.holodeckb2b.interfaces.pmode.PModeSetException;
 
 /**
- * Is the default implementation of {@link IPModeSet} that maintains the set of P-Modes in memory.
+ * Is the default implementation of {@link IPModeStorage} that maintains the set of P-Modes in memory.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
-public class InMemoryPModeSet implements IPModeSet {
+public class InMemoryPModeSet implements IPModeStorage {
 
     /**
      * The actual storage of the P-Mode set, for easy access on PMode.id we use a HashMap
@@ -42,11 +42,11 @@ public class InMemoryPModeSet implements IPModeSet {
     @Override
     public void init(IConfiguration config) throws PModeSetException {
     }
-    
+
     @Override
     public void shutdown() {
     }
-    
+
     @Override
     public IPMode get(final String id) {
         if (this.containsId(id))

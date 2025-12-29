@@ -24,28 +24,39 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.holodeckb2b.common.messagemodel.Payload;
 import org.holodeckb2b.common.messagemodel.UserMessage;
 import org.holodeckb2b.commons.util.MessageIdUtils;
 import org.holodeckb2b.commons.util.Utils;
+import org.holodeckb2b.interfaces.general.IProperty;
+import org.holodeckb2b.interfaces.messagemodel.Direction;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.messagemodel.IPullRequest;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
+import org.holodeckb2b.interfaces.storage.IPayloadEntity;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
 import org.holodeckb2b.interfaces.submit.MessageSubmitException;
 
 
 /**
- * Is a {@link IMessageSubmitter} implementation for testing that just collects all messages submitted and provides
- * methods to check the submitted messages.
+ * Is a {@link IMessageSubmitter} implementation for testing that just collects all messages and payloads submitted and
+ * provides methods to check the submitted messages.
  *
  * @author Sander Fieten (sander at chasquis-consulting.com)
  */
 public class TestMessageSubmitter implements IMessageSubmitter {
 
 	private Map<String, IMessageUnit>	submittedMessages = new HashMap<>();
+	private Map<String, IPayloadEntity>	submittedPayloads = new HashMap<>();
+
+	private boolean rejectNext = false;
+
+	public void rejectNext() {
+		this.rejectNext = true;
+	}
 
 	/* (non-Javadoc)
 	 * @see org.holodeckb2b.interfaces.submit.IMessageSubmitter#submitMessage(org.holodeckb2b.interfaces.messagemodel.IUserMessage, boolean)
@@ -63,6 +74,23 @@ public class TestMessageSubmitter implements IMessageSubmitter {
 		return submitMessageUnit(pr);
 	}
 
+	@Override
+	public IPayloadEntity submitPayload(IPayload payload, String pmodeId) throws MessageSubmitException {
+		if (rejectNext) {
+			rejectNext = false;
+			throw new MessageSubmitException("Rejected on request");
+		}
+
+		PayloadEntry stored = new PayloadEntry(payload);
+		submittedPayloads.put(stored.getPayloadId(), stored);
+		return stored;
+	}
+
+	@Override
+	public void cancelPayloadSubmission(IPayloadEntity submittedPayload) throws MessageSubmitException {
+		if (submittedPayloads.remove(submittedPayload.getPayloadId()) == null)
+			throw new MessageSubmitException("Payload bound to User Message");
+	}
 	public boolean wasSubmitted(final String msgId) {
 		return submittedMessages.containsKey(msgId);
 	}
@@ -75,13 +103,27 @@ public class TestMessageSubmitter implements IMessageSubmitter {
 		return submittedMessages.values();
 	}
 
+	public IPayloadEntity getPayload(final String payloadId) {
+		return submittedPayloads.get(payloadId);
+	}
+
+	public Collection<IPayloadEntity> getAllSubmittedPayloads() {
+		return submittedPayloads.values();
+	}
+
 	public void clear() {
 		synchronized (submittedMessages) {
 			submittedMessages.clear();
+			submittedPayloads.clear();
 		}
 	}
 
 	private  String submitMessageUnit(IMessageUnit mu) throws MessageSubmitException {
+		if (rejectNext) {
+			rejectNext = false;
+			throw new MessageSubmitException("Rejected on request");
+		}
+
 		String msgId = mu.getMessageId();
 		if (Utils.isNullOrEmpty(msgId))
 			msgId = MessageIdUtils.createMessageId();
@@ -109,14 +151,19 @@ public class TestMessageSubmitter implements IMessageSubmitter {
 		}
 	}
 
-	class PayloadEntry extends Payload {
+	class PayloadEntry extends Payload implements IPayloadEntity {
+		private String payloadId;
 		private byte[] content;
 
 		PayloadEntry(IPayload src) throws MessageSubmitException {
 			super(src);
-			try (InputStream is = src.getContent(); ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-				Utils.copyStream(is, baos);
-				content = baos.toByteArray();
+			this.payloadId = UUID.randomUUID().toString();
+			try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+				InputStream is = src.getContent();
+				if (is != null) {
+					Utils.copyStream(is, baos);
+					content = baos.toByteArray();
+				}
 			} catch (IOException e) {
 				throw new MessageSubmitException("Could not read payload data", e);
 			}
@@ -124,7 +171,32 @@ public class TestMessageSubmitter implements IMessageSubmitter {
 
 		@Override
 		public InputStream getContent() throws IOException {
-			return new ByteArrayInputStream(content);
+			return content != null ? new ByteArrayInputStream(content) : null;
+		}
+
+		@Override
+		public String getPayloadId() {
+			return payloadId;
+		}
+
+		@Override
+		public String getParentCoreId() {
+			return null;
+		}
+
+		@Override
+		public String getPModeId() {
+			return null;
+		}
+
+		@Override
+		public Direction getDirection() {
+			return null;
+		}
+
+		@Override
+		public void removeProperty(IProperty p) {
+			throw new UnsupportedOperationException();
 		}
 	}
 }

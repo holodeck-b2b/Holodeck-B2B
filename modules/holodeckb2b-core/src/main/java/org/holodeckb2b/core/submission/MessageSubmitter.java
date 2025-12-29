@@ -43,9 +43,10 @@ import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPullRequestFlow;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.IPayloadEntity;
 import org.holodeckb2b.interfaces.storage.IPullRequestEntity;
 import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
-import org.holodeckb2b.interfaces.storage.providers.StorageException;
+import org.holodeckb2b.interfaces.storage.StorageException;
 import org.holodeckb2b.interfaces.submit.IMessageSubmitter;
 import org.holodeckb2b.interfaces.submit.MessageSubmitException;
 
@@ -59,9 +60,9 @@ public class MessageSubmitter implements IMessageSubmitter {
     private static final Logger log = LogManager.getLogger(MessageSubmitter.class);
 
 	/**
-	 * {@inheritDoc} 
+	 * {@inheritDoc}
 	 * <p>After completing the submission process a {@link IMessageSubmission} event will be raised to inform external
-	 * components about the result of the submission. 
+	 * components about the result of the submission.
 	 */
     @Override
     public String submitMessage(final IUserMessage submission) throws MessageSubmitException {
@@ -75,13 +76,13 @@ public class MessageSubmitter implements IMessageSubmitter {
     		throw mse;
     	}
     }
-    
+
     /**
-     * Executes the actual submission process by checking the availability of the payloads, P-Mode for handling the 
+     * Executes the actual submission process by checking the availability of the payloads, P-Mode for handling the
      * message and validation (including custom validation specified in P-Mode).
-     *  
+     *
      * @param submission		The submitted <i>User Message</i>
-     * @return					The meta-data of the <i>User Message</i> as accepted by the Core   
+     * @return					The meta-data of the <i>User Message</i> as accepted by the Core
      * @throws MessageSubmitException	When the given message unit cannot be submitted to the Core
      */
 	private IUserMessage doSubmission(final IUserMessage submission) throws MessageSubmitException {
@@ -90,19 +91,19 @@ public class MessageSubmitter implements IMessageSubmitter {
         log.trace("Get the P-Mode for the message");
         final IPMode  pmode = HolodeckB2BCore.getPModeSet().get(submission.getPModeId());
         final ILeg leg = PModeUtils.getSendLeg(pmode);
-        if (pmode == null || leg == null) 
-            throw new MessageSubmitException("Specified P-Mode (" + submission.getPModeId() 
+        if (pmode == null || leg == null)
+            throw new MessageSubmitException("Specified P-Mode (" + submission.getPModeId()
             													+ ") does not exist or does not support sending");
 
         log.trace("Check for completeness: combined with P-Mode all info must be known");
         // The complete operation will throw aMessageSubmitException if meta-data is not complete
         final UserMessage completedMetadata = MMDCompleter.complete(submission, pmode);
-        
+
         log.trace("Checking payload references");
         final Collection<? extends IPayload> payloads = submission.getPayloads();
         if (!Utils.isNullOrEmpty(payloads))
             for(final IPayload p : payloads) {
-                if (p.getContainment() == Containment.ATTACHMENT && !Utils.isNullOrEmpty(p.getPayloadURI()) 
+                if (p.getContainment() == Containment.ATTACHMENT && !Utils.isNullOrEmpty(p.getPayloadURI())
                 		&& !MessageIdUtils.isAllowed(p.getPayloadURI())) {
                 	throw new MessageSubmitException("Specified payload reference [uri=" + p.getPayloadURI()
                     			+ "] contains invalid characters!");
@@ -111,12 +112,12 @@ public class MessageSubmitter implements IMessageSubmitter {
                     throw new MessageSubmitException("Specified payload reference [uri=" + p.getPayloadURI()
                                 + "] is not unique!");
             }
-        
+
         final StorageManager storageManager = HolodeckB2BCore.getStorageManager();
         IUserMessageEntity storedUserMessage;
         try {
             log.trace("Add message to database");
-            storedUserMessage = (IUserMessageEntity) storageManager.storeOutGoingMessageUnit(completedMetadata);            
+            storedUserMessage = (IUserMessageEntity) storageManager.storeOutGoingMessageUnit(completedMetadata);
         } catch (final StorageException dbe) {
         	log.error("An error occured when saving user message to database. Details: {}", dbe.getMessage());
         	throw new MessageSubmitException("Message could not be saved to database", dbe);
@@ -124,14 +125,14 @@ public class MessageSubmitter implements IMessageSubmitter {
         try {
 	        try {
 	        	log.trace("Validate submitted message if specified");
-	        	validateMessage(storedUserMessage, leg);        
+	        	validateMessage(storedUserMessage, leg);
 	        } catch (MessageSubmitException validationFailure) {
 	        	log.trace("Set processing state for submitter message to FAILURE");
-	        	storageManager.setProcessingState(storedUserMessage, ProcessingState.FAILURE, 
+	        	storageManager.setProcessingState(storedUserMessage, ProcessingState.FAILURE,
 	        										validationFailure.getMessage());
 	        	throw validationFailure;
 	        }
-	        
+
 	        //Use P-Mode to find out if this message is to be pulled or pushed to receiver
 	        if (PModeUtils.doesHolodeckB2BTrigger(leg)) {
 	        	log.debug("Message is to be pushed to receiver, change ProcessingState to trigger push");
@@ -140,20 +141,20 @@ public class MessageSubmitter implements IMessageSubmitter {
 	        	log.debug("Message is to be pulled by receiver, change ProcessingState to wait for pull");
 	        	storageManager.setProcessingState(storedUserMessage, ProcessingState.AWAITING_PULL);
 	        }
-	
+
 	        log.info("User Message succesfully submitted, messageId={}", storedUserMessage.getMessageId());
 	        return storedUserMessage;
         } catch (StorageException stateUpdFailure) {
-        	log.error("Error during processing state update of message (msgId={}) : {}", 
+        	log.error("Error during processing state update of message (msgId={}) : {}",
         				storedUserMessage.getMessageId(), stateUpdFailure.getMessage());
         	throw new MessageSubmitException("Failed to update processing state", stateUpdFailure);
-        }        
+        }
     }
 
     /**
      * {@inheritDoc}
 	 * <p>After completing the submission process a {@link IMessageSubmission} event will be raised to inform external
-	 * components about the result of the submission. 
+	 * components about the result of the submission.
      */
     @Override
     public String submitMessage(final IPullRequest pullRequest) throws MessageSubmitException {
@@ -167,12 +168,52 @@ public class MessageSubmitter implements IMessageSubmitter {
     		throw mse;
     	}
     }
-    
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public IPayloadEntity submitPayload(IPayload payload, String pmodeId) throws MessageSubmitException {
+    	log.debug("Start submission of Payload");
+
+        log.trace("Check if specified P-Mode exists and can be used for sending");
+        final IPMode  pmode = HolodeckB2BCore.getPModeSet().get(pmodeId);
+        final ILeg leg = PModeUtils.getSendLeg(pmode);
+        if (pmode == null || leg == null)
+            throw new MessageSubmitException("Specified P-Mode (" + pmodeId
+            													+ ") does not exist or does not support sending");
+        try {
+        	log.trace("Save the submitted payload to storage");
+        	IPayloadEntity storedPayload = HolodeckB2BCore.getStorageManager().storeSubmittedPayload(payload, pmode);
+        	log.info("Payload successfully submitted, PayloadId={}", storedPayload.getPayloadId());
+        	return storedPayload;
+        } catch (StorageException saveFailure) {
+	        log.error("An error occured when saving payload to storage : {}", Utils.getExceptionTrace(saveFailure));
+	        throw new MessageSubmitException("Failed to save payload", saveFailure);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void cancelPayloadSubmission(IPayloadEntity submittedPayload) throws MessageSubmitException {
+		log.debug("Cancel submission of payload (PayloadId={})", submittedPayload.getPayloadId());
+		try {
+			HolodeckB2BCore.getStorageManager().deleteSubmittedPayload(submittedPayload);
+			log.info("Successfully deleted payload (PayloadId={})", submittedPayload.getPayloadId());
+		} catch (StorageException ex) {
+			log.error("Could not cancel submission of payload (PayloadId={}). Details: {}",
+					submittedPayload.getPayloadId(), Utils.getExceptionTrace(ex));
+			throw new MessageSubmitException("Could not cancel submission of payload", ex);
+		}
+    }
+
     /**
      * Executes the actual submission process by checking that the indicated P-Mode can be used for pulling.
-     *  
+     *
      * @param pullRequest		The submitted <i>Pull Request</i>
-     * @return					The meta-data of the <i>Pull Request</i> as accepted by the Core 
+     * @return					The meta-data of the <i>Pull Request</i> as accepted by the Core
      * @throws MessageSubmitException	When the given message unit cannot be submitted to the Core
      */
 	private IPullRequest doSubmission(final IPullRequest pullRequest) throws MessageSubmitException {
@@ -181,27 +222,27 @@ public class MessageSubmitter implements IMessageSubmitter {
         // Check if P-Mode id and MPC are specified
         final String pmodeId = pullRequest.getPModeId();
         if (Utils.isNullOrEmpty(pmodeId))
-            throw new MessageSubmitException("P-Mode Id is missing");        
+            throw new MessageSubmitException("P-Mode Id is missing");
         final IPMode pmode = HolodeckB2BCoreInterface.getPModeSet().get(pmodeId);
         if (pmode == null)
         	throw new MessageSubmitException("No P-Mode with id=" + pmodeId + " configured");
         if (!PModeUtils.doesHolodeckB2BPull(pmode))
         	throw new MessageSubmitException("PMode with id=" + pmodeId + " does not support pulling");
-        	
-        // Check that when a MPC to pull from is available in both request and P-Mode they match or the one in the 
+
+        // Check that when a MPC to pull from is available in both request and P-Mode they match or the one in the
         // request is a sub-channel MPC of the one in the P-Mode
         final IPullRequestFlow pullRequestFlow = PModeUtils.getOutPullRequestFlow(pmode);
         final String pmodeMPC = pullRequestFlow != null ? pullRequestFlow.getMPC() : EbMSConstants.DEFAULT_MPC;
-        final String pullMPC = !Utils.isNullOrEmpty(pullRequest.getMPC()) ? pullRequest.getMPC() 
+        final String pullMPC = !Utils.isNullOrEmpty(pullRequest.getMPC()) ? pullRequest.getMPC()
         																  : EbMSConstants.DEFAULT_MPC;
-        
+
         if (!pullMPC.startsWith(pmodeMPC))
         	throw new MessageSubmitException("MPC in submission [" + pullMPC + "] conflicts with P-Mode defined MPC ]"
         										+ pmodeMPC + "]");
-        
+
         try {
         	final StorageManager storageManager = HolodeckB2BCore.getStorageManager();
-            log.trace("Add PullRequest to database");            
+            log.trace("Add PullRequest to database");
             IPullRequestEntity submittedPR = storageManager.storeOutGoingMessageUnit(pullRequest);
             log.info("Submitted PullRequest, assigned messageId={}", submittedPR.getMessageId());
             // Pull Request are always pushed, so change the processing state
@@ -218,7 +259,7 @@ public class MessageSubmitter implements IMessageSubmitter {
 
 
     /**
-     * Helper method to check the uniqueness of the payload's URI reference. 
+     * Helper method to check the uniqueness of the payload's URI reference.
      * <p>The references must be unique within the set of simularly included payloads, so there must be no other payload
      * with the same containment and reference.
      * <p>Payloads that should be included as attachment however don't need to have a reference assigned by the
@@ -246,7 +287,7 @@ public class MessageSubmitter implements IMessageSubmitter {
         return c;
     }
 
-   
+
     /**
      * Helper method that validates the submitted if custom validation has been specified in the P-Mode.
      *
@@ -275,12 +316,12 @@ public class MessageSubmitter implements IMessageSubmitter {
                 } else {
                 	// Event is always raised and indicates whether message is rejected or not
                 	HolodeckB2BCoreInterface.getEventProcessor()
-                						.raiseEvent(new CustomValidationFailureEvent(submittedMsg, validationResult));                
-                	if (!validationResult.shouldRejectMessage())                
+                						.raiseEvent(new CustomValidationFailureEvent(submittedMsg, validationResult));
+                	if (!validationResult.shouldRejectMessage())
                 		log.warn("Submitted message (msgId={}) contains validation errors, but can be processed",
                 				submittedMsg.getMessageId());
                 	else {
-                		log.warn("Submitted message (msgId={}) is not valid and must be rejected!", 
+                		log.warn("Submitted message (msgId={}) is not valid and must be rejected!",
                 				submittedMsg.getMessageId());
                 		throw new MessageSubmitException("Invalid message");
                 	}

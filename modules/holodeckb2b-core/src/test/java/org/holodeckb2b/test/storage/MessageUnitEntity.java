@@ -48,11 +48,11 @@ public abstract class MessageUnitEntity implements IMessageUnitEntity {
 
 	protected MessageUnitEntity(IMessageUnit source) {
 		this();
-		if (source ==  null)
+		if (source !=  null)
 			copyFrom(source);
 	}
 
-	public void copyFrom(IMessageUnit source) {
+	void copyFrom(IMessageUnit source) {
 		this.pModeId = source.getPModeId();
 		this.messageId = source.getMessageId();
 		this.refToMessageId = source.getRefToMessageId();
@@ -71,7 +71,7 @@ public abstract class MessageUnitEntity implements IMessageUnitEntity {
 	}
 
 	@Override
-	public abstract MessageUnitEntity clone();
+	protected abstract MessageUnitEntity clone();
 
 	public Date getLastChanged() {
 		return lastChange;

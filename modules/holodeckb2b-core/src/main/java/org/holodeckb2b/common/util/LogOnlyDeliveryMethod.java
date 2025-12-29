@@ -50,7 +50,7 @@ import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
  */
 public class LogOnlyDeliveryMethod implements IDeliveryMethod {
 	/**
-	 * The log to write the meta-data of the received User Messages to
+	 * The log to write the meta-data of the received messages to
 	 */
 	private Logger log;
 

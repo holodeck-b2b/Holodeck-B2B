@@ -21,9 +21,11 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -106,6 +108,29 @@ class DefaultPayloadStorageProviderTest {
 	}
 
 	@Test
+	void testContentAvailable() {
+		final DefaultPayloadStorageProvider provider = new DefaultPayloadStorageProvider();
+		assertDoesNotThrow(() -> provider.init(HolodeckB2BCoreInterface.getConfiguration()));
+
+		final IPayloadEntity pl = new PayloadEntity();
+		assertDoesNotThrow(() -> TestDataHelper.createTestFile(TestUtils.getTestResource("pldata"), pl.getPayloadId()));
+
+		IPayloadContent content = assertDoesNotThrow(() -> provider.getPayloadContent(pl));
+
+		assertTrue(assertDoesNotThrow(() -> content.isContentAvailable()));
+	}
+
+	@Test
+	void testContentNotAvailable() {
+		final DefaultPayloadStorageProvider provider = new DefaultPayloadStorageProvider();
+		assertDoesNotThrow(() -> provider.init(HolodeckB2BCoreInterface.getConfiguration()));
+
+		final IPayloadEntity pl = new PayloadEntity();
+		IPayloadContent content = assertDoesNotThrow(() -> provider.createNewPayloadStorage(pl));
+		assertFalse(assertDoesNotThrow(() -> content.isContentAvailable()));
+	}
+
+	@Test
 	void testGetPayloadContent() {
 		final DefaultPayloadStorageProvider provider = new DefaultPayloadStorageProvider();
 		assertDoesNotThrow(() -> provider.init(HolodeckB2BCoreInterface.getConfiguration()));
@@ -115,7 +140,11 @@ class DefaultPayloadStorageProviderTest {
 
 		IPayloadContent content = assertDoesNotThrow(() -> provider.getPayloadContent(pl));
 
-		assertNotNull(assertDoesNotThrow(() -> content.getContent()));
+		try (InputStream contentStream = assertDoesNotThrow(() -> content.getContent())) {
+			assertNotNull(contentStream);
+		} catch (IOException ioe) {
+			fail(ioe);
+		}
 	}
 
 	@Test

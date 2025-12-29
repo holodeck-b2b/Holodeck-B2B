@@ -19,8 +19,8 @@ package org.holodeckb2b.interfaces.storage;
 import org.holodeckb2b.interfaces.messagemodel.IReceipt;
 
 /**
- * Defines the interface of the stored object that is used by the Holodeck B2B to store the Receipt message 
- * unit meta-data.
+ * Defines the interface of the stored object that is used by the Holodeck B2B to store the Receipt message unit
+ * meta-data.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  3.0.0

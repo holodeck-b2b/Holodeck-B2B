@@ -86,6 +86,8 @@
     <!-- may cause Holodeck B2B to stop functioning correctly,   -->
     <!-- so handle with care!                                    -->
     <!-- ========================================================-->
+    <module ref="holodeckb2b-core"></module>
+    
     <parameter name="hotdeployment">false</parameter>
     <parameter name="hotupdate">false</parameter>
     <parameter name="enableMTOM">false</parameter>
@@ -162,8 +164,6 @@
                         class="org.apache.axis2.builder.ApplicationXMLBuilder"/>
     </messageBuilders>
 
-
-
     <!-- This is where you'd put custom transports.  See the transports project -->
     <!-- for more.  http://ws.apache.org/commons/transport                      -->
 
@@ -171,19 +171,13 @@
     <!-- Transport Outs -->
     <!-- ================================================= -->
     <transportSender name="http"
-        class="org.apache.axis2.transport.http.impl.httpclient4.HTTPClient4TransportSender">
+        class="org.holodeckb2b.core.axis2.HTTPTransportSender">
         <parameter name="PROTOCOL">HTTP/1.1</parameter>
         <parameter name="Transfer-Encoding">chunked</parameter>
 
         <!-- If following is set to 'true', optional action part of the Content-Type will not be added to the SOAP 1.2 messages -->
         <!--  <parameter name="OmitSOAP12Action">true</parameter>  -->
-    </transportSender>
-
-    <transportSender name="https"
-        class="org.apache.axis2.transport.http.impl.httpclient4.HTTPClient4TransportSender">
-        <parameter name="PROTOCOL">HTTP/1.1</parameter>
-        <parameter name="Transfer-Encoding">chunked</parameter>
-    </transportSender>
+    </transportSender>   
 
     <!-- ================================================= -->
     <!-- Phases  -->

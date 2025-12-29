@@ -20,8 +20,8 @@ import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 
 /**
- * Defines the interface of the stored object that is used by the Holodeck B2B to store the Error Message 
- * message unit meta-data.
+ * Defines the interface of the stored object that is used by the Holodeck B2B to store the Error Message message unit
+ * meta-data.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  3.0.0
@@ -38,31 +38,31 @@ public interface IErrorMessageEntity extends IMessageUnitEntity, IErrorMessage {
      *          <code>false</code> when not
      */
     boolean shouldHaveSOAPFault();
-    
+
     /**
      * Sets indicator whether this Error Signal should be combined with a SOAP Fault.
-     * 
+     *
      * @param addSOAPFault  <code>true</code> if this Error Signal should be combined with SOAP Fault,<br>
      *          			<code>false</code> when not
      * @since 7.0.0
      */
     void setAddSOAPFault(boolean addSOAPFault);
-    
+
     /**
      * Gets the label of the leg within the P-Mode on which this Error Message is exchanged. Although the Leg can in
-     * most cases be calculated there can be an issue when there is no explicit reference to the message unit in error 
+     * most cases be calculated there can be an issue when there is no explicit reference to the message unit in error
      * and there are more than one sent message units in the message the Error Message is a reply to. In that case the
      * P-Mode and Leg of the primary message unit from the sent message are used. But this information is not persisted
-     * and therefore the leg is stored with the Error Message.    
-     * 
+     * and therefore the leg is stored with the Error Message.
+     *
      * @return  The leg label
      * @since 6.0.0
      */
     ILeg.Label getLeg();
-    
+
     /**
-     * Sets the label of the leg within the P-Mode on which this Error Message is exchanged. 
-     * 
+     * Sets the label of the leg within the P-Mode on which this Error Message is exchanged.
+     *
      * @param leg  The leg label
      * @since 7.0.0
      */

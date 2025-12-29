@@ -48,7 +48,11 @@ public class UserMessageEntity extends MessageUnitEntity implements IUserMessage
 
     public UserMessageEntity(final IUserMessage sourceUserMessage) {
         super(sourceUserMessage);
-        copyFrom(sourceUserMessage);
+        this.mpc = sourceUserMessage.getMPC();
+        setSender(sourceUserMessage.getSender());
+        setReceiver(sourceUserMessage.getReceiver());
+        setCollaborationInfo(sourceUserMessage.getCollaborationInfo());
+        setMessageProperties(sourceUserMessage.getMessageProperties());
     }
 
     public void copyFrom(IUserMessage sourceUserMessage) {
@@ -67,8 +71,10 @@ public class UserMessageEntity extends MessageUnitEntity implements IUserMessage
     }
 
     @Override
-	public MessageUnitEntity clone() {
-		return new UserMessageEntity(this);
+	protected MessageUnitEntity clone() {
+		UserMessageEntity clone = new UserMessageEntity();
+		clone.copyFrom(this);
+		return clone;
 	}
 
     @Override
@@ -112,13 +118,13 @@ public class UserMessageEntity extends MessageUnitEntity implements IUserMessage
         return msgProperties;
     }
 
-    public void setMessageProperties(final Collection<IProperty> msgProps) {
+    void setMessageProperties(final Collection<IProperty> msgProps) {
         this.msgProperties = new ArrayList<>(msgProps != null ? msgProps.size() : 0);
         if(!Utils.isNullOrEmpty(msgProps))
             msgProps.forEach(p -> this.msgProperties.add(new Property(p)));
     }
 
-    public void addMessageProperty(final IProperty prop) {
+    void addMessageProperty(final IProperty prop) {
         if (prop != null)
             this.msgProperties.add(new Property(prop));
     }
@@ -126,5 +132,9 @@ public class UserMessageEntity extends MessageUnitEntity implements IUserMessage
     @Override
     public Collection<PayloadEntity> getPayloads() {
         return payloads;
+    }
+
+    void addPayload(PayloadEntity payload) {
+    	payloads.add(payload);
     }
 }
