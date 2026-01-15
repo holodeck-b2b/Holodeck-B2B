@@ -89,9 +89,9 @@
 	</contributors>
 
 	<properties>
-		<!-- This version of Holodeck B2B requires at least JDK 11 -->
-		<maven.compiler.source>11</maven.compiler.source>
-		<maven.compiler.target>11</maven.compiler.target>
+		<!-- This version of Holodeck B2B requires JDK 17 (for Jakarta EE and WSS4J 4.0) -->
+		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
 
 		<hb2b-utils-version>2.0.0</hb2b-utils-version>
 		<axis2-version>1.8.2</axis2-version>
@@ -223,22 +223,16 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
-			<!-- Add JAXB for Java9 and later compatibilitu -->
+			<!-- Jakarta XML Binding (JAXB) for JDK 17+ -->
 			<dependency>
-				<groupId>javax.xml.bind</groupId>
-				<artifactId>jaxb-api</artifactId>
-				<version>2.3.1</version>
-				<exclusions>
-					<exclusion>
-						<groupId>javax.activation</groupId>
-						<artifactId>javax.activation-api</artifactId>
-					</exclusion>
-				</exclusions>
+				<groupId>jakarta.xml.bind</groupId>
+				<artifactId>jakarta.xml.bind-api</artifactId>
+				<version>4.0.2</version>
 			</dependency>
 			<dependency>
 				<groupId>org.glassfish.jaxb</groupId>
 				<artifactId>jaxb-runtime</artifactId>
-				<version>2.3.8</version>
+				<version>4.0.5</version>
 				<scope>runtime</scope>
 			</dependency>
 
@@ -273,10 +267,9 @@
 		        <scope>test</scope>
 		    </dependency>
 	        <dependency>
-	            <groupId>com.sun.activation</groupId>
-	            <artifactId>jakarta.activation</artifactId>
-	            <version>1.2.1</version>
-	            <scope>test</scope>
+	            <groupId>jakarta.activation</groupId>
+	            <artifactId>jakarta.activation-api</artifactId>
+	            <version>2.1.3</version>
 	        </dependency>		    
 			<dependency>
 				<groupId>org.mockito</groupId>
