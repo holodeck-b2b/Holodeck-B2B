@@ -42,10 +42,10 @@
             <artifactId>holodeckb2b-core</artifactId>
         </dependency>        
 
-		<!-- JAXB API is needed for Java 9 and up-->
+		<!-- Jakarta XML Binding (JAXB) -->
 		<dependency>
-		    <groupId>javax.xml.bind</groupId>
-		    <artifactId>jaxb-api</artifactId>
+		    <groupId>jakarta.xml.bind</groupId>
+		    <artifactId>jakarta.xml.bind-api</artifactId>
 		</dependency>        
 
         <!-- Dependencies for testing -->

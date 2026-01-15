@@ -51,6 +51,12 @@
             <artifactId>holodeckb2b-certmanager</artifactId>         
         </dependency>
 
+        <!-- javax.activation for DataHandler -->
+        <dependency>
+            <groupId>com.sun.activation</groupId>
+            <artifactId>javax.activation</artifactId>
+        </dependency>
+
         <!-- WSS4J Security libs -->
         <dependency>
             <groupId>org.apache.wss4j</groupId>

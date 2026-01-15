@@ -18,9 +18,9 @@ package org.holodeckb2b.storage.metadata.jpa;
 
 import java.io.Serializable;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.Lob;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Lob;
 
 import org.holodeckb2b.interfaces.general.IService;
 

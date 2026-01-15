@@ -35,7 +35,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>holodeckb2b-core</artifactId>
-        </dependency>       
+        </dependency>
  	    <!-- WS-Addressing libs required for multi-hop support -->
         <dependency>
             <groupId>org.apache.axis2</groupId>
@@ -68,7 +68,8 @@
 		</dependency>
         <dependency>
             <groupId>com.sun.activation</groupId>
-            <artifactId>jakarta.activation</artifactId>
+            <artifactId>javax.activation</artifactId>
+            <version>1.2.0</version>
             <scope>test</scope>
         </dependency>
 		<!-- Test util classes from the Core -->

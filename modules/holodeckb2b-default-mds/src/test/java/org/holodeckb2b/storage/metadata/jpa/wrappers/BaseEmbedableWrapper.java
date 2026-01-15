@@ -16,10 +16,10 @@
  */
 package org.holodeckb2b.storage.metadata.jpa.wrappers;
 
-import javax.persistence.Embedded;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.MappedSuperclass;
 
 @MappedSuperclass
 abstract class BaseEmbedableWrapper<E> {

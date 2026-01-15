@@ -47,10 +47,10 @@
 			</exclusions>
         </dependency>
 
-        <!-- Add JAXB for Java9 and later compatibilitu -->
+        <!-- Jakarta XML Binding (JAXB) -->
         <dependency>
-			<groupId>javax.xml.bind</groupId>
-			<artifactId>jaxb-api</artifactId>
+			<groupId>jakarta.xml.bind</groupId>
+			<artifactId>jakarta.xml.bind-api</artifactId>
         </dependency>
         <dependency>
 			<groupId>org.glassfish.jaxb</groupId>
@@ -90,7 +90,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>jaxb2-maven-plugin</artifactId>
-                <version>2.5.0</version>
+                <version>3.2.0</version>
                 <executions>
                     <execution>
                         <id>xjc</id>

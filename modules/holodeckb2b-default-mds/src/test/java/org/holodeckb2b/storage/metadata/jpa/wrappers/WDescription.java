@@ -16,7 +16,7 @@
  */
 package org.holodeckb2b.storage.metadata.jpa.wrappers;
 
-import javax.persistence.Entity;
+import jakarta.persistence.Entity;
 
 import org.holodeckb2b.storage.metadata.jpa.Description;
 
