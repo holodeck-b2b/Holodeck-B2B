@@ -18,7 +18,7 @@ package org.holodeckb2b.storage.metadata.jpa;
 
 import java.io.Serializable;
 
-import javax.persistence.Embeddable;
+import jakarta.persistence.Embeddable;
 
 import org.holodeckb2b.interfaces.messagemodel.IAgreementReference;
 

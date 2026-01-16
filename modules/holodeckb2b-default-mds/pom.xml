@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.holodeckb2b</groupId>
         <artifactId>holodeckb2b</artifactId>
-        <version>8.0.0</version>
+        <version>8.1.0</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -38,42 +38,41 @@
     </description>
 
     <properties>
-        <hibernate.version>5.6.15.Final</hibernate.version>
+        <hibernate.version>6.4.4.Final</hibernate.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>holodeckb2b-core</artifactId>
-        </dependency>        
+        </dependency>
 
         <!--===============================================================
             Hibernate JPA framework is used to manage configuration and
             message meta data in database. Actual storage is in Derby DB
         =============================================================== -->
         <dependency>
-            <groupId>org.hibernate</groupId>
+            <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-core</artifactId>
             <version>${hibernate.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>javax.activation</groupId>
-					<artifactId>javax.activation-api</artifactId>
-				</exclusion>
-			</exclusions>
         </dependency>
-		<!-- JAXB API is needed for Java 9 and up-->
-		<dependency>
-		    <groupId>javax.xml.bind</groupId>
-		    <artifactId>jaxb-api</artifactId>
-		</dependency>        
         <dependency>
             <groupId>org.apache.derby</groupId>
             <artifactId>derby</artifactId>
-            <version>10.12.1.1</version>
+            <version>10.16.1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.derby</groupId>
+            <artifactId>derbytools</artifactId>
+            <version>10.16.1.1</version>
         </dependency>
 
         <!-- Dependencies for testing -->
+        <dependency>
+            <groupId>com.sun.activation</groupId>
+            <artifactId>javax.activation</artifactId>
+            <scope>test</scope>
+        </dependency>
 	    <dependency>
 	        <groupId>org.junit.jupiter</groupId>
 	        <artifactId>junit-jupiter</artifactId>

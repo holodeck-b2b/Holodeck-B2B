@@ -44,6 +44,7 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.NTCredentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.AuthCache;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
@@ -52,6 +53,8 @@ import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.params.AuthPolicy;
 import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
@@ -223,7 +226,7 @@ class RequestImpl implements Request {
 
     @Override
     public void releaseConnection() {
-        HttpEntity entity = response.getEntity();
+        HttpEntity entity = response != null ? response.getEntity() : null;
         if (entity != null) {
         	log.trace("Cleanup response and release connection");
             try {
@@ -270,17 +273,22 @@ class RequestImpl implements Request {
 
         String username = authenticator.getUsername();
         String password = authenticator.getPassword();
-        String host = authenticator.getHost();
-        String domain = authenticator.getDomain();
-
-        int port = authenticator.getPort();
         String realm = authenticator.getRealm();
+
+        String domain = authenticator.getDomain();
+        String host = authenticator.getHost();
+        int port = authenticator.getPort();
 
         Credentials creds;
         CredentialsProvider credsProvider = clientContext.getCredentialsProvider();
         if (credsProvider == null) {
             credsProvider = new BasicCredentialsProvider();
             clientContext.setCredentialsProvider(credsProvider);
+        }
+        if (clientContext.getAuthCache() == null) {
+        	AuthCache authCache = new BasicAuthCache();
+        	authCache.put(httpHost, new BasicScheme());
+        	clientContext.setAuthCache(authCache);
         }
         if (host != null) {
             if (domain != null) {

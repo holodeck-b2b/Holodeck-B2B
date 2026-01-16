@@ -20,7 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 import org.holodeckb2b.storage.metadata.jpa.wrappers.WService;
 import org.holodeckb2b.storage.metadata.testhelpers.EntityManagerUtil;

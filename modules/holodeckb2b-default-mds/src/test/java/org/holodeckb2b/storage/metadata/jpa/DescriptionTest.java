@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.util.Random;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 import org.holodeckb2b.storage.metadata.jpa.wrappers.WDescription;
 import org.holodeckb2b.storage.metadata.testhelpers.EntityManagerUtil;

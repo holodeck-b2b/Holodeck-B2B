@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.UUID;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 import org.holodeckb2b.common.errors.FailedAuthentication;
 import org.holodeckb2b.common.messagemodel.ErrorMessage;

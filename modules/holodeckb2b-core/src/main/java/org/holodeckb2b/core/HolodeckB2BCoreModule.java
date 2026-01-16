@@ -20,28 +20,33 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.AxisDescription;
 import org.apache.axis2.description.AxisModule;
+import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.modules.Module;
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.Policy;
-import org.holodeckb2b.common.VersionInfo;
+import org.holodeckb2b.core.config.InternalConfiguration;
 
 /**
  * Axis2 module class for the Holodeck B2B Core module.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
-public class HolodeckB2BCoreModule implements Module {
+public final class HolodeckB2BCoreModule implements Module {
     /**
      * The name of the Axis2 Module that contains the Holodeck B2B Core implementation
      */
-    public static final String HOLODECKB2B_CORE_MODULE = "holodeckb2b-core";
+    public static final String NAME = "holodeckb2b-core";
 
-    /**
-     * Logger
-     */
-    private static final Logger log = LogManager.getLogger(HolodeckB2BCoreModule.class);
+//    /**
+//     * The singleton Axis2 Module instance of the Holodeck B2B Core
+//     */
+//    public static final HolodeckB2BCoreModule INSTANCE = new HolodeckB2BCoreModule();
+
+//    @Override
+//    public Module getModule() {
+//    	return INSTANCE;
+//    }
 
     /**
      * Initializes the Holodeck B2B Core module.
@@ -51,15 +56,15 @@ public class HolodeckB2BCoreModule implements Module {
      * @throws AxisFault
      */
     @Override
-    public void init(final ConfigurationContext cc, final AxisModule am) throws AxisFault {        
-        // Check if module name in module.xml is equal to constant use in code
-        if (!am.getName().equals(HOLODECKB2B_CORE_MODULE)) {
-            // Name is not equal! This is a fatal configuration error, stop loading this module and alert operator
-            log.fatal("Invalid Holodeck B2B Core module configuration! Name in configuration is: {}, expected was: {}",
-            			am.getName(), HOLODECKB2B_CORE_MODULE);
+    public void init(final ConfigurationContext cc, final AxisModule am) throws AxisFault {
+    	AxisConfiguration axisConfiguration = cc.getAxisConfiguration();
+//    	if (am.getModule() != this || !(axisConfiguration instanceof InternalConfiguration)) {
+        if (!(axisConfiguration instanceof InternalConfiguration)) {
+            LogManager.getLogger().fatal("Invalid Holodeck B2B Core module configuration!");
             throw new AxisFault("Invalid configuration found for module: " + am.getName());
         }
-        log.info("Holodeck B2B Core Module " + VersionInfo.fullVersion + " STARTED.");
+//        setModuleClassLoader(axisConfiguration.getModuleClassLoader());
+        HolodeckB2BCore.init((InternalConfiguration) axisConfiguration);
     }
 
     @Override
@@ -73,11 +78,11 @@ public class HolodeckB2BCoreModule implements Module {
 
     @Override
     public void applyPolicy(final Policy policy, final AxisDescription ad) throws AxisFault {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public void shutdown(final ConfigurationContext cc) throws AxisFault {
-        log.info("Shutting down Holodeck B2B Core module...");
-    }    
+    	HolodeckB2BCore.shutdown();
+    }
 }

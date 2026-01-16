@@ -91,9 +91,9 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
     private static Logger  log = LogManager.getLogger(SecurityHeaderProcessor.class);
 
     /**
-     * The Certificate manager of the security provider
+     * The Security Provider instance
      */
-//    private DefaultCertManager certManager;
+    private DefaultProvider securityProvider;
 
     /**
      * Reference to the current message processing context
@@ -127,6 +127,15 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
         tmp.put(WSConstants.USERNAME_TOKEN, Action.USERNAME_TOKEN);
         tmp.put(WSConstants.REFERENCE_LIST, Action.DECRYPT);
         FAULT_CAUSES = java.util.Collections.unmodifiableMap(tmp);
+    }
+
+    /**
+     * Creates a new <code>SecurityHeaderProcessor</code> instance
+     *
+     * @param securityProvider The Security Provider instance that creates this instance
+     */
+    SecurityHeaderProcessor(DefaultProvider securityProvider) {
+    	this.securityProvider = securityProvider;
     }
 
     /**
@@ -265,6 +274,7 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
 
         // Configure signature verification action
         reqData.setSigVerCrypto(new CertManWSS4JCrypto(Action.VERIFY));
+        reqData.setSignatureProvider(securityProvider.getJceProvider());
         wssConfig.setValidator(WSConstants.SIGNATURE, new SignatureTrustValidator());
         reqData.setEnableRevocation(false);
         reqData.setEnableSignatureConfirmation(false);

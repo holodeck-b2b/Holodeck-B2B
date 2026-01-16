@@ -24,12 +24,17 @@ import org.holodeckb2b.interfaces.pmode.IPMode;
 /**
  * Defines the interface of the Holodeck B2B Core component that is responsible for the processing of {@link
  * IMessageProcessingEvent}s. When a component wants to inform others about an event that occurred in the processing of
- * a message unit it MUST <i>"raise"</i> the event with the event processor by calling the {@link
- * HolodeckB2BCoreInterface#getEventProcessor()#raiseEvent(IMessageProcessingEvent)} method.
- * <p>The event processor will then ensure that the event is handled as configured in either the P-Mode governing the
+ * a message unit it MUST <i>"raise"</i> the event by calling the {@link #raiseEvent(IMessageProcessingEvent)} method 
+ * of the installed event processor, which it can retrieve using the {@link HolodeckB2BCoreInterface#getEventProcessor()}
+ * method.
+ * <p>
+ * The event processor will then ensure that the event is handled as configured in either the P-Mode governing the
  * processing of the message unit to which the event applies or the global configuration (as registered with the Core).
  * The event processor always checks the most specific configuration first, i.e. first the configuration of the Leg
  * level is checked, then the generic P-Mode configuration and finally the global configuration.
+ * <p>
+ * A default event processor implementation is included in the Core project. It processes the events synchronously with
+ * the message processing. Another event processor can be used in a Holodeck B2B instance using the Java SPI mechanism.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 2.1.0

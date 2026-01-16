@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 import org.holodeckb2b.common.util.CompareUtils;
 import org.holodeckb2b.interfaces.messagemodel.Direction;

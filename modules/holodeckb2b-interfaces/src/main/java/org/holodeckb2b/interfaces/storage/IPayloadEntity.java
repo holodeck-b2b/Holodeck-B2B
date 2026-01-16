@@ -25,7 +25,7 @@ import org.holodeckb2b.interfaces.messagemodel.IPayload;
 
 /**
  * Defines the interface of the object that is used by the Holodeck B2B Core to store the payload meta-data. Note that
- * this interface extends {@link IPayload} and therefore also has a {@Link #getContent()} method. Because the
+ * this interface extends {@link IPayload} and therefore also has a {@link #getContent()} method. Because the
  * <i>Metadata Storage Provider</i> doesn't handle the content it doesn't need to implement this method and providing
  * access to the payload's content is managed by the Core.
  *
@@ -45,7 +45,7 @@ public interface IPayloadEntity extends IPayload {
 	/**
 	 * Gets the <i>CoreId</i> of the User Message that this payload is contained in.
 	 *
-	 * @return	the <i>CoreId> of the User Message that this payload is contained in, or <code>null</code> if the
+	 * @return	the <i>CoreId</i> of the User Message that this payload is contained in, or <code>null</code> if the
 	 * 			paylaod is not yet assigned to a User Message
 	 */
 	String getParentCoreId();

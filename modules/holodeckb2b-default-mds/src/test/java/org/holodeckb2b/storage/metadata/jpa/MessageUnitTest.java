@@ -24,9 +24,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.UUID;
 
-import javax.persistence.EntityManager;
-import javax.persistence.OptimisticLockException;
-import javax.persistence.RollbackException;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.OptimisticLockException;
+import jakarta.persistence.RollbackException;
 
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.storage.metadata.testhelpers.EntityManagerUtil;

@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.holodeckb2b</groupId>
         <artifactId>holodeckb2b</artifactId>
-        <version>8.0.0</version>
+        <version>8.1.0</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -42,10 +42,10 @@
             <artifactId>holodeckb2b-core</artifactId>
         </dependency>        
 
-		<!-- JAXB API is needed for Java 9 and up-->
+		<!-- Jakarta XML Binding (JAXB) -->
 		<dependency>
-		    <groupId>javax.xml.bind</groupId>
-		    <artifactId>jaxb-api</artifactId>
+		    <groupId>jakarta.xml.bind</groupId>
+		    <artifactId>jakarta.xml.bind-api</artifactId>
 		</dependency>        
 
         <!-- Dependencies for testing -->

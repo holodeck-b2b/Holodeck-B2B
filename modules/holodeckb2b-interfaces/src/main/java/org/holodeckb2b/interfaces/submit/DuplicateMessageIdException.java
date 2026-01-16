@@ -25,6 +25,11 @@ package org.holodeckb2b.interfaces.submit;
  */
 public class DuplicateMessageIdException extends MessageSubmitException {
 
+	/**
+	 * Creates a new instance of the exception.
+	 *
+	 * @param messageId the duplicate MesssageId
+	 */
 	public DuplicateMessageIdException(String messageId) {
 		super(messageId + " already exists");
 	}

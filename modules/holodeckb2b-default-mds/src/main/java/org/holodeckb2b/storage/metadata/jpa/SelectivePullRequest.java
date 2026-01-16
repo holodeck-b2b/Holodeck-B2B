@@ -16,12 +16,12 @@
  */
 package org.holodeckb2b.storage.metadata.jpa;
 
-import javax.persistence.Column;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.Lob;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Lob;
+import jakarta.persistence.Table;
 
 import org.holodeckb2b.interfaces.general.IService;
 import org.holodeckb2b.interfaces.messagemodel.IAgreementReference;

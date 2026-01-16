@@ -130,7 +130,7 @@ public interface IQueryManager {
      * @param userMessage The <code>User Message</code> to check for if it's already processed
      * @return            <code>true</code> if there exists a User Message entity with {@link
      *                    IUserMessage#getMessageId()} == <code>messageId</code> and {@link IUserMessage#getDirection()}
-     *                    == <code>IN</code> and {@link IUserMessage#getCurrentProcessingState()} ==
+     *                    == <code>IN</code> and {@link IUserMessageEntity#getCurrentProcessingState()} ==
      *                    {@link ProcessingState#DELIVERED} | {@link ProcessingState#FAILURE},
      *                    <br><code>false</code> otherwise.
      * @throws StorageException If an error occurs when executing this query

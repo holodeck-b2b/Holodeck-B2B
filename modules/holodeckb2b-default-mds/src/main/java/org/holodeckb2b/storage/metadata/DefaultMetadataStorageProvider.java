@@ -25,13 +25,13 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
-import javax.persistence.NoResultException;
-import javax.persistence.OptimisticLockException;
-import javax.persistence.TemporalType;
-import javax.persistence.TypedQuery;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.OptimisticLockException;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.TypedQuery;
 
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.holodeckb2b.common.VersionInfo;

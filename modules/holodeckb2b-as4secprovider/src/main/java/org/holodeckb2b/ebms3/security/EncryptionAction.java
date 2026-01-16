@@ -54,7 +54,7 @@ public class EncryptionAction implements Action {
 	public void execute(WSHandler handler, SecurityActionToken actionToken, RequestData reqData)
 			throws WSSecurityException {
 
-        WSSecExtendedEK wsEncrypt = new WSSecExtendedEK(reqData.getSecHeader());
+        WSSecExtendedEK wsEncrypt = new WSSecExtendedEK(reqData.getSecHeader(), reqData.getSignatureProvider());
         wsEncrypt.setIdAllocator(reqData.getWssConfig().getIdAllocator());
         wsEncrypt.setWsDocInfo(reqData.getWsDocInfo());
         wsEncrypt.setExpandXopInclude(reqData.isExpandXopInclude());

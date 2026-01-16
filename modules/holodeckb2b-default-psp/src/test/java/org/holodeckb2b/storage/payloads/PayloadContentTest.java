@@ -52,9 +52,13 @@ class PayloadContentTest {
 	}
 
 	@AfterAll
-	static void cleanup() throws IOException {
-		FileUtils.cleanDirectory(TESTDIR);
-		Files.delete(TESTDIR);
+	static void cleanup() {
+		try {
+			FileUtils.cleanDirectory(TESTDIR);
+			Files.delete(TESTDIR);
+		} catch (IOException e) {
+			// Ignore cleanup errors - may occur on Windows due to file locking
+		}
 	}
 
 	@Test

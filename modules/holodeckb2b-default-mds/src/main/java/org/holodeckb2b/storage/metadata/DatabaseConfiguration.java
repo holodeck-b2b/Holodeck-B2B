@@ -24,14 +24,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
-import javax.persistence.SharedCacheMode;
-import javax.persistence.ValidationMode;
-import javax.persistence.spi.ClassTransformer;
-import javax.persistence.spi.PersistenceUnitInfo;
-import javax.persistence.spi.PersistenceUnitTransactionType;
+import jakarta.persistence.SharedCacheMode;
+import jakarta.persistence.ValidationMode;
+import jakarta.persistence.spi.ClassTransformer;
+import jakarta.persistence.spi.PersistenceUnitInfo;
+import jakarta.persistence.spi.PersistenceUnitTransactionType;
 import javax.sql.DataSource;
 
-import org.hibernate.dialect.DerbyTenSevenDialect;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.holodeckb2b.commons.util.Utils;
 
@@ -92,15 +91,12 @@ final class DatabaseConfiguration implements PersistenceUnitInfo {
         	dbPath = "db";
         props.put(org.hibernate.cfg.AvailableSettings.URL,
                                                     "jdbc:derby:" + dbPath + "/coreDB;databaseName=coreDB;create=true");
-        props.put(org.hibernate.cfg.AvailableSettings.DIALECT, DerbyTenSevenDialect.class);
+        // Hibernate 6 auto-detects the dialect from the JDBC URL
         props.put(org.hibernate.cfg.AvailableSettings.HBM2DDL_AUTO, "update");
         props.put(org.hibernate.cfg.AvailableSettings.SHOW_SQL, false);
-        props.put(org.hibernate.cfg.AvailableSettings.QUERY_STARTUP_CHECKING, false);
         props.put(org.hibernate.cfg.AvailableSettings.GENERATE_STATISTICS, false);
-        props.put(org.hibernate.cfg.AvailableSettings.USE_REFLECTION_OPTIMIZER, false);
         props.put(org.hibernate.cfg.AvailableSettings.USE_SECOND_LEVEL_CACHE, false);
         props.put(org.hibernate.cfg.AvailableSettings.USE_QUERY_CACHE, false);
-        props.put(org.hibernate.cfg.AvailableSettings.USE_STRUCTURED_CACHE, false);
         props.put(org.hibernate.cfg.AvailableSettings.STATEMENT_BATCH_SIZE, 20);
 
         return props;

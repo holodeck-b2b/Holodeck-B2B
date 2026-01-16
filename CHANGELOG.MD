@@ -2,8 +2,31 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 8.1.0
+##### 2025-12-29
+### Added
+* New processing state _INTERRUPTED_ to indicate that an [unexpected] error occurred that prevented completion of
+  processing a received Message Unit but which could be recovered on a next attempt.
+* Option to set the _P-Mode Manager_ in `HolodeckB2BTestCore`
+* Support for running on JVM version 17
+* Configuration of the default TLS client certificates when connecting to other MSH is now done in `holodeckb2b.xml` by
+  providing the references to the key pairs in the _Certificate Manager_ as a list of `KeystoreAlias` elements as 
+  children of the _CLIENT_TLS_ `Parameter` element.
+ 
+### Fixed
+* Received message marked as duplicate even if not completely processed before.
+* HTTP Authorization header not included in HTTP request when using Basic Authentication
+* Out of Bound exception when registering global event handler.
+* NPE when copying P-Mode delivery configuration
+* Fix IOException when parent directories of specified payload storage path do not exist
+* Fix NPE on connection release with empty response
+* Fix NPE when using the default certificate reference method in Key Agreement
+
+### Deprecated
+* Configuration of the default TLS client certificates when connecting to other MSH through the Java system properties
+
 ## 8.0.0
-##### 2025-07-23
+##### Unreleased
 ### Added
 * Possibility to "pre-submit" Payloads before the actual User Message is submitted. See new methods in 
   `org.holodeckb2b.interfaces.submit.IMessageSubmitter`  
