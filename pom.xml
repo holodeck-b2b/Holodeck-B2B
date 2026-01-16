@@ -110,7 +110,7 @@
 		<module>modules/holodeckb2b-default-psp</module>
 		<module>modules/holodeckb2b-ui</module>
 		<module>modules/holodeckb2b-distribution</module>
-		<!--        <module>modules/holodeckb2b-it</module> -->
+		<module>modules/holodeckb2b-it</module>
 	</modules>
 
 	<licenses>
@@ -264,6 +264,12 @@
 		        <groupId>org.junit.vintage</groupId>
 		        <artifactId>junit-vintage-engine</artifactId>
 		        <version>5.7.2</version>
+		        <scope>test</scope>
+		    </dependency>
+		    <dependency>
+		        <groupId>junit</groupId>
+		        <artifactId>junit</artifactId>
+		        <version>4.13.2</version>
 		        <scope>test</scope>
 		    </dependency>
 	        <dependency>
