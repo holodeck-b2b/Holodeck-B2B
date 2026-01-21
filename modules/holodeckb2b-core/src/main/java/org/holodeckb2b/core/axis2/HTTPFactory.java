@@ -1,21 +1,22 @@
 /*
  * Copyright (C) 2019 The Holodeck B2B Team, Sander Fieten
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.holodeckb2b.core.axis2;
 
+import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -23,8 +24,10 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.description.TransportInDescription;
+import org.apache.axis2.transport.http.server.DefaultConnectionListener;
 import org.apache.axis2.transport.http.server.DefaultHttpConnectionManager;
 import org.apache.axis2.transport.http.server.HttpConnectionManager;
+import org.apache.axis2.transport.http.server.IOProcessor;
 import org.apache.axis2.transport.http.server.RequestSessionCookie;
 import org.apache.axis2.transport.http.server.ResponseSessionCookie;
 import org.apache.axis2.transport.http.server.WorkerFactory;
@@ -37,21 +40,25 @@ import org.apache.http.protocol.ResponseDate;
 import org.apache.http.protocol.ResponseServer;
 
 /**
- * Is a customised {@link org.apache.axis2.transport.http.server.HttpFactory} that uses the actual {@link 
+ * Is a customised {@link org.apache.axis2.transport.http.server.HttpFactory} that uses the actual {@link
  * TransportInDescription} to configure this server and uses Holodeck B2B's own HTTP worker factory to support the use
  * of Service specified messsge processing.
- * 
+ *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 5.0.0
  */
 public class HTTPFactory extends org.apache.axis2.transport.http.server.HttpFactory {
-	
+
 	private TransportInDescription	httpConfiguration;
-	
-	public HTTPFactory(ConfigurationContext axisConf, TransportInDescription transprtIn) throws AxisFault {
+
+	private HTTPListener httpListener;
+
+	public HTTPFactory(ConfigurationContext axisConf, TransportInDescription transprtIn, HTTPListener listener)
+																									throws AxisFault {
         super(axisConf, 0, new HTTPWorkerFactory(transprtIn));
         this.httpConfiguration = transprtIn;
-        
+        this.httpListener = listener;
+
         setPort(getIntParam(PARAMETER_PORT, 8080));
         setHostAddress(getStringParam(PARAMETER_HOST_ADDRESS, null));
         setOriginServer(Axis2Utils.HTTP_PRODID_HEADER);
@@ -60,19 +67,19 @@ public class HTTPFactory extends org.apache.axis2.transport.http.server.HttpFact
         setRequestCoreThreadPoolSize(getIntParam(PARAMETER_REQUEST_CORE_THREAD_POOL_SIZE, 100));
         setRequestMaxThreadPoolSize(getIntParam(PARAMETER_REQUEST_MAX_THREAD_POOL_SIZE, 150));
         setThreadKeepAliveTime(getLongParam(PARAMETER_THREAD_KEEP_ALIVE_TIME, 180L));
-        setThreadKeepAliveTimeUnit(getTimeUnitParam(PARAMETER_THREAD_KEEP_ALIVE_TIME_UNIT, TimeUnit.SECONDS));        
+        setThreadKeepAliveTimeUnit(getTimeUnitParam(PARAMETER_THREAD_KEEP_ALIVE_TIME_UNIT, TimeUnit.SECONDS));
 	}
-	
+
 	/*
 	 * Because everything related to the HTTP configuration is private in the Axis2 parent class we have just copied
-	 * relevant methods to this class. 
+	 * relevant methods to this class.
 	 */
-	
+
     @Override
 	public TransportInDescription getHttpConfiguration() {
         return httpConfiguration;
-    }	
-	
+    }
+
     @Override
     public HttpProcessor newHttpProcessor() {
         BasicHttpProcessor httpProcessor = new BasicHttpProcessor();
@@ -84,17 +91,31 @@ public class HTTPFactory extends org.apache.axis2.transport.http.server.HttpFact
         httpProcessor.addInterceptor(new ResponseSessionCookie());
         return httpProcessor;
     }
-    
+
+    /**
+     * Create the listener for request connections
+     */
+    @Override
+    public IOProcessor newRequestConnectionListener(int port, final HttpConnectionManager manager,
+    												final HttpParams params) throws IOException {
+        return new DefaultConnectionListener(
+                port,
+                manager,
+                new HttpListenerFailureHandler(httpListener),
+                params);
+    }
+
     /**
      * Create the connection manager used to launch request threads
      */
-    public HttpConnectionManager newRequestConnectionManager(ExecutorService requestExecutor,
+    @Override
+	public HttpConnectionManager newRequestConnectionManager(ExecutorService requestExecutor,
                                                              WorkerFactory workerFactory,
                                                              HttpParams params) {
         return new DefaultHttpConnectionManager(getConfigurationContext(), requestExecutor,
                                                 workerFactory, params, this);
     }
-    
+
     private int getIntParam(String name, int def) {
         String config = getStringParam(name, null);
         if (config != null) {
@@ -149,5 +170,5 @@ public class HTTPFactory extends org.apache.axis2.transport.http.server.HttpFact
             }
         }
         return def;
-    }	
+    }
 }

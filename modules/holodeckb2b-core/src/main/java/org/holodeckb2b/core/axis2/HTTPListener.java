@@ -1,22 +1,20 @@
 /*
  * Copyright (C) 2019 The Holodeck B2B Team, Sander Fieten
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.holodeckb2b.core.axis2;
-
-import java.io.IOException;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.EndpointReference;
@@ -28,17 +26,19 @@ import org.apache.axis2.description.TransportInDescription;
 import org.apache.axis2.kernel.TransportListener;
 import org.apache.axis2.transport.http.HTTPTransportUtils;
 import org.apache.axis2.transport.http.server.SimpleHttpServer;
+import org.apache.logging.log4j.LogManager;
+import org.holodeckb2b.commons.util.Utils;
 
 /**
- * Is an Axis2 {@link TransportListener} implementation that will create a stand alone HTTP listener that will use the 
+ * Is an Axis2 {@link TransportListener} implementation that will create a stand alone HTTP listener that will use the
  * {@link Builder} implementation specified by the service configured at the requested URL. The Builder to use can be
- * specified in the <i>Sevice</i> parameter "hb2b:builder". If no builder is specified the default Axis2 Builder 
- * applicable to the Content-Type of the request is used.   
- * <p>To implement this functionality this listener uses the HTTP sever built into Axis2 but initialises its with a 
- * custom {@link HTTPFactory} to create workers that provide the required functionality. 
+ * specified in the <i>Sevice</i> parameter "hb2b:builder". If no builder is specified the default Axis2 Builder
+ * applicable to the Content-Type of the request is used.
+ * <p>To implement this functionality this listener uses the HTTP sever built into Axis2 but initialises its with a
+ * custom {@link HTTPFactory} to create workers that provide the required functionality.
  * <p>As this transport listener replaces the default Axis2 listener it uses the same parameters, the main one being
  * the port parameter where the message should be received. If that parameter is not provided the default port 8080
- * is used. 
+ * is used.
  *
  * @author Sander Fieten (sander at chasquis-consulting.com)
  * @since 5.0.0
@@ -60,13 +60,16 @@ public class HTTPListener implements TransportListener {
      * The factory for HTTP workers
      */
     private HTTPFactory httpFactory;
+    /**
+     * Cause of the startup failure
+     */
+    private Throwable 	startupFailure;
 
 	@Override
 	public void init(ConfigurationContext axisConf, TransportInDescription transprtIn) throws AxisFault {
         this.configurationContext = axisConf;
         this.transportConfig = transprtIn;
-        if (httpFactory == null)
-            httpFactory = new HTTPFactory(configurationContext, transprtIn);        
+        this.httpFactory = new HTTPFactory(configurationContext, transprtIn, this);
 	}
 
 	@Override
@@ -74,11 +77,27 @@ public class HTTPListener implements TransportListener {
         try {
             embedded = new SimpleHttpServer(httpFactory, httpFactory.getPort());
             embedded.init();
+            startupFailure = null;
             embedded.start();
-        } catch (IOException e) {
+            if (startupFailure != null) {
+            	embedded.destroy();
+            	throw startupFailure;
+            }
+        } catch (Throwable e) {
+        	LogManager.getLogger().error("Failed to start HTTP transport ({}) : {}", transportConfig.getName(),
+        			Utils.getExceptionTrace(startupFailure));
             throw AxisFault.makeFault(e);
-        }		
+        }
     }
+
+	/**
+	 * Indicates that the startup of the HTTP listener failed.
+	 *
+	 * @param t	the cause of the failure
+	 */
+	void notifyStartupFailure(Throwable t) {
+		this.startupFailure = t;
+	}
 
 	@Override
 	public void stop() throws AxisFault {
@@ -95,13 +114,13 @@ public class HTTPListener implements TransportListener {
         if (embedded == null) {
             throw new AxisFault("Unable to generate EPR for the transport : http");
         }
-        return HTTPTransportUtils.getEPRsForService(configurationContext, transportConfig, 
+        return HTTPTransportUtils.getEPRsForService(configurationContext, transportConfig,
         											serviceName, ip, embedded.getPort());
 	}
 
 	@Override
 	public SessionContext getSessionContext(MessageContext messageContext) {
-		// Session support isn't needed for Holodeck B2B 
+		// Session support isn't needed for Holodeck B2B
 		return null;
 	}
 

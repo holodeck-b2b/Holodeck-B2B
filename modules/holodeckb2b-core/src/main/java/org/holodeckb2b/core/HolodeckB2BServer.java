@@ -17,11 +17,14 @@
 package org.holodeckb2b.core;
 
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.axis2.engine.AxisServer;
+import org.apache.axis2.engine.ListenerManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.commons.util.Utils;
@@ -57,7 +60,6 @@ public class HolodeckB2BServer extends AxisServer {
         super(false);
         final HB2BAxis2Configurator configurator = new HB2BAxis2Configurator(hb2bHome);
         serverConfig = (InternalConfiguration) configurator.getAxisConfiguration();
-//        HolodeckB2BCore.init(serverConfig);
         configContext = ConfigurationContextFactory.createConfigurationContext(configurator);
     }
 
@@ -102,20 +104,33 @@ public class HolodeckB2BServer extends AxisServer {
             System.exit(-1);
         }
 
+        // Check if all transport listeners have correctly started
+        ListenerManager listenerManager = configContext.getListenerManager();
+        final List<String> failedTransports =  serverConfig.getTransportsIn().entrySet().parallelStream()
+									        			.filter(t -> !listenerManager.isListenerRunning(t.getKey()))
+									        			.map(ft -> ft.getKey())
+									        			.collect(Collectors.toList());
         // Check if all modules and services have correctly started
-    	final Hashtable<String,String> faultyModules = serverConfig.getFaultyModules();
-    	final Hashtable<String,String> faultyServices = serverConfig.getFaultyServices();
-    	if (!Utils.isNullOrEmpty(faultyModules) || !Utils.isNullOrEmpty(faultyServices)) {
+    	final Hashtable<String,String> failedModules = serverConfig.getFaultyModules();
+    	final Hashtable<String,String> failedServices = serverConfig.getFaultyServices();
+
+    	if (!Utils.isNullOrEmpty(failedModules) || !Utils.isNullOrEmpty(failedServices)
+    		|| !Utils.isNullOrEmpty(failedTransports)) {
     		final StringBuilder logMsg = new StringBuilder();
-    		logMsg.append("Holodeck B2B cannot be started because one or more modules or services failed to start!");
-    		if (!Utils.isNullOrEmpty(faultyModules)) {
+    		logMsg.append("Holodeck B2B cannot be started because one or more transports, modules or services failed to start!");
+    		if (!Utils.isNullOrEmpty(failedTransports)) {
+  			  logMsg.append("\tList of transports that failed to start:");
+  			  for(String ft : failedTransports)
+  				  logMsg.append("\t\t").append(ft).append('\n');
+    		}
+    		if (!Utils.isNullOrEmpty(failedModules)) {
     			  logMsg.append("\tList of modules that failed to start:");
-    			  for(Entry<String, String> fm : faultyModules.entrySet())
+    			  for(Entry<String, String> fm : failedModules.entrySet())
     				  logMsg.append("\t\t").append(fm.getKey()).append(" - ").append(fm.getValue()).append('\n');
     		}
-    		if (!Utils.isNullOrEmpty(faultyServices)) {
+    		if (!Utils.isNullOrEmpty(failedServices)) {
     			logMsg.append("\tList of services that failed to start:");
-    			for(Entry<String, String> fs : faultyServices.entrySet())
+    			for(Entry<String, String> fs : failedServices.entrySet())
     				logMsg.append("\t\t").append(fs.getKey()).append(" - ").append(fs.getValue()).append('\n');
     		}
     		log.fatal(logMsg.toString());
