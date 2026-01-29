@@ -31,15 +31,20 @@ import org.apache.axis2.deployment.DeploymentConstants;
 import org.apache.axis2.deployment.DeploymentEngine;
 import org.apache.axis2.deployment.DeploymentException;
 import org.apache.axis2.engine.AxisConfiguration;
+import org.apache.axis2.kernel.http.ApplicationXMLFormatter;
+import org.apache.axis2.kernel.http.HTTPConstants;
+import org.apache.axis2.kernel.http.SOAPMessageFormatter;
 import org.apache.axis2.util.XMLUtils;
 import org.holodeckb2b.commons.util.Utils;
+import org.holodeckb2b.core.HolodeckB2BCoreModule;
+import org.holodeckb2b.core.axis2.MimeMultipartBuilder;
 
 /**
- * Is a specialised {@link AxisConfigBuilder} that will not only build the Axis2 configuration but also read the 
+ * Is a specialised {@link AxisConfigBuilder} that will not only build the Axis2 configuration but also read the
  * Holodeck B2B specific configuration parameters from the configuration file. This configuration file is a Axis2
  * configuration file with root element <code>holodeckb2b-config</code> and includes the Holodeck B2B as <code>parameter
  * </code> elements.
- * 
+ *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  5.0.0
  */
@@ -49,17 +54,17 @@ public class HB2BConfigBuilder extends AxisConfigBuilder {
 	 * The [local] name of the root element of the Holodeck B2B configuration XML file
 	 */
 	private static final String	HB2B_CONFIG_ROOT = "holodeckb2b-config";
-	
+
 	public HB2BConfigBuilder(InputStream serviceInputStream, AxisConfiguration axisConfiguration,
 			DeploymentEngine deploymentEngine) {
 		super(serviceInputStream, axisConfiguration, deploymentEngine);
 	}
 
     /**
-     * Creates the {@link OMElement} representation for the Holodeck B2B/Axis2 configuration file. 
+     * Creates the {@link OMElement} representation for the Holodeck B2B/Axis2 configuration file.
      * <p>Due to private methods in {@link AxisConfigBuilder} we cannot override the {@link #populateConfig()} method
-     * to process a renamed root element (<code>holodeckb2b-config</code> instead of <code>axisconfig</code>). Therefore 
-     * we override this method and rename the read root element so <code>AxisConfigBuilder</code> can process it.   
+     * to process a renamed root element (<code>holodeckb2b-config</code> instead of <code>axisconfig</code>). Therefore
+     * we override this method and rename the read root element so <code>AxisConfigBuilder</code> can process it.
      *
      * @return Returns <code>OMElement</code> for the Holodeck B2B config file.
      * @throws javax.xml.stream.XMLStreamException  when the XML document could not be read or the root element is not
@@ -67,28 +72,39 @@ public class HB2BConfigBuilder extends AxisConfigBuilder {
      */
     @Override
 	public OMElement buildOM() throws XMLStreamException {
-        OMElement element = (OMElement) XMLUtils.toOM(descriptionStream);        
+        OMElement element = (OMElement) XMLUtils.toOM(descriptionStream);
         element.build();
-        
+
         final String elName = element.getLocalName();
         if (HB2B_CONFIG_ROOT.equals(elName))
         	element.setLocalName(DeploymentConstants.TAG_AXISCONFIG);
         else
         	throw new XMLStreamException("Unexpected root element encountered");
-        
+
         return element;
-    }	
-    
-    
+    }
+
+
     @Override
     public void populateConfig() throws DeploymentException {
     	// First process the Axis2 configuration
     	super.populateConfig();
-    	
+
+    	// Ensure the SOAP and plain XML message formatters are available
+    	axisConfig.addMessageFormatter(HTTPConstants.MEDIA_TYPE_APPLICATION_SOAP_XML, new SOAPMessageFormatter());
+    	axisConfig.addMessageFormatter(HTTPConstants.MEDIA_TYPE_APPLICATION_XML, new ApplicationXMLFormatter());
+
+    	// Replace the default Axis2 MIME multi-part builder with HB2B specific one
+    	axisConfig.addMessageBuilder(HTTPConstants.MEDIA_TYPE_MULTIPART_RELATED, new MimeMultipartBuilder());
+
+    	// Make sure that the Holodeck B2B Core module is registered
+    	if (!axisConfig.isGlobalModulesRegistered(HolodeckB2BCoreModule.NAME))
+    		axisConfig.addGlobalModuleRef(HolodeckB2BCoreModule.NAME);
+
     	// Then process Holodeck B2B specific settings
     	InternalConfiguration hb2bConfig = (InternalConfiguration) axisConfig;
     	// The hostname to use in message processing
-    	String hostName = (String) axisConfig.getParameterValue("ExternalHostName");    	
+    	String hostName = (String) axisConfig.getParameterValue("ExternalHostName");
 		if (Utils.isNullOrEmpty(hostName)) {
 			try {
 				hostName = InetAddress.getLocalHost().getCanonicalHostName();
@@ -106,13 +122,13 @@ public class HB2BConfigBuilder extends AxisConfigBuilder {
 		// The configuration of the worker pool. By default the "workers.xml" in the conf directory is used. But it is
 		// possible to specify another location using the "WorkerConfig" parameter
 		final String workerCfgFile = (String) axisConfig.getParameterValue("WorkerConfig");
-		hb2bConfig.setWorkerPoolCfgFile(!Utils.isNullOrEmpty(workerCfgFile) ? Paths.get(workerCfgFile) 
+		hb2bConfig.setWorkerPoolCfgFile(!Utils.isNullOrEmpty(workerCfgFile) ? Paths.get(workerCfgFile)
 																		    : hb2bHome.resolve("conf/workers.xml"));
-		
+
 		// The temp dir. By default it is set to «HB2B_HOME»/temp but a specific directory can be assigned using the
 		// "TempDir" parameter
 		final String tempDirectory = (String) axisConfig.getParameterValue("TempDir");
-		hb2bConfig.setTempDirectory(!Utils.isNullOrEmpty(tempDirectory) ? Paths.get(tempDirectory) 
+		hb2bConfig.setTempDirectory(!Utils.isNullOrEmpty(tempDirectory) ? Paths.get(tempDirectory)
 																	    : hb2bHome.resolve("temp"));
 
         // Global setting for reporting Errors on Errors
@@ -120,17 +136,17 @@ public class HB2BConfigBuilder extends AxisConfigBuilder {
 
 		// Global setting for reporting Errors on Receipts
 		hb2bConfig.setReportErrorOnReceipts(Utils.isTrue((String) axisConfig.getParameterValue("ReportErrorOnReceipt")));
-		
+
         // Indicator whether a fall back to the default event processor is allowed
         hb2bConfig.setEventProcessorFallback(!Utils.isTrue((String) axisConfig
         														.getParameterValue("DisableEventProcessorFallback")));
-        
-        // Indicator whether to accept non validable P-Modes, default false       
+
+        // Indicator whether to accept non validable P-Modes, default false
         hb2bConfig.setAcceptNonValidablePMode(Utils.isTrue((String) axisConfig
         															 .getParameterValue("AcceptNonValidablePModes")));
-        
+
         // Indicator whether strict header validation should be performed
         hb2bConfig.setStrictHeaderValidation(Utils.isTrue((String) axisConfig
-        															   .getParameterValue("StrictHeaderValidation")));    	
+        															   .getParameterValue("StrictHeaderValidation")));
     }
 }

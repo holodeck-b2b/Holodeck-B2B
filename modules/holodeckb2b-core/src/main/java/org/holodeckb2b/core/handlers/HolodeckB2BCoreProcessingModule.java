@@ -14,29 +14,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.core;
+package org.holodeckb2b.core.handlers;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.AxisDescription;
 import org.apache.axis2.description.AxisModule;
-import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.modules.Module;
-import org.apache.logging.log4j.LogManager;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.Policy;
-import org.holodeckb2b.core.config.InternalConfiguration;
 
 /**
- * Axis2 module class for the Holodeck B2B Core module.
+ * Axis2 module class for the Holodeck B2B Core Processing module which contains the processing logic common to all
+ * messaging protocols.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
-public final class HolodeckB2BCoreModule implements Module {
-    /**
-     * The name of the Axis2 Module that contains the Holodeck B2B Core implementation
-     */
-    public static final String NAME = "holodeckb2b-core";
+public final class HolodeckB2BCoreProcessingModule implements Module {
 
     /**
      * Initializes the Holodeck B2B Core module.
@@ -47,12 +41,6 @@ public final class HolodeckB2BCoreModule implements Module {
      */
     @Override
     public void init(final ConfigurationContext cc, final AxisModule am) throws AxisFault {
-    	AxisConfiguration axisConfiguration = cc.getAxisConfiguration();
-        if (!(axisConfiguration instanceof InternalConfiguration)) {
-            LogManager.getLogger().fatal("Invalid Holodeck B2B Core module configuration!");
-            throw new AxisFault("Invalid configuration found for module: " + am.getName());
-        }
-        HolodeckB2BCore.init((InternalConfiguration) axisConfiguration);
     }
 
     @Override
@@ -71,6 +59,5 @@ public final class HolodeckB2BCoreModule implements Module {
 
     @Override
     public void shutdown(final ConfigurationContext cc) throws AxisFault {
-    	HolodeckB2BCore.shutdown();
     }
 }

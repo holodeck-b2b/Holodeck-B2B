@@ -80,28 +80,26 @@
         <!-- <parameter name="threadKeepAliveTimeUnit">MILLISECONDS</parameter>            -->
     </transportReceiver>    
     
+    <!-- ================================================= -->
+    <!-- Transport Outs -->
+    <!-- ================================================= -->
+    <transportSender name="http"
+        class="org.holodeckb2b.core.axis2.HTTPTransportSender">
+        <parameter name="PROTOCOL">HTTP/1.1</parameter>
+        <parameter name="Transfer-Encoding">chunked</parameter>
+
+        <!-- If following is set to 'true', optional action part of the Content-Type will not be added to the SOAP 1.2 messages -->
+        <!--  <parameter name="OmitSOAP12Action">true</parameter>  -->
+    </transportSender>   
+    
     
     <!-- ========================================================-->
     <!-- Axis2 parameters, chnanging any of the parameters below -->
     <!-- may cause Holodeck B2B to stop functioning correctly,   -->
     <!-- so handle with care!                                    -->
     <!-- ========================================================-->
-    <module ref="holodeckb2b-core"></module>
-    
-    <parameter name="hotdeployment">false</parameter>
-    <parameter name="hotupdate">false</parameter>
-    <parameter name="enableMTOM">false</parameter>
-    <parameter name="enableSwA">true</parameter>
-
-    <!--Uncomment if you want to enable file caching for attachments -->
-    <!--parameter name="cacheAttachments">true</parameter>
-    <parameter name="attachmentDIR"></parameter>
-    <parameter name="sizeThreshold">4000</parameter-->
-    
+        
     <parameter name="EnableChildFirstClassLoading">false</parameter>
-
-    <!--Uncomment if you want to plugin your own attachments lifecycle implementation -->
-    <!--<attachmentsLifecycleManager class="org.apache.axiom.attachments.lifecycle.impl.LifecycleManagerImpl"/>-->
 
     <!--This will give out the timout of the configuration contexts, in milliseconds-->
     <parameter name="ConfigContextTimeoutInterval">30000</parameter>
@@ -116,68 +114,6 @@
     <!--is set, then Axis2 tries to get the first exception and set its message as the faultreason/Reason.-->
     <parameter name="DrillDownToRootCauseForFaultReason">false</parameter>
 
-    <parameter name="userName">admin</parameter>
-    <parameter name="password">axis2</parameter>
-
-    <parameter name="contextRoot"/> <!-- axis2</parameter>-->
-    <parameter name="servicePath">holodeckb2b</parameter>
-
-    <!--Service deployer , this will alow users to deploy AAR or exploded AAR as axis2 services-->
-    <deployer extension=".aar" directory="services" class="org.apache.axis2.deployment.ServiceDeployer"/>
-
-    <threadContextMigrators>
-        <threadContextMigrator listId="JAXWS-ThreadContextMigrator-List"
-                               class="org.apache.axis2.jaxws.addressing.migrator.EndpointContextMapMigrator"/>
-    </threadContextMigrators>
-
-    <!-- ================================================= -->
-    <!-- Message Receivers -->
-    <!-- ================================================= -->
-    <!--This is the default MessageReceiver for the system , if you want to have MessageReceivers for -->
-    <!--all the other MEP implement it and add the correct entry to here , so that you can refer from-->
-    <!--any operation -->
-    <!--Note : You can override this for a particular service by adding the same element with your requirement-->
-    <messageReceivers>
-        <messageReceiver mep="http://www.w3.org/ns/wsdl/in-only"
-                         class="org.apache.axis2.receivers.RawXMLINOnlyMessageReceiver"/>
-        <messageReceiver mep="http://www.w3.org/ns/wsdl/in-out"
-                         class="org.apache.axis2.receivers.RawXMLINOutMessageReceiver"/>
-    </messageReceivers>
-
-    <!-- ================================================= -->
-    <!-- Message Formatter -->
-    <!-- ================================================= -->
-    <!--Following content type to message formatter mapping can be used to implement support for different message -->
-    <!--format  serialization in Axis2. These message formats are expected to be resolved based on the content type. -->
-    <messageFormatters>
-        <messageFormatter contentType="application/soap+xml"
-            class="org.apache.axis2.kernel.http.SOAPMessageFormatter"/>
-    </messageFormatters>
-
-    <!-- ================================================= -->
-    <!-- Message Builders -->
-    <!-- ================================================= -->
-    <!--Following content type to builder mapping can be used to implement support for different message -->
-    <!--formats in Axis2. These message formats are expected to be resolved based on the content type. -->
-    <messageBuilders>
-        <messageBuilder contentType="application/xml"
-                        class="org.apache.axis2.builder.ApplicationXMLBuilder"/>
-    </messageBuilders>
-
-    <!-- This is where you'd put custom transports.  See the transports project -->
-    <!-- for more.  http://ws.apache.org/commons/transport                      -->
-
-    <!-- ================================================= -->
-    <!-- Transport Outs -->
-    <!-- ================================================= -->
-    <transportSender name="http"
-        class="org.holodeckb2b.core.axis2.HTTPTransportSender">
-        <parameter name="PROTOCOL">HTTP/1.1</parameter>
-        <parameter name="Transfer-Encoding">chunked</parameter>
-
-        <!-- If following is set to 'true', optional action part of the Content-Type will not be added to the SOAP 1.2 messages -->
-        <!--  <parameter name="OmitSOAP12Action">true</parameter>  -->
-    </transportSender>   
 
     <!-- ================================================= -->
     <!-- Phases  -->

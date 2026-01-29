@@ -17,12 +17,11 @@
 package org.holodeckb2b.core.config;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.Map.Entry;
-import java.util.Set;
+import java.util.List;
 
-import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.AxisModule;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.holodeckb2b.interfaces.config.IConfiguration;
@@ -69,11 +68,6 @@ public class InternalConfiguration extends AxisConfiguration implements IConfigu
      */
     private boolean defaultReportErrorOnReceipt = false;
 
-    /*
-     * The Axis2 configuration context that is used to process the messages
-     */
-    private ConfigurationContext    axisCfgCtx = null;
-
     /**
      * The indicator whether the Core should fall back to the default event processor implementation in case the
      * configured implementation cannot be loaded.
@@ -93,6 +87,21 @@ public class InternalConfiguration extends AxisConfiguration implements IConfigu
      * @since 4.0.0
      */
     private boolean useStrictHeaderValidation = false;
+
+    /**
+     * The list of globally declared Axis2 modules.
+     *
+     * @since 8.1.1
+     */
+    private List<String> globalModules = new ArrayList<>();
+
+    /**
+     * The list of transport senders that failed during initialisation consisting of the name as specified in the
+     * configuration file and the error message.
+	 *
+	 * @since 8.1.1
+     */
+    private HashMap<String, String> faultyTransports = new HashMap<>();
 
     /**
      * Creates a new Holodeck B2B configuration instance that uses the given path as its home directory.
@@ -259,12 +268,40 @@ public class InternalConfiguration extends AxisConfiguration implements IConfigu
 	}
 
 	@Override
-	public HashMap<String, AxisModule> getModules() {
-		Set<Entry<String, AxisModule>> cfgdModules = super.getModules().entrySet();
-		HashMap<String, AxisModule> allModules = new LinkedHashMap<>(cfgdModules.size());
-		cfgdModules.stream().filter(e -> isGlobalModulesRegistered(e.getValue().getName()))
-							.forEach(e -> allModules.put(e.getKey(), e.getValue()));
-		cfgdModules.parallelStream().forEach(e -> allModules.putIfAbsent(e.getKey(), e.getValue()));
+	public void addGlobalModuleRef(String moduleName) {
+		super.addGlobalModuleRef(moduleName);
+		globalModules.add(moduleName);
+
+	}
+
+	/**
+	 * @return	the list of the names of the global modules, i.e. modules referenced in the main config file.
+	 * @since 8.1.1
+	 */
+	public List<String> getGlobalModules() {
+		return globalModules;
+	}
+
+	/**
+	 * Gets the list of all configured modules.
+	 *
+	 * @return {@link LinkedHashMap} with the names and {@link AxisModule} instance with the meta-data of all configured
+	 * 		   modules, with the globally defined ones first in the order as specified in the configuration file
+	 * @since 8.1.1
+	 */
+	@Override
+	public LinkedHashMap<String, AxisModule> getModules() {
+		LinkedHashMap<String, AxisModule> allModules = new LinkedHashMap<>();
+		globalModules.forEach(n -> { AxisModule m = super.getModule(n); if (m != null) allModules.put(n, m); });
+		super.getModules().forEach((n, m) -> allModules.putIfAbsent(m.getName(), m));
 		return allModules;
+	}
+
+	/**
+	 * @return	{@link HashMap} with the names and error message of the transport senders that failed to start
+	 * @since 8.1.1
+	 */
+	public HashMap<String, String> getFaultyTransports() {
+		return faultyTransports;
 	}
 }

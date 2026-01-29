@@ -40,7 +40,7 @@ import org.holodeckb2b.interfaces.workerpool.WorkerPoolException;
 /**
  * Axis2 module class for the Holodeck B2B ebMS3/AS4 module.
  * <p>This class is responsible for the initialization and shutdown of the ebMS module.
- * 
+ *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  */
 public class EbMS3Module implements Module {
@@ -59,10 +59,10 @@ public class EbMS3Module implements Module {
     private static final Logger log = LogManager.getLogger(EbMS3Module.class);
 
     /**
-     * The installed {@link ISecurityProvider} that will handle the WS-Security header in the ebMS3/AS4 messages. 
+     * The installed {@link ISecurityProvider} that will handle the WS-Security header in the ebMS3/AS4 messages.
      */
-    private ISecurityProvider secProvider; 
-    
+    private ISecurityProvider secProvider;
+
     /**
      * Initializes the Holodeck B2B Core module.
      *
@@ -77,11 +77,11 @@ public class EbMS3Module implements Module {
         // Check if module name in module.xml is equal to constant use in code
         if (!am.getName().equals(HOLODECKB2B_EBMS3_MODULE)) {
             // Name is not equal! This is a fatal configuration error, stop loading this module and alert operator
-            log.fatal("Invalid Holodeck B2B Core module configuration found! Name in configuration is: "
+            log.fatal("Invalid Holodeck B2B ebMS3/AS4 module configuration found! Name in configuration is: "
                         + am.getName() + ", expected was: " + HOLODECKB2B_EBMS3_MODULE);
             throw new AxisFault("Invalid configuration found for module: " + am.getName());
         }
-        
+
         log.trace("Load the ebMS3 Security Provider");
     	secProvider = Utils.getFirstAvailableProvider(ISecurityProvider.class);
     	if (secProvider != null) {
@@ -93,12 +93,12 @@ public class EbMS3Module implements Module {
 	            		  secProvider.getName(), initializationFailure.getMessage());
 	            throw new AxisFault("Unable to initialize required security provider!");
 	        }
-	        log.info("Succesfully loaded " + secProvider.getName() + " as security provider");        
+	        log.info("Succesfully loaded " + secProvider.getName() + " as security provider");
     	} else {
     		log.fatal("No ebMS3 security provider available!");
     		throw new AxisFault("Missing required security provider!");
     	}
-    	
+
         final Parameter cfgFileParam = HolodeckB2BCore.getConfiguration().getParameter("EbMSPullConfigFile");
         Path cfgFilePath;
         if (cfgFileParam == null)
@@ -108,7 +108,7 @@ public class EbMS3Module implements Module {
         	cfgFilePath = Paths.get((String) cfgFileParam.getValue());
         	if (!cfgFilePath.isAbsolute())
         		cfgFilePath = HolodeckB2BCore.getConfiguration().getHolodeckB2BHome().resolve(cfgFilePath);
-        }									 
+        }
         log.trace("Check availability of pull configuration file: {}", cfgFilePath.toString());
         PullConfiguration pullConfig = new PullConfiguration(cfgFilePath);
         if (pullConfig.isAvailable()) {
@@ -116,27 +116,27 @@ public class EbMS3Module implements Module {
         	try {
 				HolodeckB2BCore.createWorkerPool(PULL_WORKER_POOL_NAME, pullConfig);
 			} catch (WorkerPoolException poolError) {
-				log.error("The pull worker pool could not be started! Error details:\n{}", 
+				log.error("The pull worker pool could not be started! Error details:\n{}",
 							Utils.getExceptionTrace(poolError, true));
 				throw new AxisFault("Unable to start pull worker pool", poolError);
-			}        	
+			}
         } else {
         	log.warn("Pulling disabled, as no configuration is provided.");
         }
-        
+
         log.info("Holodeck B2B ebMS3/AS4 module " + VersionInfo.fullVersion + " STARTED.");
     }
-        
+
     /**
      * Gets the active <i>Security Provider</i> of this Holodeck B2B instance that will create/process the WS-Security
-     * header of the ebMS3/AS4 messages. 
+     * header of the ebMS3/AS4 messages.
      *
      * @return 	The active security provider
      * @since 	5.0.0
      */
     public ISecurityProvider getSecurityProvider() {
         return secProvider;
-    }    
+    }
 
     @Override
     public void engageNotify(final AxisDescription ad) throws AxisFault {
@@ -157,5 +157,5 @@ public class EbMS3Module implements Module {
         log.info("Holodeck B2B ebMS3/AS4 module STOPPED.");
     }
 
-   
+
 }

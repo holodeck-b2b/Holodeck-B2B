@@ -24,19 +24,23 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.deployment.AxisConfigBuilder;
 import org.apache.axis2.deployment.DeploymentConstants;
 import org.apache.axis2.deployment.DeploymentEngine;
 import org.apache.axis2.deployment.ModuleDeployer;
+import org.apache.axis2.deployment.ServiceDeployer;
+import org.apache.axis2.description.AxisModule;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.engine.AxisConfigurator;
 import org.holodeckb2b.commons.util.Utils;
+import org.holodeckb2b.core.HolodeckB2BCoreModule;
 
 /**
  * Is a specialised {@link AxisConfigurator} that will uses the {@link HB2BConfigBuilder} to build a configuration that
  * does not only include the Axis2 settings but also the Holodeck B2B ones.
- * 
+ *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  5.0.0
  */
@@ -53,68 +57,84 @@ public class HB2BAxis2Configurator extends DeploymentEngine implements AxisConfi
 	/**
 	 * Path to the repository directory
 	 */
-	private Path 	repositoryPath;		
+	private Path 	repositoryPath;
 
 	/**
 	 * Creates a new configuration builder using the given path as the Holodeck B2B home directory. The configuration
 	 * should then be located in <code>«HB2B_HOME»/conf/holodeckb2b.xml</code> and the default repository directory is
-	 * <code>«HB2B_HOME»/repository</code>. However both locations can be specifically set, with the location of the 
+	 * <code>«HB2B_HOME»/repository</code>. However both locations can be specifically set, with the location of the
 	 * configuration file in a [Java] system property "hb2b.config" and the repository directory in the configuration
 	 * file itself using the "repository" parameter.
-	 *  
-	 * @param configPath	path of the Holodeck B2B home directory 
-	 * @throws AxisFault	when either the configuration file or repository is not available at the given location 
+	 *
+	 * @param configPath	path of the Holodeck B2B home directory
+	 * @throws AxisFault	when either the configuration file or repository is not available at the given location
 	 */
 	public HB2BAxis2Configurator(final String hb2bHome) throws AxisFault {
 		hb2bHomeDirectory = Paths.get(hb2bHome).normalize();
 		if (!Files.isDirectory(hb2bHomeDirectory) || !Files.isReadable(hb2bHomeDirectory))
 			throw new AxisFault("HB2B home directory (" + hb2bHome + ") does not exist or is not accessible");
-		
+
 		// Check if system property for config file is set
 		final String sysCfgProp = System.getProperty("hb2b.config");
 		configFile = !Utils.isNullOrEmpty(sysCfgProp) ? Paths.get(sysCfgProp) :
 													   hb2bHomeDirectory.resolve("conf/holodeckb2b.xml");
 		if (!Files.isReadable(configFile))
 			throw new AxisFault("Configuration file not found at " + configFile.toString());
-		
+
 		repositoryPath = hb2bHomeDirectory.resolve("repository");
 		if (!Files.isDirectory(repositoryPath) || !Files.isReadable(repositoryPath))
-			throw new AxisFault("Specified repository path (" + repositoryPath.toString() 
-																			+ ") does not exist or is not accessible");			
+			throw new AxisFault("Specified repository path (" + repositoryPath.toString()
+																			+ ") does not exist or is not accessible");
 	}
-	
+
 	@Override
 	public AxisConfiguration getAxisConfiguration() throws AxisFault {
 		// If we have already built the configuration, just return it
 		if (axisConfig != null)
 			return axisConfig;
-		
+
         try (InputStream configStream = new FileInputStream(configFile.toFile())) {
         	axisConfig = new InternalConfiguration(hb2bHomeDirectory);
             AxisConfigBuilder builder = new HB2BConfigBuilder(configStream, axisConfig, this);
             builder.populateConfig();
         } catch (IOException e) {
             throw new AxisFault("Cannot access the configuration file " + configFile.toString());
-		} 
+		}
         moduleDeployer = new ModuleDeployer(axisConfig);
-        
-        // Check if a specific repository path is specified in the configuration file and use it when the specified 
+        serviceDeployer = new ServiceDeployer();
+
+        // Check if a specific repository path is specified in the configuration file and use it when the specified
         // directory is accessible
         Parameter axis2repoPara = axisConfig.getParameter(DeploymentConstants.AXIS2_REPO);
         if (axis2repoPara != null) {
             final Path repoLocation = Paths.get((String) axis2repoPara.getValue());
             if (Files.isDirectory(repoLocation) && Files.isReadable(repoLocation))
-            	repositoryPath = repoLocation;            
+            	repositoryPath = repoLocation;
         }
-        
+
+        loadCoreModule();
         loadRepository(repositoryPath.toString());
         axisConfig.setConfigurator(this);
-        return axisConfig;		
+        return axisConfig;
 	}
-    
+
+	@Override
+	public void setConfigContext(ConfigurationContext configContext) {
+		super.setConfigContext(configContext);
+		serviceDeployer.init(configContext);
+	}
+
 	@Override
 	public void engageGlobalModules() throws AxisFault {
-		engageModules();
+		 axisConfig.engageGlobalModules();
+	}
+
+	private void loadCoreModule() throws AxisFault {
+		AxisModule coreModule = new AxisModule();
+		coreModule.setName(HolodeckB2BCoreModule.NAME);
+		coreModule.setModule(new HolodeckB2BCoreModule());
+		coreModule.setModuleClassLoader(axisConfig.getModuleClassLoader());
+		this.axisConfig.addModule(coreModule);
 	}
 
 }

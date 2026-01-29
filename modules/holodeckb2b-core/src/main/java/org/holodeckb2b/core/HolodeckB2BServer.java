@@ -16,18 +16,20 @@
  */
 package org.holodeckb2b.core;
 
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.context.ConfigurationContextFactory;
-import org.apache.axis2.engine.AxisServer;
 import org.apache.axis2.engine.ListenerManager;
+import org.apache.axis2.kernel.TransportSender;
+import org.apache.axis2.modules.Module;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.commons.util.Utils;
+import org.holodeckb2b.core.axis2.ConfigurationContext;
 import org.holodeckb2b.core.config.HB2BAxis2Configurator;
 import org.holodeckb2b.core.config.InternalConfiguration;
 
@@ -35,9 +37,9 @@ import org.holodeckb2b.core.config.InternalConfiguration;
  * Is the Java application to start the Holodeck B2B Server.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since  5.0.0
+ * @since 5.0.0
  */
-public class HolodeckB2BServer extends AxisServer {
+public class HolodeckB2BServer { // extends AxisServer {
 
 	private static final Logger log = LogManager.getLogger(HolodeckB2BServer.class);
 
@@ -48,131 +50,76 @@ public class HolodeckB2BServer extends AxisServer {
 	/**
 	 * The server configuration read from the <code>holodeckb2b.xml</code> file
 	 */
-	private final InternalConfiguration	serverConfig;
+	private final InternalConfiguration serverConfig;
+	/**
+	 * The configuration context for the server
+	 */
+	private final ConfigurationContext configContext;
 
 	/**
 	 * Creates a new server instance and initialises the configuration context.
 	 *
-	 * @param hb2bHome		path to the Holodeck B2B home directory
-	 * @throws AxisFault	when there is a problem in initialising the configuration
+	 * @param hb2bHome path to the Holodeck B2B home directory
+	 * @throws AxisFault when there is a problem in initialising the configuration
 	 */
-    public HolodeckB2BServer(final String hb2bHome) throws AxisFault {
-        super(false);
-        final HB2BAxis2Configurator configurator = new HB2BAxis2Configurator(hb2bHome);
-        serverConfig = (InternalConfiguration) configurator.getAxisConfiguration();
-        configContext = ConfigurationContextFactory.createConfigurationContext(configurator);
-    }
+	public HolodeckB2BServer(final String hb2bHome) throws AxisFault {
+		final HB2BAxis2Configurator configurator = new HB2BAxis2Configurator(hb2bHome);
+		serverConfig = (InternalConfiguration) configurator.getAxisConfiguration();
+		configContext = new ConfigurationContext(serverConfig);
+		configurator.setConfigContext(configContext);
+	}
 
-    /**
-     * Main script to start the Holodeck B2B server.
-     *
-     * @param args			command line args
-     */
-    public static void main(String[] args) {
-    	if (args.length == 0) {
-    		log.fatal("Missing required argument \"{}\" defining Holodeck B2B's root directory", A_HOME);
-    		printUsage();
-    	}
-    	String hb2bHome = null;
-    	for(int i = 0; i < args.length - 1 && hb2bHome == null; i++)
-    		if (A_HOME.equalsIgnoreCase(args[i]))
-    			hb2bHome = args[i+1];
-    	if (hb2bHome == null) {
-    		log.fatal("No value specified for argument \"{}\" defining Holodeck B2B's root directory", A_HOME);
-    		printUsage();
-    	}
+	/**
+	 * Main script to start the Holodeck B2B server.
+	 *
+	 * @param args command line args
+	 */
+	public static void main(String[] args) {
+		if (args.length == 0) {
+			log.fatal("Missing required argument \"{}\" defining Holodeck B2B's root directory", A_HOME);
+			printUsage();
+		}
+		String hb2bHome = null;
+		for (int i = 0; i < args.length - 1 && hb2bHome == null; i++)
+			if (A_HOME.equalsIgnoreCase(args[i]))
+				hb2bHome = args[i + 1];
+		if (hb2bHome == null) {
+			log.fatal("No value specified for argument \"{}\" defining Holodeck B2B's root directory", A_HOME);
+			printUsage();
+		}
 
-    	System.out.println("[HolodeckB2BServer] Starting server");
-    	try {
-        	log.info("Starting server");
+		System.out.println("[HolodeckB2BServer] Starting server");
+		try {
+			log.info("Starting server");
 			server = new HolodeckB2BServer(hb2bHome);
 			server.start();
 		} catch (AxisFault e) {
-            log.fatal("Error during startup of the server: {}", Utils.getExceptionTrace(e));
-            System.err.println("[HolodeckB2BServer] Aborted startup due to error. See log for details.");
-            System.exit(-1);
+			log.fatal("Error during startup of the server: {}", Utils.getExceptionTrace(e));
+			System.err.println("[HolodeckB2BServer] Aborted startup due to error. See log for details.");
+			System.exit(-1);
 		}
-    }
-
-    @Override
-    protected void start() {
-        try {
-            super.start();
-        } catch (Throwable t) {
-            log.fatal("Error during startup of the server: {}", Utils.getExceptionTrace(t));
-            System.err.println("[HolodeckB2BServer] Aborted startup due to error. See log for details.");
-            System.exit(-1);
-        }
-
-        // Check if all transport listeners have correctly started
-        ListenerManager listenerManager = configContext.getListenerManager();
-        final List<String> failedTransports =  serverConfig.getTransportsIn().entrySet().parallelStream()
-									        			.filter(t -> !listenerManager.isListenerRunning(t.getKey()))
-									        			.map(ft -> ft.getKey())
-									        			.collect(Collectors.toList());
-        // Check if all modules and services have correctly started
-    	final Hashtable<String,String> failedModules = serverConfig.getFaultyModules();
-    	final Hashtable<String,String> failedServices = serverConfig.getFaultyServices();
-
-    	if (!Utils.isNullOrEmpty(failedModules) || !Utils.isNullOrEmpty(failedServices)
-    		|| !Utils.isNullOrEmpty(failedTransports)) {
-    		final StringBuilder logMsg = new StringBuilder();
-    		logMsg.append("Holodeck B2B cannot be started because one or more transports, modules or services failed to start!");
-    		if (!Utils.isNullOrEmpty(failedTransports)) {
-  			  logMsg.append("\tList of transports that failed to start:");
-  			  for(String ft : failedTransports)
-  				  logMsg.append("\t\t").append(ft).append('\n');
-    		}
-    		if (!Utils.isNullOrEmpty(failedModules)) {
-    			  logMsg.append("\tList of modules that failed to start:");
-    			  for(Entry<String, String> fm : failedModules.entrySet())
-    				  logMsg.append("\t\t").append(fm.getKey()).append(" - ").append(fm.getValue()).append('\n');
-    		}
-    		if (!Utils.isNullOrEmpty(failedServices)) {
-    			logMsg.append("\tList of services that failed to start:");
-    			for(Entry<String, String> fs : failedServices.entrySet())
-    				logMsg.append("\t\t").append(fs.getKey()).append(" - ").append(fs.getValue()).append('\n');
-    		}
-    		log.fatal(logMsg.toString());
-            System.err.println("[HolodeckB2BServer] Aborted startup due to error. See log for details.");
-            System.exit(-1);
-    	}
-        log.info("Server started successfully");
-        System.out.println("[HolodeckB2BServer] Started server");
-		Runtime.getRuntime().addShutdownHook(new Thread() {
-			@Override
-			public void run() {
-				HolodeckB2BServer.shutdown();
-			}
-		});
-    	synchronized (this) {
-			try {
-				wait();
-			} catch (InterruptedException stopped) {
-			}
-		}
-    }
-
-    @Override
-	public void stop() throws AxisFault {
-		configContext.shutdownModulesAndServices();
-    	super.stop();
 	}
 
-    public static void shutdown(String... args) {
+	/**
+	 * Prints a simple "usage" instruction.
+	 */
+	private static void printUsage() {
+		System.out.println("Usage: HolodeckB2B -home <HB2B root directory>");
+		System.out.println();
+		System.exit(-1);
+	}
+
+	public static void shutdown() {
 		if (server != null) {
 			log.info("Shutting down server");
 			System.out.println("[HolodeckB2BServer] Shutting down server");
 			try {
-//				log.debug("Shutting down Axis2 components");
 				server.stop();
 			} catch (AxisFault e) {
 				System.err.println("[HolodeckB2BServer] An error occurred during shutdown. See log for details.");
 				log.error("Error during shutdown of the server: {}", Utils.getExceptionTrace(e));
 			}
-//			log.debug("Shutting down HB2B Core components");
-//			HolodeckB2BCore.shutdown();
-			synchronized(server) {
+			synchronized (server) {
 				server.notify();
 			}
 			log.info("Server STOPPED");
@@ -180,14 +127,122 @@ public class HolodeckB2BServer extends AxisServer {
 			server = null;
 		}
 		LogManager.shutdown();
-    }
+	}
 
-    /**
-     * Prints a simple "usage" instruction.
-     */
-    private static void printUsage() {
-        System.out.println("Usage: HolodeckB2B -home <HB2B root directory>");
-        System.out.println();
-        System.exit(-1);
-    }
+	private void start() {
+		log.trace("Initialise modules");
+		initModules();
+		log.trace("Load services");
+		serverConfig.getConfigurator().loadServices();
+		log.trace("Initialise transport senders");
+		initTransportSenders();
+
+		log.trace("Starting transport listeners");
+		ListenerManager listenerManager = new ListenerManager();
+		listenerManager.startSystem(configContext);
+
+		// Check if everything has been correctly initialised/started
+		//
+		final List<String> failedListeners = serverConfig.getTransportsIn().entrySet().parallelStream()
+				.filter(t -> !listenerManager.isListenerRunning(t.getKey())).map(ft -> ft.getKey())
+				.collect(Collectors.toList());
+		final Hashtable<String, String> failedModules = serverConfig.getFaultyModules();
+		final Hashtable<String, String> failedServices = serverConfig.getFaultyServices();
+		final HashMap<String, String> failedTransports = serverConfig.getFaultyTransports();
+
+		if (!Utils.isNullOrEmpty(failedModules) || !Utils.isNullOrEmpty(failedServices)
+			|| !Utils.isNullOrEmpty(failedListeners) || !Utils.isNullOrEmpty(failedTransports)) {
+			final StringBuilder logMsg = new StringBuilder();
+			logMsg.append(
+					"Holodeck B2B FAILED TO START because one or more of the required components failed to start!");
+			if (!Utils.isNullOrEmpty(failedListeners)) {
+				logMsg.append("\tList of listeners that failed to start:");
+				for (String ft : failedListeners)
+					logMsg.append("\t\t").append(ft).append('\n');
+			}
+			if (!Utils.isNullOrEmpty(failedTransports)) {
+				logMsg.append("\tList of transport senders that failed to start:");
+				for (Entry<String, String> ft : failedModules.entrySet())
+					logMsg.append("\t\t").append(ft.getKey()).append(" - ").append(ft.getValue()).append('\n');
+			}
+			if (!Utils.isNullOrEmpty(failedModules)) {
+				logMsg.append("\tList of modules that failed to start:");
+				for (Entry<String, String> fm : failedModules.entrySet())
+					logMsg.append("\t\t").append(fm.getKey()).append(" - ").append(fm.getValue()).append('\n');
+			}
+			if (!Utils.isNullOrEmpty(failedServices)) {
+				logMsg.append("\tList of services that failed to start:");
+				for (Entry<String, String> fs : failedServices.entrySet())
+					logMsg.append("\t\t").append(fs.getKey()).append(" - ").append(fs.getValue()).append('\n');
+			}
+			log.fatal(logMsg.toString());
+			System.err.println("[HolodeckB2BServer] Aborted startup due to error. See log for details.");
+			System.exit(-1);
+		}
+		log.info("Server started successfully");
+		System.out.println("[HolodeckB2BServer] Started server");
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+			@Override
+			public void run() {
+				HolodeckB2BServer.shutdown();
+			}
+		});
+		synchronized (this) {
+			try {
+				wait();
+			} catch (InterruptedException stopped) {
+			}
+		}
+	}
+
+	/**
+	 * Initialises the registered modules and engages the global modules.
+	 */
+	private void initModules() {
+		serverConfig.getModules().forEach((name, axismodule) -> {
+			Module module = axismodule.getModule();
+			if (module != null) {
+				try {
+					module.init(configContext, axismodule);
+				} catch (Throwable initFailure) {
+					serverConfig.getFaultyModules().put(axismodule.getName(), Utils.getExceptionTrace(initFailure));
+				}
+			}
+		});
+		serverConfig.getGlobalModules().forEach(n -> {
+			try {
+				serverConfig.engageModule(n);
+			} catch (Throwable engageFailure) {
+				serverConfig.getFaultyModules().put(n, Utils.getExceptionTrace(engageFailure));
+			}
+		});
+	}
+
+	/**
+	 * Initialises the configured transport senders.
+	 */
+	private void initTransportSenders() {
+		serverConfig.getTransportsOut().forEach((name, transportOut) -> {
+			TransportSender sender = transportOut.getSender();
+			if (sender != null) {
+				try {
+					sender.init(configContext, transportOut);
+				} catch (Throwable initFailure) {
+					serverConfig.getFaultyTransports().put(transportOut.getName(), Utils.getExceptionTrace(initFailure));
+				}
+			}
+		});
+	}
+
+	/**
+	 * Stop the server, automatically terminates the listener manager as well.
+	 *
+	 * @throws AxisFault
+	 */
+	private void stop() throws AxisFault {
+		if (configContext != null) {
+			configContext.terminate();
+		}
+	}
+
 }

@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
 
+import org.apache.axiom.soap.SOAP12Constants;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.axis2.addressing.EndpointReference;
@@ -107,8 +108,8 @@ public class HTTPWorker implements Worker {
             final MessageContext msgContext) throws HttpException, IOException {
 
 		ConfigurationContext configurationContext = msgContext.getConfigurationContext();
-        final String servicePath = configurationContext.getServiceContextPath();
-        final String contextPath = (servicePath.startsWith("/") ? servicePath : "/" + servicePath);
+        String contextPath = configurationContext.getContextRoot();
+        contextPath = (contextPath.startsWith("/") ? contextPath : "/" + contextPath);
 
         String url = request.getRequestURI();
         String method = request.getMethod();
@@ -120,7 +121,7 @@ public class HTTPWorker implements Worker {
         log.trace("Handling request for URL: {}", url);
         // First handle non service URLs to display a HB2B landing page
         if (method.equals(HTTPConstants.HEADER_GET)) {
-        	if (url.equals(servicePath + "/logo.png")) {
+        	if (url.equals(contextPath + "/logo.png")) {
         		log.trace("Handling GET request for logo");
                 response.setStatus(HttpStatus.SC_OK);
                 response.setContentType("image/png");
@@ -191,7 +192,8 @@ public class HTTPWorker implements Worker {
 					} catch (IOException httpDecompressionError) {
 						log.error("An error occured while processing the GZIP encoded HTTP entity body: "
 									+ httpDecompressionError.getMessage());
-						throw new AxisFault("Error processing the GZIP encoded HTTP entity body");
+						throw new AxisFault("Error processing the GZIP encoded HTTP entity body",
+						        			SOAP12Constants.QNAME_SENDER_FAULTCODE);
 					}
 					// The builder SHOULD return a SOAP info-set, but for safety we do an extra check
 					msgContext.setEnvelope(TransportUtils.createSOAPEnvelope(msgBuilder.processDocument(is,

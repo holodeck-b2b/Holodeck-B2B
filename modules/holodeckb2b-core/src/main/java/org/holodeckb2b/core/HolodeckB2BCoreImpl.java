@@ -149,7 +149,6 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
      */
     HolodeckB2BCoreImpl(final InternalConfiguration config) throws AxisFault {
         log.info("Starting Holodeck B2B Core...");
-        System.out.println("Starting Holodeck B2B Core...");
         this.instanceConfiguration = config;
         try {
         	log.trace("Initialize the P-Mode manager");
@@ -268,7 +267,6 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
         }
 
         log.info("Holodeck B2B Core " + VersionInfo.fullVersion + " STARTED.");
-        System.out.println("Holodeck B2B Core started.");
     }
 
 	public void shutdown() {
