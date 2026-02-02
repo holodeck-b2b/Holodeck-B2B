@@ -35,6 +35,7 @@ import org.holodeckb2b.core.HolodeckB2BCore;
 import org.holodeckb2b.ebms3.pulling.PullConfiguration;
 import org.holodeckb2b.interfaces.security.ISecurityProvider;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
+import org.holodeckb2b.interfaces.workerpool.IWorkerPool;
 import org.holodeckb2b.interfaces.workerpool.WorkerPoolException;
 
 /**
@@ -154,6 +155,17 @@ public class EbMS3Module implements Module {
 
     @Override
     public void shutdown(final ConfigurationContext cc) throws AxisFault {
+        log.trace("Shutting down ebMS3/AS4 module");
+        try {
+        	final IWorkerPool pullWorkerPool = HolodeckB2BCore.getWorkerPool(PULL_WORKER_POOL_NAME);
+        	if (pullWorkerPool != null) {
+        		log.trace("Closing pull worker pool");
+        		pullWorkerPool.shutdown(10);
+        		log.debug("Pull worker pool closed");
+        	}
+        } catch (Throwable t) {
+        	log.error("Error during pull worker pool shutdown: {}", Utils.getExceptionTrace(t));
+        }
         log.info("Holodeck B2B ebMS3/AS4 module STOPPED.");
     }
 

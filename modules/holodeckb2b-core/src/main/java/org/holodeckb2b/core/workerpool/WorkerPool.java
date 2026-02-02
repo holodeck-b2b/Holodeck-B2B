@@ -232,21 +232,6 @@ public class WorkerPool implements IWorkerPool {
     }
         
     /**
-     * Cleans up the worker pool and tries to stop all workers when not stopped already
-     */
-    @Override
-    public void finalize() throws Throwable {
-        try {
-    	    // Try to stop all workers within 20 seconds
-            stop(20);
-        } catch (final Exception e) {
-            log.error("An error occurred when stopping the pool while finalizing");
-        }
-
-        super.finalize();
-    }
-
-    /**
      * Reconfigures this worker pool 
      * 
      * @param  newWorkerCfgs	the new configuration to use for the pool, as a list of worker configurations 
