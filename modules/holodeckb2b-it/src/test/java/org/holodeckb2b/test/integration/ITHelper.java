@@ -59,7 +59,7 @@ import org.xml.sax.SAXException;
 public class ITHelper {
 
 	private static final String HB2B_DISTRO_MODULE = "holodeckb2b-distribution";
-	
+
     private static String projectVersion;
     private static String distributionPath;
 
@@ -71,7 +71,7 @@ public class ITHelper {
     static {
     	final Path projectHome = TestUtils.getTestClassBasePath().resolve("../..");
     	MavenProject project;
-    	
+
     	final File pomFile = projectHome.resolve("pom.xml").toFile();
     	try (FileReader reader = new FileReader(pomFile)) {
     		final MavenXpp3Reader mavenReader = new MavenXpp3Reader();
@@ -83,17 +83,17 @@ public class ITHelper {
     		throw new RuntimeException();
     	}
     	projectVersion = project.getVersion();
-    	    
-    	distributionPath =  projectHome.resolve("../" + HB2B_DISTRO_MODULE 
+
+    	distributionPath =  projectHome.resolve("../" + HB2B_DISTRO_MODULE
     												+ "/target/holodeckb2b-distribution-" + projectVersion + ".zip")
-    										.toString();        
+    										.toString();
 
     	workingDirPath = TestUtils.getTestClassBasePath().resolve("integ");
     }
 
     /**
      * Unpacks HolodeckB2B distribution and renames the distribution directory to <code>instanceDir</code>
-     * 
+     *
      * @param instanceDir HolodeckB2B instance folder name
      */
     void unzipHolodeckDistribution(String instanceDir) {
@@ -108,14 +108,14 @@ public class ITHelper {
 
     /**
      * Copies <code>pmodeFileName</code> to <code>distrDirName</code>/conf/pmodes directory
-     * 
+     *
      * @param instanceDir HolodeckB2B instance folder name
      * @param pmodeFileName pmode configuration file name
      */
     void copyPModeDescriptor(String instanceDir, String pmodeFileName) {
         Path srcPModeFile = workingDirPath.resolve(instanceDir + "/examples/pmodes/" + pmodeFileName);
         Path destPmodeFile = workingDirPath.resolve(instanceDir + "/repository/pmodes/" + pmodeFileName);
-        
+
         try {
             Files.copy(srcPModeFile, destPmodeFile, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
@@ -135,7 +135,7 @@ public class ITHelper {
 
         File workersXml = workingDirPath.resolve(distrDirName + "/conf/workers.xml").toFile();
         assertTrue(workersXml.exists());
-    	addRMIPortWorkersXml(workersXml.getPath(), rmiPort);        
+    	addRMIPortWorkersXml(workersXml.getPath(), rmiPort);
     }
 
     /**
@@ -150,7 +150,7 @@ public class ITHelper {
             if (SystemUtils.IS_OS_LINUX || SystemUtils.IS_OS_MAC) {
             	Path startScriptAPath = workingDirPath.resolve(dADirName + "/bin/startServer.sh");
             	Path startScriptBPath = workingDirPath.resolve(dBDirName + "/bin/startServer.sh");
-            	
+
                 command = "chmod +x " + startScriptAPath.toString();
                 p = Runtime.getRuntime().exec(command);
                 p.waitFor();
@@ -169,7 +169,7 @@ public class ITHelper {
             } else if (SystemUtils.IS_OS_WINDOWS) {
             	Path startScriptAPath = workingDirPath.resolve(dADirName + "/bin/startServer.bat");
             	Path startScriptBPath = workingDirPath.resolve(dBDirName + "/bin/startServer.bat");
-            	
+
             	ProcessBuilder pbA = new ProcessBuilder(startScriptAPath.toString());
                 pbA.redirectOutput(ProcessBuilder.Redirect.INHERIT);
                 pbA.redirectError(workingDirPath.resolve("error.log").toFile());
@@ -222,18 +222,26 @@ public class ITHelper {
      * Copies the example data files to <code>distrDirName</code>/data/msg_out directory
      * @param distrDirName HolodeckB2B instance folder name
      */
-    void copyExampleDataToMsgOutDir(String distrDirName) {    	
+    void copyExampleDataToMsgOutDir(String distrDirName) {
         File msgsDir = workingDirPath.resolve(distrDirName + "/examples/msgs").toFile();
         Path msgOutDir = workingDirPath.resolve(distrDirName + "/data/msg_out");
-        
+
         try {
             for (File s : msgsDir.listFiles()) {
                 if(s.isDirectory()) {
                 	msgOutDir.resolve(s.getName()).toFile().mkdir();
-                	for(File c : s.listFiles())
-                    	Files.copy(c.toPath(), msgOutDir.resolve(s.getName() + "/" + c.getName()));
-                } else 
-                	Files.copy(s.toPath(), msgOutDir.resolve(s.getName()));
+                	for(File c : s.listFiles()) {
+                        Path target = msgOutDir.resolve(s.getName() + "/" + c.getName());
+                        if (!Files.exists(target)) {
+                            Files.copy(c.toPath(), target);
+                        }
+                    }
+                } else {
+                    Path target = msgOutDir.resolve(s.getName());
+                    if (!Files.exists(target)) {
+                        Files.copy(s.toPath(), target);
+                    }
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -249,8 +257,8 @@ public class ITHelper {
         File msgsDir = workingDirPath.resolve(distrDirName + "/examples/certs").toFile();
         Path msgOutDir = workingDirPath.resolve(distrDirName + "/repository/certs");
         try {
-            for (File s : msgsDir.listFiles()) 
-                Files.copy(s.toPath(), msgOutDir.resolve(s.getName()), StandardCopyOption.REPLACE_EXISTING);                                                
+            for (File s : msgsDir.listFiles())
+                Files.copy(s.toPath(), msgOutDir.resolve(s.getName()), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             e.printStackTrace();
             throw new IllegalStateException("Could not copy key stores");
@@ -267,7 +275,7 @@ public class ITHelper {
             fu.deleteFolderContent(workingDirPath.resolve(distrDirName + "/data/msg_out"), false);
             fu.deleteFolderContent(workingDirPath.resolve(distrDirName + "/data/msg_in"), false);
         } catch (IOException e) {
-//            e.printStackTrace();
+            // Silently ignore - file locking on Windows may prevent deletion during test execution
         }
     }
 
@@ -277,7 +285,6 @@ public class ITHelper {
      * @param distrDirName HolodeckB2B instance folder name
      */
     boolean changeMsgExtensionToMMD(String msgFileName, String distrDirName) {
-        
     	File file = workingDirPath.resolve(distrDirName + "/data/msg_out/" + msgFileName).toFile();
         int index = file.getName().lastIndexOf(".");
         String fileName = file.getName().substring(0, index);
@@ -339,7 +346,7 @@ public class ITHelper {
             sae.printStackTrace();
         }
     }
-    
+
     /**
      * Adds port parameter to UI RMI Server in workers.xml
      * @param filePath
@@ -358,7 +365,7 @@ public class ITHelper {
     		portParam.setAttribute("name", "port");
     		portParam.setTextContent(port);
     		rmiWorker.appendChild(portParam);
-    		
+
     		TransformerFactory transformerFactory = TransformerFactory.newInstance();
     		Transformer transformer = transformerFactory.newTransformer();
     		DOMSource source = new DOMSource(doc);
@@ -449,9 +456,9 @@ public class ITHelper {
         boolean res = false;
         File dir = new File(workingDirPath + File.separator + dirName);
         if(dir.exists()) {
-            res = dir.listFiles().length > 0;
+            File[] files = dir.listFiles();
+            res = files != null && files.length > 0;
         }
         return res;
     }
 }
-
