@@ -242,7 +242,7 @@ public class DefaultCertManager implements ICertificateManager {
 		} catch (Throwable bcUnavailable) {
 			log.fatal("Required BouncyCastle provider is not available! Details: {}", bcUnavailable.getMessage());
 			throw new SecurityProcessingException("BouncyCastle provider not available!");
-		}       
+		}
         // We enable OCSP by default, even if revocation checking is disabled
         Security.setProperty("ocsp.enable", "true");
 
@@ -564,8 +564,18 @@ public class DefaultCertManager implements ICertificateManager {
 				// If reason is "unspecified" or "undetermined" this could be caused by a problem in the OCSP check, so
 				// try again without
 				Reason reason = validationException.getReason();
+				log.warn("Certificate path validation failed - Reason: {}, Message: {}, Certificate: {}, Trace: {}",
+						 reason,
+						 validationException.getMessage(),
+						 validationException.getCertPath() != null && validationException.getIndex() >= 0 ?
+							 validationException.getCertPath().getCertificates().get(validationException.getIndex()) : "N/A",
+                         Utils.getExceptionTrace(validationException)
+                );
+
+				// Only fallback for OCSP infrastructure issues, NOT for actual revocation
 				if (performRevocationCheck
-					&& (reason == BasicReason.UNSPECIFIED || reason == BasicReason.UNDETERMINED_REVOCATION_STATUS)) {
+				    && (reason == BasicReason.UNSPECIFIED || reason == BasicReason.UNDETERMINED_REVOCATION_STATUS)
+				    && validationException.getMessage() !== null && validationException.getMessage().toLowerCase().contains("certificate revoked")) {
 					try {
 						log.debug("Validation with revocation check failed ({}), retry without",
 									validationException.getMessage());
