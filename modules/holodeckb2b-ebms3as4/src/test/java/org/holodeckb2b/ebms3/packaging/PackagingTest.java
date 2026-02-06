@@ -169,8 +169,8 @@ public class PackagingTest {
 		}
 		
 		private void print(SAXParseException x) {
-			String msg = message.format(new Object[] { x.getSystemId(), new Integer(x.getLineNumber()),
-					new Integer(x.getColumnNumber()), x.getMessage() });
+			String msg = message.format(new Object[] { x.getSystemId(), Integer.valueOf(x.getLineNumber()),
+					Integer.valueOf(x.getColumnNumber()), x.getMessage() });
 			System.out.println(msg);
 		}
 
