@@ -6,9 +6,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ##### 
 ### Changed
 * Server startup is now aborted when one of the configured transports for receiving messages cannot be started
+* Improved logging of errors that prevented Holodeck B2B to start 
 
 ### Fixed
-
+* HTTP 500 instead of 400 returned when request contains invalid MIME multi-part Content-Type header
 
 ## 8.1.0
 ##### 2025-12-29
