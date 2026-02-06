@@ -44,6 +44,8 @@ import org.junit.jupiter.api.Test;
 
 class PayloadContentTest {
 	private static final Path TESTDIR = TestUtils.getTestResource("plc-storage");
+	private static final int CLEANUP_MAX_RETRIES = 3;
+	private static final int CLEANUP_RETRY_DELAY_MS = 100;
 
 	@BeforeAll
 	static void setupTest() throws IOException {
@@ -53,8 +55,32 @@ class PayloadContentTest {
 
 	@AfterAll
 	static void cleanup() throws IOException {
-		FileUtils.cleanDirectory(TESTDIR);
-		Files.delete(TESTDIR);
+		// On Windows, file handles may not be released immediately after streams are closed.
+		// Retry cleanup with delays to handle file locking issues.
+		int retries = CLEANUP_MAX_RETRIES;
+		IOException lastException = null;
+
+		for (int i = 0; i < retries; i++) {
+			try {
+				System.gc(); // Suggest garbage collection to help release file handles
+				FileUtils.cleanDirectory(TESTDIR);
+				Files.delete(TESTDIR);
+				return; // Success
+			} catch (IOException e) {
+				lastException = e;
+				if (i < retries - 1) {
+					try {
+						Thread.sleep(CLEANUP_RETRY_DELAY_MS);
+					} catch (InterruptedException ie) {
+						Thread.currentThread().interrupt();
+						throw new IOException("Cleanup interrupted", ie);
+					}
+				}
+			}
+		}
+
+		// If all retries failed, throw the last exception
+		throw lastException;
 	}
 
 	@Test
@@ -73,17 +99,16 @@ class PayloadContentTest {
 		final File testfile = TestDataHelper.createTestFile(TESTDIR);
 		final PayloadContent content = new PayloadContent("readtest2", testfile);
 
-		InputStream cis1 = assertDoesNotThrow(() -> content.getContent());
-		byte[] buf1 = new byte[20];
-		assertEquals(20, cis1.read(buf1));
+		try (InputStream cis1 = assertDoesNotThrow(() -> content.getContent());
+			 InputStream cis2 = assertDoesNotThrow(() -> content.getContent())) {
+			byte[] buf1 = new byte[20];
+			assertEquals(20, cis1.read(buf1));
 
-		InputStream cis2 = assertDoesNotThrow(() -> content.getContent());
-		byte[] buf2 = new byte[20];
-		assertEquals(20, cis2.read(buf2));
+			byte[] buf2 = new byte[20];
+			assertEquals(20, cis2.read(buf2));
 
-		assertArrayEquals(buf1, buf2);
-
-		cis1.close(); cis2.close();
+			assertArrayEquals(buf1, buf2);
+		}
 	}
 
 	@Test
