@@ -10,6 +10,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 * HTTP 500 instead of 400 returned when request contains invalid MIME multi-part Content-Type header
+* File locking issues on Windows in `PayloadContentTest` (thanks to @ckaaber for reprorting and fixing this)
+
 
 ## 8.1.0
 ##### 2025-12-29
