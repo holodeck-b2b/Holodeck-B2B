@@ -21,6 +21,7 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.AxisDescription;
 import org.apache.axis2.description.AxisModule;
 import org.apache.axis2.modules.Module;
+import org.apache.logging.log4j.LogManager;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.Policy;
 
@@ -41,6 +42,7 @@ public final class HolodeckB2BCoreProcessingModule implements Module {
      */
     @Override
     public void init(final ConfigurationContext cc, final AxisModule am) throws AxisFault {
+    	LogManager.getLogger().info("Holodeck B2B Core Processing module loaded");
     }
 
     @Override
