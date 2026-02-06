@@ -55,7 +55,7 @@ public class XMLWorkerPoolCfgDocumentTest {
 		}
 
         assertNotNull(result);
-        assertEquals(new Integer(5), result.getRefreshInterval());
+        assertEquals(Integer.valueOf(5), result.getRefreshInterval());
         
         final List<IWorkerConfiguration> workers = result.getWorkers();
         assertEquals(2, workers.size());
