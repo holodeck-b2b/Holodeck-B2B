@@ -29,6 +29,7 @@ import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.List;
 
+import org.holodeckb2b.commons.testing.TestUtils;
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
@@ -56,9 +57,14 @@ import org.junit.jupiter.api.io.TempDir;
 class DefaultCertManagerTest {
 
     private static final String VALID_CONFIG = "valid-config.xml";
+    private static final String KEYSTORES_DIR = "keystores/";
+    private static final String PRIVATE_KEYSTORE = "privatekeys.jks";
     private static final String KEYPAIR_ALIAS = "testkey";
     private static final String KEYPAIR_PASSWORD = "test123";
+    private static final String CHAIN_ALIAS = "chainkey";
+    private static final String PARTNER_KEYSTORE = "partnercerts.jks";
     private static final String PARTNER_ALIAS = "partnercert";
+    private static final String TRUST_KEYSTORE = "trustanchors.jks";
     private static final String TRUSTANCHOR_ALIAS = "trustanchor";
     private static final String TRUSTANCHOR_PASSWORD = "trust123";
 
@@ -82,13 +88,12 @@ class DefaultCertManagerTest {
         Files.createDirectories(keystoresDir);
 
         // Copy test keystores
-        Path resourceBase = Path.of("src/test/resources");
-        copyIfExists(resourceBase.resolve("keystores/privatekeys.jks"), keystoresDir.resolve("privatekeys.jks"));
-        copyIfExists(resourceBase.resolve("keystores/partnercerts.jks"), keystoresDir.resolve("partnercerts.jks"));
-        copyIfExists(resourceBase.resolve("keystores/trustanchors.jks"), keystoresDir.resolve("trustanchors.jks"));
+        copyIfExists(TestUtils.getTestResource(KEYSTORES_DIR + PRIVATE_KEYSTORE), keystoresDir.resolve(PRIVATE_KEYSTORE));
+        copyIfExists(TestUtils.getTestResource(KEYSTORES_DIR + PARTNER_KEYSTORE), keystoresDir.resolve(PARTNER_KEYSTORE));
+        copyIfExists(TestUtils.getTestResource(KEYSTORES_DIR + TRUST_KEYSTORE), keystoresDir.resolve(TRUST_KEYSTORE));
 
         // Copy config file
-        Files.copy(resourceBase.resolve("config/" + configFile),
+        Files.copy(TestUtils.getTestResource("config/" + configFile),
                    confDir.resolve("certmanager_config.xml"), StandardCopyOption.REPLACE_EXISTING);
 
         IConfiguration config = mock(IConfiguration.class);
@@ -103,7 +108,7 @@ class DefaultCertManagerTest {
     }
 
     private X509Certificate loadCertFromKeystore(String keystoreName, String password, String alias) throws Exception {
-        Path ksPath = tempDir.resolve("keystores/" + keystoreName);
+        Path ksPath = tempDir.resolve(KEYSTORES_DIR + keystoreName);
         KeyStore ks = KeyStore.getInstance("JKS");
         try (InputStream is = Files.newInputStream(ksPath)) {
             ks.load(is, password.toCharArray());
@@ -171,8 +176,6 @@ class DefaultCertManagerTest {
     @DisplayName("When managing key pairs for signing and decryption")
     class KeyPairManagement {
 
-        private IConfiguration config;
-
         @BeforeEach
         void initCertManager() throws Exception {
             certManager.init(setupEnvironment(VALID_CONFIG));
@@ -208,6 +211,18 @@ class DefaultCertManagerTest {
         void returnsNullForUnknownAlias() throws Exception {
             assertNull(certManager.getKeyPairCertificates("unknown-alias"));
             assertNull(certManager.getKeyPair("unknown-alias", "anypassword"));
+        }
+
+        @Test
+        @DisplayName("it should provide the full certificate chain for a CA-signed key pair")
+        void providesFullCertificateChain() throws Exception {
+            List<X509Certificate> certs = certManager.getKeyPairCertificates(CHAIN_ALIAS);
+
+            assertEquals(2, certs.size(), "Chain should contain leaf and CA certificates");
+            X509Certificate leaf = certs.get(0);
+            X509Certificate ca = certs.get(1);
+            assertEquals(ca.getSubjectX500Principal(), leaf.getIssuerX500Principal(),
+                "Leaf certificate should be issued by the CA certificate");
         }
 
         @Test
@@ -318,10 +333,15 @@ class DefaultCertManagerTest {
         }
 
         @Test
-        @DisplayName("it should reject validation of empty certificate list")
-        void rejectsEmptyCertificateList() {
+        @DisplayName("it should reject validation when certificate list is null")
+        void rejectsNullCertificateList() {
             assertThrows(SecurityProcessingException.class,
                 () -> certManager.validateCertificate(null, SecurityLevel.MLS));
+        }
+
+        @Test
+        @DisplayName("it should reject validation when certificate list is empty")
+        void rejectsEmptyCertificateList() {
             assertThrows(SecurityProcessingException.class,
                 () -> certManager.validateCertificate(List.of(), SecurityLevel.MLS));
         }
@@ -330,11 +350,36 @@ class DefaultCertManagerTest {
         @DisplayName("it should trust a certificate that is a registered trust anchor")
         void trustsRegisteredTrustAnchor() throws Exception {
             X509Certificate trustAnchor = loadCertFromKeystore(
-                "trustanchors.jks", TRUSTANCHOR_PASSWORD, TRUSTANCHOR_ALIAS);
+                TRUST_KEYSTORE, TRUSTANCHOR_PASSWORD, TRUSTANCHOR_ALIAS);
 
             IValidationResult result = certManager.validateCertificate(List.of(trustAnchor), SecurityLevel.MLS);
 
             assertEquals(Trust.OK, result.getTrust(), "Trust anchor should be trusted");
+        }
+
+        @Test
+        @DisplayName("it should trust a certificate path that links to a registered trust anchor")
+        void trustsCertificatePathToTrustAnchor() throws Exception {
+            X509Certificate leafCert = loadCertFromKeystore(
+                PRIVATE_KEYSTORE, KEYPAIR_PASSWORD, CHAIN_ALIAS);
+
+            IValidationResult result = certManager.validateCertificate(List.of(leafCert), SecurityLevel.MLS);
+
+            assertEquals(Trust.OK, result.getTrust(),
+                "Certificate signed by trust anchor should be trusted");
+        }
+
+        @Test
+        @DisplayName("it should reject a certificate that does not link to any trust anchor")
+        void rejectsUntrustedCertificate() throws Exception {
+            X509Certificate untrustedCert = loadCertFromKeystore(
+                PRIVATE_KEYSTORE, KEYPAIR_PASSWORD, KEYPAIR_ALIAS);
+
+            IValidationResult result = certManager.validateCertificate(
+                List.of(untrustedCert), SecurityLevel.MLS);
+
+            assertEquals(Trust.NOK, result.getTrust(),
+                "Self-signed certificate not in trust store should be rejected");
         }
 
         @Test
@@ -367,7 +412,7 @@ class DefaultCertManagerTest {
         void shutsDownGracefully() throws Exception {
             certManager.init(setupEnvironment(VALID_CONFIG));
 
-            assertDoesNotThrow(() -> certManager.shutdown());
+            certManager.shutdown();
         }
     }
 }

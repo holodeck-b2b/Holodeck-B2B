@@ -17,170 +17,209 @@
 package org.holodeckb2b.security;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
-import java.security.KeyStore;
 import java.security.cert.X509Certificate;
+import java.util.List;
 
-import org.apache.axis2.AxisFault;
 import org.apache.wss4j.common.ext.WSSecurityException;
 import org.apache.wss4j.dom.validate.Credential;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
-import org.holodeckb2b.common.testhelpers.TestCertificateManager;
-import org.holodeckb2b.commons.security.KeystoreUtils;
-import org.holodeckb2b.commons.testing.TestUtils;
 import org.holodeckb2b.ebms3.security.SignatureTrustValidator;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
+import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
 import org.holodeckb2b.interfaces.security.trust.IValidationResult;
 import org.holodeckb2b.interfaces.security.trust.IValidationResult.Trust;
-import org.junit.jupiter.api.AfterEach;
+import org.holodeckb2b.interfaces.security.trust.SecurityLevel;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
- * Functional tests for the signature trust validator.
+ * Tests for {@link SignatureTrustValidator} verifying that it correctly bridges between WSS4J's signature
+ * verification and Holodeck B2B's Certificate Manager for trust validation.
  * <p>
- * The {@link SignatureTrustValidator} bridges WSS4J's signature verification with Holodeck B2B's
- * Certificate Manager for trust validation. It receives the certificate chain from a signature
- * and delegates trust validation to the configured Certificate Manager.
- * <p>
- * These tests verify:
+ * The Certificate Manager is mocked to verify that the validator:
  * <ul>
- *   <li>Certificates signed by trusted CA are accepted</li>
- *   <li>Self-signed certificates without trust anchor are rejected</li>
- *   <li>Missing or empty certificate chains are rejected</li>
- *   <li>Validation results are properly stored for retrieval</li>
+ *   <li>Passes the correct certificate(s) to {@link ICertificateManager#validateCertificate}</li>
+ *   <li>Stores the returned {@link IValidationResult} for later retrieval</li>
+ *   <li>Throws the appropriate {@link WSSecurityException} based on the validation outcome</li>
  * </ul>
  */
+@ExtendWith(MockitoExtension.class)
 class SignatureTrustValidatorTest {
 
-    private static KeyStore.PrivateKeyEntry rsaKeyPair;
-    private static KeyStore.PrivateKeyEntry ecKeyPair;
+    private static HolodeckB2BTestCore testCore;
+
+    @Mock
+    private ICertificateManager mockCertManager;
+
+    @Mock
+    private IValidationResult mockResult;
+
+    @Mock
+    private X509Certificate testCert;
 
     private SignatureTrustValidator validator;
 
     @BeforeAll
     static void setupCore() throws Exception {
-        HolodeckB2BCoreInterface.setImplementation(new HolodeckB2BTestCore());
-
-        rsaKeyPair = KeystoreUtils.readKeyPairFromPKCS12(TestUtils.getTestResource("keypairs/rsa.p12"), "test");
-        ecKeyPair = KeystoreUtils.readKeyPairFromPKCS12(TestUtils.getTestResource("keypairs/ec.p12"), "test");
-    }
-
-    private TestCertificateManager certManager() throws SecurityProcessingException {
-        return (TestCertificateManager) HolodeckB2BCoreInterface.getCertificateManager();
+        testCore = new HolodeckB2BTestCore();
+        HolodeckB2BCoreInterface.setImplementation(testCore);
     }
 
     @BeforeEach
     void setUp() {
+        testCore.setCertificateManager(mockCertManager);
         validator = new SignatureTrustValidator();
     }
 
-    @AfterEach
-    void cleanup() throws SecurityProcessingException {
-        certManager().clear();
-    }
-
     // ==================================================================================
-    // Tests for trusted certificate validation
+    // Tests for successful trust validation
     // ==================================================================================
 
     @Nested
-    @DisplayName("When validating trusted certificates")
-    class TrustedCertificates {
+    @DisplayName("When the Certificate Manager reports the certificate as trusted")
+    class TrustedCertificate {
 
-        @Test
-        @DisplayName("it should accept a certificate that is registered as trusted")
-        void acceptsTrustedCertificate() throws Exception {
-            X509Certificate cert = (X509Certificate) rsaKeyPair.getCertificate();
-            certManager().registerTrustedCertificate(cert, "trustedcert");
-
-            Credential credential = new Credential();
-            credential.setCertificates(new X509Certificate[] { cert });
-
-            Credential result = validator.validate(credential, null);
-
-            assertNotNull(result);
-            assertEquals(credential, result);
+        @BeforeEach
+        void setupTrustedResult() throws Exception {
+            when(mockResult.getTrust()).thenReturn(Trust.OK);
+            when(mockCertManager.validateCertificate(anyList(), any(SecurityLevel.class)))
+                    .thenReturn(mockResult);
         }
 
         @Test
-        @DisplayName("it should provide the validation result after successful validation")
-        void providesValidationResultForTrusted() throws Exception {
-            X509Certificate cert = (X509Certificate) rsaKeyPair.getCertificate();
-            certManager().registerTrustedCertificate(cert, "trustedcert");
-
+        @DisplayName("it should pass the certificate chain to the Certificate Manager")
+        void passesCertificatesToCertManager() throws Exception {
             Credential credential = new Credential();
-            credential.setCertificates(new X509Certificate[] { cert });
+            credential.setCertificates(new X509Certificate[] { testCert });
 
             validator.validate(credential, null);
 
-            IValidationResult validationResult = validator.getValidationResult();
+            @SuppressWarnings("unchecked")
+            ArgumentCaptor<List<X509Certificate>> certsCaptor = ArgumentCaptor.forClass(List.class);
+            verify(mockCertManager).validateCertificate(certsCaptor.capture(), eq(SecurityLevel.MLS));
 
-            assertNotNull(validationResult);
-            assertEquals(Trust.OK, validationResult.getTrust());
+            List<X509Certificate> passedCerts = certsCaptor.getValue();
+            assertEquals(1, passedCerts.size());
+            assertSame(testCert, passedCerts.get(0));
         }
 
         @Test
-        @DisplayName("it should accept EC certificates when trusted")
-        void acceptsTrustedEcCertificate() throws Exception {
-            X509Certificate cert = (X509Certificate) ecKeyPair.getCertificate();
-            certManager().registerTrustedCertificate(cert, "trustedeccert");
-
+        @DisplayName("it should pass a full 3-level certificate path to the Certificate Manager")
+        void passesFullCertificatePathToCertManager(@Mock X509Certificate intermediateCert,
+                                                    @Mock X509Certificate rootCert) throws Exception {
             Credential credential = new Credential();
-            credential.setCertificates(new X509Certificate[] { cert });
+            credential.setCertificates(new X509Certificate[] { testCert, intermediateCert, rootCert });
+
+            validator.validate(credential, null);
+
+            @SuppressWarnings("unchecked")
+            ArgumentCaptor<List<X509Certificate>> certsCaptor = ArgumentCaptor.forClass(List.class);
+            verify(mockCertManager).validateCertificate(certsCaptor.capture(), eq(SecurityLevel.MLS));
+
+            List<X509Certificate> passedCerts = certsCaptor.getValue();
+            assertEquals(3, passedCerts.size());
+            assertSame(testCert, passedCerts.get(0), "Leaf certificate should be first");
+            assertSame(intermediateCert, passedCerts.get(1), "Intermediate CA should be second");
+            assertSame(rootCert, passedCerts.get(2), "Root CA should be last");
+        }
+
+        @Test
+        @DisplayName("it should return the credential on successful validation")
+        void returnsCredential() throws Exception {
+            Credential credential = new Credential();
+            credential.setCertificates(new X509Certificate[] { testCert });
 
             Credential result = validator.validate(credential, null);
 
-            assertNotNull(result);
+            assertSame(credential, result);
+        }
+
+        @Test
+        @DisplayName("it should store the validation result for later retrieval")
+        void storesValidationResult() throws Exception {
+            Credential credential = new Credential();
+            credential.setCertificates(new X509Certificate[] { testCert });
+
+            validator.validate(credential, null);
+
+            assertSame(mockResult, validator.getValidationResult());
         }
     }
 
     // ==================================================================================
-    // Tests for untrusted certificate rejection
+    // Tests for failed trust validation
     // ==================================================================================
 
     @Nested
-    @DisplayName("When validating untrusted certificates")
-    class UntrustedCertificates {
+    @DisplayName("When the Certificate Manager reports the certificate as untrusted")
+    class UntrustedCertificate {
+
+        @BeforeEach
+        void setupUntrustedResult() throws Exception {
+            when(mockResult.getTrust()).thenReturn(Trust.NOK);
+            when(mockCertManager.validateCertificate(anyList(), any(SecurityLevel.class)))
+                    .thenReturn(mockResult);
+        }
 
         @Test
-        @DisplayName("it should reject certificates that are not registered as trusted")
-        void rejectsUntrustedCertificate() {
-            X509Certificate cert = (X509Certificate) rsaKeyPair.getCertificate();
-            // Certificate is NOT registered as trusted
-
+        @DisplayName("it should throw WSSecurityException with FAILED_AUTHENTICATION")
+        void throwsFailedAuthentication() {
             Credential credential = new Credential();
-            credential.setCertificates(new X509Certificate[] { cert });
+            credential.setCertificates(new X509Certificate[] { testCert });
 
             WSSecurityException exception = assertThrows(WSSecurityException.class,
-                () -> validator.validate(credential, null));
+                    () -> validator.validate(credential, null));
 
             assertEquals(WSSecurityException.ErrorCode.FAILED_AUTHENTICATION, exception.getErrorCode());
         }
 
         @Test
-        @DisplayName("it should provide the validation result after failed validation")
-        void providesValidationResultForUntrusted() {
-            X509Certificate cert = (X509Certificate) rsaKeyPair.getCertificate();
-            // Certificate is NOT registered as trusted
-
+        @DisplayName("it should still store the validation result for later retrieval")
+        void storesValidationResult() {
             Credential credential = new Credential();
-            credential.setCertificates(new X509Certificate[] { cert });
+            credential.setCertificates(new X509Certificate[] { testCert });
 
-            try {
-                validator.validate(credential, null);
-            } catch (WSSecurityException e) {
-                // Expected
-            }
+            assertThrows(WSSecurityException.class, () -> validator.validate(credential, null));
 
-            IValidationResult validationResult = validator.getValidationResult();
+            assertSame(mockResult, validator.getValidationResult());
+        }
+    }
 
-            assertNotNull(validationResult);
-            assertEquals(Trust.NOK, validationResult.getTrust());
+    // ==================================================================================
+    // Tests for Certificate Manager errors
+    // ==================================================================================
+
+    @Nested
+    @DisplayName("When the Certificate Manager throws an exception")
+    class CertManagerError {
+
+        @BeforeEach
+        void setupError() throws Exception {
+            when(mockCertManager.validateCertificate(anyList(), any(SecurityLevel.class)))
+                    .thenThrow(new SecurityProcessingException("Certificate manager error"));
+        }
+
+        @Test
+        @DisplayName("it should throw WSSecurityException with FAILED_CHECK")
+        void throwsFailedCheck() {
+            Credential credential = new Credential();
+            credential.setCertificates(new X509Certificate[] { testCert });
+
+            WSSecurityException exception = assertThrows(WSSecurityException.class,
+                    () -> validator.validate(credential, null));
+
+            assertEquals(WSSecurityException.ErrorCode.FAILED_CHECK, exception.getErrorCode());
         }
     }
 
@@ -193,27 +232,29 @@ class SignatureTrustValidatorTest {
     class InvalidCredentials {
 
         @Test
-        @DisplayName("it should reject credentials with null certificate array")
-        void rejectsNullCertificates() {
+        @DisplayName("it should reject credentials with null certificate array without calling Certificate Manager")
+        void rejectsNullCertificates() throws Exception {
             Credential credential = new Credential();
             credential.setCertificates(null);
 
             WSSecurityException exception = assertThrows(WSSecurityException.class,
-                () -> validator.validate(credential, null));
+                    () -> validator.validate(credential, null));
 
             assertEquals(WSSecurityException.ErrorCode.UNSUPPORTED_SECURITY_TOKEN, exception.getErrorCode());
+            verifyNoInteractions(mockCertManager);
         }
 
         @Test
-        @DisplayName("it should reject credentials with empty certificate array")
-        void rejectsEmptyCertificates() {
+        @DisplayName("it should reject credentials with empty certificate array without calling Certificate Manager")
+        void rejectsEmptyCertificates() throws Exception {
             Credential credential = new Credential();
             credential.setCertificates(new X509Certificate[0]);
 
             WSSecurityException exception = assertThrows(WSSecurityException.class,
-                () -> validator.validate(credential, null));
+                    () -> validator.validate(credential, null));
 
             assertEquals(WSSecurityException.ErrorCode.UNSUPPORTED_SECURITY_TOKEN, exception.getErrorCode());
+            verifyNoInteractions(mockCertManager);
         }
     }
 
@@ -228,27 +269,7 @@ class SignatureTrustValidatorTest {
         @Test
         @DisplayName("it should return null when no validation has been performed")
         void returnsNullBeforeValidation() {
-            IValidationResult result = validator.getValidationResult();
-
-            assertNull(result);
-        }
-
-        @Test
-        @DisplayName("validation result should contain the validated certificate path")
-        void resultContainsCertificatePath() throws Exception {
-            X509Certificate cert = (X509Certificate) rsaKeyPair.getCertificate();
-            certManager().registerTrustedCertificate(cert, "trustedcert");
-
-            Credential credential = new Credential();
-            credential.setCertificates(new X509Certificate[] { cert });
-
-            validator.validate(credential, null);
-
-            IValidationResult result = validator.getValidationResult();
-
-            assertNotNull(result.getValidatedCertPath());
-            assertFalse(result.getValidatedCertPath().isEmpty());
-            assertEquals(cert, result.getValidatedCertPath().get(0));
+            assertNull(validator.getValidationResult());
         }
     }
 }
