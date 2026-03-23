@@ -18,6 +18,7 @@ package org.holodeckb2b.interfaces.core;
 
 import java.util.List;
 
+import org.apache.axis2.description.AxisService;
 import org.apache.axis2.modules.Module;
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.delivery.IDeliveryManager;
@@ -199,6 +200,19 @@ public class HolodeckB2BCoreInterface {
     public static Module getModule(final String name) {
     	assertInitialized();
     	return coreImplementation.getModule(name);
+    }
+
+    /**
+     * Gets the active Axis2 Service with the given name. This can for example be used by protocol extensions to get
+     * access to "their" service for protocol specific settings.
+     *
+     * @param name	the requested service's name
+     * @return 		the active Axis2 service if it exists in this Holodeck B2B instance,<br><code>null</code> otherwise
+     * @since 8.2.0
+     */
+    public static AxisService getService(final String name) {
+    	assertInitialized();
+    	return coreImplementation.getService(name);
     }
 
     /**

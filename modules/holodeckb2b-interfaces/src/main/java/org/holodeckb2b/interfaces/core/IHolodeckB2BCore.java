@@ -18,6 +18,7 @@ package org.holodeckb2b.interfaces.core;
 
 import java.util.List;
 
+import org.apache.axis2.description.AxisService;
 import org.apache.axis2.modules.Module;
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.delivery.IDeliveryManager;
@@ -69,6 +70,16 @@ public interface IHolodeckB2BCore {
      * @return  A {@link IMessageSubmitter} object to use for submission of User Messages
      */
     IMessageSubmitter getMessageSubmitter();
+
+    /**
+     * Gets the active Axis2 Service with the given name. This can for example be used by protocol extensions to get
+     * access to "their" service for protocol specific settings.
+     *
+     * @param name	the requested service's name
+     * @return 		the active Axis2 service if it exists in this Holodeck B2B instance,<br><code>null</code> otherwise
+     * @since 8.2.0
+     */
+    AxisService getService(final String name);
 
     /**
      * Gets the set of currently configured P-Modes.

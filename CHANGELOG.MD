@@ -4,6 +4,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## 8.2.0
 #####
+### Added
+* `getService()` to public Holodeck B2B Core interface 
 ### Changed
 * Server startup is now aborted when one of the configured transports for receiving messages cannot be started
 * Improved logging of errors that prevented Holodeck B2B to start 

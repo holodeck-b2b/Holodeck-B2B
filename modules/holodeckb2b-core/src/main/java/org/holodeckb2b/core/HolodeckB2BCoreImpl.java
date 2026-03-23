@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.description.AxisModule;
+import org.apache.axis2.description.AxisService;
 import org.apache.axis2.engine.AxisError;
 import org.apache.axis2.modules.Module;
 import org.apache.logging.log4j.LogManager;
@@ -464,6 +465,20 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
 		final AxisModule module = instanceConfiguration.getModule(name);
 		// The AxisModule is only meta-data on the module, we need to get the actual implementing class from it
 		return module != null ? module.getModule() : null;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @since 8.2.0
+     */
+    @Override
+	public AxisService getService(final String name) {
+    	try {
+			return instanceConfiguration.getService(name);
+		} catch (AxisFault svcError) {
+			log.error("Failed to get meta-data for Axis2 service [name={}] : {}", name, svcError.getMessage());
+			return null;
+		}
     }
 
     /**
