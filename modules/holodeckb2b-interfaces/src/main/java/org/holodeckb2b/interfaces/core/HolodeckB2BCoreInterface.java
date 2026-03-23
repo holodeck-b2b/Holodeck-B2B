@@ -18,6 +18,8 @@ package org.holodeckb2b.interfaces.core;
 
 import java.util.List;
 
+import org.apache.axis2.AxisFault;
+import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.kernel.TransportSender;
 import org.apache.axis2.modules.Module;
@@ -226,6 +228,22 @@ public class HolodeckB2BCoreInterface {
     public static TransportSender getTransportSender(final String name) {
     	assertInitialized();
     	return coreImplementation.getTransportSender(name);
+    }
+
+    /**
+     * Creates a new Axis2 Service Client for the given service and transport sender that can be used to start the
+     * send process. The service and transport are optional. If no service is provided a default "anonymous" service is
+	 * used. For the transport no default is set and it should be set during the send process.
+	 *
+     * @param service		Axis2 service to use for sending
+     * @param transport		Axis2 transport sender to use for sending
+     * @return	a new service client
+     * @throws AxisFault when an error occurs creating the service client
+     * @since 8.2.0
+     */
+    public static ServiceClient createServiceClient(AxisService service, TransportSender transport) throws AxisFault {
+	    assertInitialized();
+	    return coreImplementation.createServiceClient(service, transport);
     }
 
     /**

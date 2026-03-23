@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.client.ServiceClient;
+import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.AxisModule;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.TransportOutDescription;
@@ -80,6 +82,14 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
      * Logger
      */
     private static final Logger log = LogManager.getLogger(HolodeckB2BCoreImpl.class);
+
+    /**
+     * The default "anonymous" Axis2 Service that will be used to create service clients when no specific service is
+     * specified by the caller.
+     *
+     * @since 8.2.0
+     */
+    private static final AxisService DEFAULT_SERVICE = new AxisService("HB2B_CORE_ANON_SVC");
 
     /**
      * The configuration of this Holodeck B2B instance
@@ -579,4 +589,14 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
     	return deliveryManager;
     }
 
+
+    /**
+     * {@inheritDoc}
+     * @since 8.2.0
+     */
+    @Override
+	public ServiceClient createServiceClient(AxisService service, TransportSender transport) throws AxisFault {
+		return new ServiceClient(new ConfigurationContext(instanceConfiguration),
+								 service != null ? service : DEFAULT_SERVICE);
+    }
 }
