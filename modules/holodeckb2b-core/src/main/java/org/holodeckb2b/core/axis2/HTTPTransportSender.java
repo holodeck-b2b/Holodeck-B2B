@@ -36,6 +36,7 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.description.TransportOutDescription;
+import org.apache.axis2.kernel.MessageFormatter;
 import org.apache.axis2.kernel.http.HTTPConstants;
 import org.apache.axis2.transport.http.HTTPSender;
 import org.apache.axis2.transport.http.Request;
@@ -53,19 +54,18 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jsse.provider.BouncyCastleJsseProvider;
 import org.holodeckb2b.commons.security.KeystoreUtils;
 import org.holodeckb2b.commons.util.Utils;
-import org.holodeckb2b.core.MessageProcessingContext;
-import org.holodeckb2b.core.pmode.PModeUtils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
-import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IProtocol;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
+import org.holodeckb2b.interfaces.security.trust.TLSCertificateTrustManager;
 
 /**
- * Is the Axis2 {@link HTTPTransportSender} implementation used for sending requests to other servers using HTTP. The
+ * Is a customisation of the Axis2 {@link HTTPTransportSender} for sending requests to other servers using HTTP. The
  * sender is configured in the main Holodeck B2B configuration file where it should be registered as the "http" <code>
- * transportSender</code>. The following parameters can be specified to set the default connection configuration:<ul>
+ * transportSender</code>. It will then automatically be used for both http and https requests.
+ * <p>
+ * The following parameters can be specified to set the default connection configuration:<ul>
  * <li>Content-Encoding : When sending large requests it is useful to compress them on transport. This is done by the
  *      use of the standard compression feature of HTTP/1.1. Currently Holodeck B2B only supports the <i>gzip</i>
  *      Transfer-Encoding. Therefore the value of this parameter MUST be "gzip" if included. If not included no
@@ -89,19 +89,24 @@ import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
  * 		by the <i>Certificate Manager</i> that by default should be used for TLS client authentication. The
  * 		<code>password</code> attribute of these elements can contain the literal (= clear text) password or reference
  * 		to a Java System Property or Environment Variable. In the latter cases the name of the property or environment
- * 		variable should be prefixed with <i>sys:</i> respectively <i>env:</i>.</li>
+ * 		variable should be prefixed with <i>sys:</i> respectively <i>env:</i>.<br/>
+ *      NOTE: For backward compatibility the default Java system properties <i>javax.net.ssl.keyStore</i> and
+ *      <i>javax.net.ssl.keyStorePassword</i> will be used to retrieve the key pair if the transport sender parameter is
+ *      not provided. This method however is deprecated and will be removed in a future version!</li>
  * </ul>
- * If the sender is invoked to send a message unit to another MSH, it will use the P-Mode governing the exchange of the
- * [primary] message unit to configure the HTTP(S) connection. The P-Mode can override the default settings specified in
- * the configuration of the <code>transportSender</code>.
  * <p>
- * <b>NOTES</b>:<br/>
- * 1) The sender does not determine the URL to which a request must be send. It is the responsibility of other
- * components in the send chain to provide it in the {@link Constants.Configuration#TRANSPORT_URL} <code>MessageContext
- * </code> property.<br/>
- * 2) For backward compatibility the default Java system properties <i>javax.net.ssl.keyStore</i> and
- * <i>javax.net.ssl.keyStorePassword</i> will be used to retrieve the key pair if the transport sender parameter is
- * not provided. This method however is deprecated and will be removed in a future version!
+ * To use this transport sender for sending the <i>scheme</i> of the message's "target URL" must be set to the name of
+ * the transport sender ("http" by default). The target URL should be provided in either the {@link
+ * Constants.Configuration.TRANSPORT_URL} message context property or the <i>To</i> address of the
+ * <code>EndpointReference</code>.<br/>
+ * Request specific configuration can be provided through a {@link IProtocol} instance that should be set in the {@link
+ * #MC_HTTP_CONFIG} message context property. Note that {@linkplain IProtocol#getAddress()} which can also provide the
+ * target URL is ignored.<br/>
+ * The message content is created using a {@link MessageFormatter} which can be explicitly configured in the {@link
+ * Constants.Configuration.MESSAGE_FORMATTER} MessageContext property. If this property is not set the formatter
+ * will be derived from the message type as contained in the {@link Constants.Configuration.MESSAGE_TYPE} MessageContext
+ * property or parameter using the registered formatters in the main Holodeck B2B configuration file. The used formatter
+ * MUST only write the content of the HTTP entity body and not include any headers in its output.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 8.0.0
@@ -109,6 +114,13 @@ import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
  */
 public class HTTPTransportSender extends HTTPClient4TransportSender {
 	private static final Logger log = LogManager.getLogger(HTTPTransportSender.class);
+
+	/**
+	 * Defines the name of the message context property that includes the request specific HTTP configuration.
+	 *
+	 * @since 8.2.0
+	 */
+	public static final String MC_HTTP_CONFIG = "hb2b-http-sender::ConnConfig";
 
 	/*
 	 * Name of the operation context property that contains the HTTP request. Needed to properly close the connection
@@ -134,7 +146,9 @@ public class HTTPTransportSender extends HTTPClient4TransportSender {
 	 * compression is as well.
 	 */
 	private boolean defaultChunked;
-
+	/**
+	 * The Apache HttpClient connection manager responsible for managing the connections used by this transport sender.
+	 */
 	private HttpClientConnectionManager connectionManager;
 
 	@Override
@@ -198,22 +212,18 @@ public class HTTPTransportSender extends HTTPClient4TransportSender {
 
 	@Override
 	public InvocationResponse invoke(MessageContext msgContext) throws AxisFault {
-		MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(msgContext);
-		IMessageUnit primaryMU = procCtx != null ? procCtx.getPrimarySentMessageUnit() : null;
+		// Check if custom configuration is provided
+		IProtocol connConfig = (IProtocol) msgContext.getProperty(MC_HTTP_CONFIG);
+		if (connConfig != null) {
+			log.debug("Apply request specific HTTP settings");
 
-		// If a message unit is being sent, check the P-Mode if specific http configuration is required
-		if (primaryMU != null) {
-			log.debug("Get P-Mode Leg for primary MU (msgID={})", primaryMU.getMessageId());
-	        final ILeg leg = PModeUtils.getLeg(primaryMU);
-
-	        // Get current set of options
+			// Get current set of options
 	        final Options options = msgContext.getOptions();
 
 	        // Check if HTTP compression and/or chunking should be used and set options accordingly
-	        final IProtocol protocolCfg = leg != null ? leg.getProtocol() : null;
-	        final boolean compress = (protocolCfg != null ? protocolCfg.useHTTPCompression() : defaultCompression);
+	        final boolean compress = (connConfig != null ? connConfig.useHTTPCompression() : defaultCompression);
 	        log.debug("{} HTTP compression using gzip Content-Encoding", compress ? "Enable" : "Disable");
-	        if (procCtx.isHB2BInitiated())
+	        if (!msgContext.isServerSide())
 	            // Holodeck B2B is sending the message, so request has to be compressed
 	            options.setProperty(HTTPConstants.MC_GZIP_REQUEST, compress);
 	        else
@@ -222,13 +232,25 @@ public class HTTPTransportSender extends HTTPClient4TransportSender {
 
 	        // Check if HTTP "chunking" should be used. In case of gzip CE, chunked TE is required. But as Axis2 does
 	        // not automaticly enable this we also enable chunking here when compression is used
-	        if (compress || (protocolCfg != null ? protocolCfg.useChunking() : defaultChunked)) {
+	        if (compress || (connConfig != null ? connConfig.useChunking() : defaultChunked)) {
 	            log.debug("Enable chunked transfer-encoding");
 	            options.setProperty(HTTPConstants.CHUNKED, Boolean.TRUE);
 	        } else {
 	            log.debug("Disable chunked transfer-encoding");
 	            options.setProperty(HTTPConstants.CHUNKED, Boolean.FALSE);
 	        }
+
+	        // Check if custom time out settings are specified
+        	Integer to = connConfig.getConnectionTimeout();
+        	if (to != null) {
+	    		log.debug("Set connection timeout to {} ms", to);
+	    		msgContext.setProperty(HTTPConstants.CONNECTION_TIMEOUT, to);
+        	}
+    		to = connConfig.getReadTimeout();
+    		if (to != null) {
+	    		log.debug("Set read timeout to {} ms", to);
+	    		msgContext.setProperty(HTTPConstants.SO_TIMEOUT, to);
+        	}
 
 	        // If the message does not contain any attachments we can disable SwA
 	        boolean hasAttachments = !msgContext.getAttachmentMap().getContentIDSet().isEmpty();

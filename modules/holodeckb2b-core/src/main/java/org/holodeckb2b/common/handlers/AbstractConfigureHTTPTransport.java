@@ -27,6 +27,7 @@ import org.holodeckb2b.core.storage.StorageManager;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.pmode.ILeg;
+import org.holodeckb2b.interfaces.pmode.IProtocol;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
 import org.holodeckb2b.interfaces.storage.StorageException;
@@ -60,31 +61,35 @@ public abstract class AbstractConfigureHTTPTransport extends AbstractBaseHandler
 
         // If Holodeck B2B is initiator the destination URL must be set
         if (procCtx.isHB2BInitiated()) {
-            // Get the destination URL via the P-Mode of this message unit
-            String destURL = null;
+            // Get the protocol configuration via the P-Mode of this message unit
+            IProtocol protocol = null;
+            String destURL;
             try {
-            	destURL = getDestinationURL(primaryMU, procCtx);
+            	protocol = getProtocolConfig(primaryMU, procCtx);
             } catch (Throwable t) {
             	log.error("Error in determination of target URL for message (msgID={}) : {}",
             				primaryMU.getMessageId(), t.getMessage());
             }
-            if (Utils.isNullOrEmpty(destURL)) {
+            if (protocol == null || Utils.isNullOrEmpty(destURL = protocol.getAddress())) {
             	// No destination URL available, unable to sent this message!
-                log.error("No destination URL availabel for " + MessageUnitUtils.getMessageUnitName(primaryMU)
+                log.error("No destination URL available for " + MessageUnitUtils.getMessageUnitName(primaryMU)
                 			+ " with msgId: " + primaryMU.getMessageId());
                 final StorageManager updManager = HolodeckB2BCore.getStorageManager();
             	final IMessageProcessingEventProcessor eventProcessor = HolodeckB2BCore.getEventProcessor();
             	for(IMessageUnitEntity mu : procCtx.getSendingMessageUnits()) {
-        			log.debug("Updating processing state to FAILURE for message unit [msgId="
+            		// As the configuration can be added to the P-Mode put message unit in SUSPENDED state so they can
+            		// be resumed when the P-Mode is updated
+        			log.debug("Updating processing state to SUSPENDED for message unit [msgId="
         						+ mu.getMessageId() + "]");
-        			updManager.setProcessingState(mu, ProcessingState.FAILURE);
+        			updManager.setProcessingState(mu, ProcessingState.SUSPENDED);
         			eventProcessor.raiseEvent(new MessageTransferFailure(mu,
         														new Exception("Unable to configure HTTP Connection")));
         		}
                 return InvocationResponse.ABORT;
             }
-            log.debug("Destination URL=" + destURL);
+            log.debug("Destination URL = {}", destURL);
             procCtx.getParentContext().setProperty(Constants.Configuration.TRANSPORT_URL, destURL);
+            procCtx.getParentContext().setProperty(HTTPTransportSender.MC_HTTP_CONFIG, protocol);
         }
         prepareHttp(primaryMU, procCtx);
         log.debug("HTTP configuration done");
@@ -93,14 +98,15 @@ public abstract class AbstractConfigureHTTPTransport extends AbstractBaseHandler
     }
 
 	/**
-	 * Gets the destination URL for the given message unit.
+	 * Gets the protocol configuration for the given message unit.
 	 *
 	 * @param msgToSend		The primary message unit being send
 	 * @param procCtx		The message processing context
-	 * @return				The destination URL, <code>null</code> if URL cannot be determined
-	 * @since 8.0.0 Removed the <code>leg</code> parameter
+	 * @return				A {@link IProtocol} instance with the protocol configuration,<br/>
+	 * 						or <code>null</code> if the configuration cannot be determined
+	 * @since 8.2.0
 	 */
-	protected abstract String getDestinationURL(IMessageUnitEntity msgToSend, IMessageProcessingContext procCtx);
+	protected abstract IProtocol getProtocolConfig(IMessageUnitEntity msgToSend, IMessageProcessingContext procCtx);
 
 	/**
 	 * Sets the messaging protocol specific HTTP configuration.

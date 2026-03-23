@@ -33,7 +33,6 @@ import javax.net.ssl.TrustManager;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
-import org.apache.axis2.kernel.http.HTTPConstants;
 import org.apache.axis2.transport.http.AxisRequestEntity;
 import org.apache.axis2.transport.http.Request;
 import org.apache.http.client.protocol.HttpClientContext;
@@ -49,19 +48,19 @@ import org.bouncycastle.jsse.provider.BouncyCastleJsseProvider;
 import org.holodeckb2b.common.pmode.TLSConfiguration;
 import org.holodeckb2b.commons.security.CertificateUtils;
 import org.holodeckb2b.commons.util.Utils;
-import org.holodeckb2b.core.MessageProcessingContext;
-import org.holodeckb2b.core.pmode.PModeUtils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
-import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 import org.holodeckb2b.interfaces.pmode.IProtocol;
+import org.holodeckb2b.interfaces.pmode.ITLSConfiguration;
+import org.holodeckb2b.interfaces.security.trust.TLSCertificateTrustManager;
 
 /**
- * Extends {@link org.apache.axis2.transport.http.HTTPSender} to handle custom connection configuration based on the
- * P-Mode settings.
+ * Extends {@link org.apache.axis2.transport.http.HTTPSender} to handle connection specific TLS configuration.
+ * The custom TLS settings must be provided using a {@link IProtocol} instance in the {@link
+ * HTTPTransportSender#MC_HTTP_CONFIG} message context property.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 8.0.0
- * @see IProtocol
+ * @see ITLSConfiguration
  */
 class HTTPSender extends org.apache.axis2.transport.http.HTTPSender {
 	private static final Logger log = LogManager.getLogger(HTTPSender.class);
@@ -86,54 +85,42 @@ class HTTPSender extends org.apache.axis2.transport.http.HTTPSender {
 		log.debug("Setup request context for connection to {}", url.toString());
 		HttpClientContext	clientCtx = HttpClientContext.create();
 
-		log.trace("Check if a message unit is being sent");
-		MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(msgContext);
-		IMessageUnit primaryMU = procCtx != null ? procCtx.getPrimarySentMessageUnit() : null;
-		// If a message unit is being sent, check the P-Mode if specific http configuration is required
-		if (primaryMU != null) {
-	        final IProtocol protocolCfg = PModeUtils.getLeg(primaryMU).getProtocol();
+		// Check if this is a https connection that requires custom TLS configuration
+		IProtocol connConfig = (IProtocol) msgContext.getProperty(HTTPTransportSender.MC_HTTP_CONFIG);
+		ITLSConfiguration tlsConfig;
+		if (url.getProtocol().equalsIgnoreCase("https") && connConfig != null
+			&& (tlsConfig = connConfig.getTLSConfiguration()) != null) {
+			log.trace("Apply request specific TLS settings");
+			// We create a copy of the TLS configuration to ensure we have a good equals method as the TLSConfiguration
+			// instance is used by the connection manager to determine if a pooled connection can be reused
+    		if (!(tlsConfig instanceof TLSConfiguration))
+    			tlsConfig = new TLSConfiguration(tlsConfig);
+			// Set the TLS configuration as User Token so the connection manager will only select connections
+			// to the server that use this configuration
+			clientCtx.setUserToken(tlsConfig);
 
-        	Integer to = protocolCfg.getConnectionTimeout();
-        	if (to != null) {
-	    		log.debug("Set connection timeout to {} ms", to);
-	    		msgContext.setProperty(HTTPConstants.CONNECTION_TIMEOUT, to);
-        	}
-    		to = protocolCfg.getReadTimeout();
-    		if (to != null) {
-	    		log.debug("Set read timeout to {} ms", to);
-	    		msgContext.setProperty(HTTPConstants.SO_TIMEOUT, to);
-        	}
+			String[] allowedProtocols = tlsConfig.getAllowedProtocols();
+			if (allowedProtocols != null && allowedProtocols.length > 0)
+				log.debug("Set allowed protocols to : {}", Arrays.toString(allowedProtocols));
+			else
+				// Use default of TLS 1.2 or 1.3
+				allowedProtocols = new String[] { "TLSv1.2", "TLSv1.3" };
 
-    		if (url.getProtocol().equalsIgnoreCase("https") && protocolCfg.getTLSConfiguration() != null) {
-    			log.trace("Prepare custom TLS configuration");
-    			TLSConfiguration tlsConfiguration = new TLSConfiguration(protocolCfg.getTLSConfiguration());
-    			// Set the TLS configuration as User Token so the connection manager will only select connections
-    			// to the server that use this configuration
-    			clientCtx.setUserToken(tlsConfiguration);
+			final String[] allowedCipherSuites = tlsConfig.getAllowedCipherSuites();
+			if (allowedCipherSuites != null && allowedCipherSuites.length > 0)
+    			log.debug("Set allowed cipher suites to : {}", Arrays.toString(allowedCipherSuites));
 
-    			String[] allowedProtocols = tlsConfiguration.getAllowedProtocols();
-    			if (allowedProtocols != null && allowedProtocols.length > 0)
-    				log.debug("Set allowed protocols to : {}", Arrays.toString(allowedProtocols));
-    			else
-    				// Use default of TLS 1.2 or 1.3
-    				allowedProtocols = new String[] { "TLSv1.2", "TLSv1.3" };
-
-    			final String[] allowedCipherSuites = tlsConfiguration.getAllowedCipherSuites();
-    			if (allowedCipherSuites != null && allowedCipherSuites.length > 0)
-	    			log.debug("Set allowed cipher suites to : {}", Arrays.toString(allowedCipherSuites));
-
-    			// Create and set the socket factory registry so the connection manager will use the correct TLS
-    			// settings when it needs to create connections for this request
-    			clientCtx.setAttribute(SOCKET_FACTORY_REGISTRY,
-    				RegistryBuilder.<ConnectionSocketFactory>create()
-							.register("http", PlainConnectionSocketFactory.getSocketFactory())
-							.register("https", new SSLConnectionSocketFactory(createSSLContext(tlsConfiguration),
-																			allowedProtocols,
-																			allowedCipherSuites,
-																			(HostnameVerifier) null))
-							.build());
-    		}
-        }
+			// Create and set the socket factory registry so the connection manager will use the correct TLS
+			// settings when it needs to create connections for this request
+			clientCtx.setAttribute(SOCKET_FACTORY_REGISTRY,
+				RegistryBuilder.<ConnectionSocketFactory>create()
+						.register("http", PlainConnectionSocketFactory.getSocketFactory())
+						.register("https", new SSLConnectionSocketFactory(createSSLContext(tlsConfig),
+																		allowedProtocols,
+																		allowedCipherSuites,
+																		(HostnameVerifier) null))
+						.build());
+		}
 
 		RequestImpl request = new RequestImpl(HttpClientBuilder.create().setConnectionManager(connectionManager)
 				  										 .setConnectionManagerShared(true)
@@ -155,7 +142,7 @@ class HTTPSender extends org.apache.axis2.transport.http.HTTPSender {
 	 * @throws AxisFault if an error occurs loading the key pair to be used for TLS client authentication from the
 	 * 					 installed Certificate Manager.
 	 */
-	private SSLContext createSSLContext(TLSConfiguration tlsConfiguration) throws AxisFault {
+	private SSLContext createSSLContext(ITLSConfiguration tlsConfiguration) throws AxisFault {
 		KeyManager[] kms = null;
 		String clientCertAlias = tlsConfiguration.getClientCertificateAlias();
 		if (!Utils.isNullOrEmpty(clientCertAlias)) {

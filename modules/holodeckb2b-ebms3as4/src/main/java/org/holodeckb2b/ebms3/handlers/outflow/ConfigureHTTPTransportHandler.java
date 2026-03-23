@@ -19,13 +19,17 @@ package org.holodeckb2b.ebms3.handlers.outflow;
 import org.apache.axis2.Constants;
 import org.apache.axis2.context.MessageContext;
 import org.holodeckb2b.common.handlers.AbstractConfigureHTTPTransport;
+import org.holodeckb2b.common.pmode.Protocol;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.pmode.PModeUtils;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
 import org.holodeckb2b.interfaces.messagemodel.IPayload.Containment;
 import org.holodeckb2b.interfaces.messagemodel.IReceipt;
+import org.holodeckb2b.interfaces.messagemodel.ISignalMessage;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.pmode.ILeg;
+import org.holodeckb2b.interfaces.pmode.IProtocol;
 import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
 
 /**
@@ -38,43 +42,57 @@ import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
 public class ConfigureHTTPTransportHandler extends AbstractConfigureHTTPTransport {
 
 	@Override
-	protected String getDestinationURL(IMessageUnitEntity msgToSend, IMessageProcessingContext procCtx) {
+	protected IProtocol getProtocolConfig(IMessageUnitEntity msgToSend, IMessageProcessingContext procCtx) {
 		ILeg leg = PModeUtils.getLeg(msgToSend);
 		if (leg == null)
 			return null;
 
-        String destURL = null;
-        try {
-            // If the message to send is a Receipt or Error signal we first check if they have a specific URL defined,
-        	// otherwise we will use the default target URL
-            try {
-               if (msgToSend instanceof IReceipt)
-                    destURL = leg.getReceiptConfiguration().getTo();
-                else if (msgToSend instanceof IErrorMessage)
-                    destURL = leg.getUserMessageFlow().getErrorHandlingConfiguration().getReceiverErrorsTo();
-            } catch (NullPointerException npe) {}
-            // If not we use the URL defined on the leg level which is also the one to use for UserMessage and
-            // PullRequest
-            if (destURL == null)
-                destURL = leg.getProtocol().getAddress();
-        } catch (final NullPointerException npe) {
-        }
-
-        return destURL;
+		IProtocol legProtocol = leg.getProtocol();
+		if (legProtocol != null)
+			return legProtocol;
+		// Receipts and Error Messages may have a specific target URL
+		else if (msgToSend instanceof IReceipt || msgToSend instanceof IErrorMessage) {
+			Protocol sigProtocol = new Protocol();
+			sigProtocol.setAddress(getSignalTargetURL((ISignalMessage) msgToSend, leg));
+			return sigProtocol;
+		} else
+			return null;
     }
 
 	@Override
 	protected void prepareHttp(IMessageUnitEntity msgToSend, IMessageProcessingContext procCtx) {
 		MessageContext messageContext = procCtx.getParentContext();
-        // Disable use of SOAP Action (=> will result in empty SOAPAction http header for SOAP 1.1)
-    	messageContext.setProperty(Constants.Configuration.DISABLE_SOAP_ACTION, "true");
 
-    	// If the primary message unit is not a User Message or does not contain any attachments we can disable SwA
-    	IMessageUnitEntity primary = procCtx.getPrimaryMessageUnit();
-        boolean hasAttachments = primary != null && (primary instanceof IUserMessage) &&
-        							((IUserMessage) primary).getPayloads() != null &&
-        							((IUserMessage) primary).getPayloads().stream()
-								  						  .anyMatch(p -> p.getContainment() == Containment.ATTACHMENT);
-        messageContext.setProperty(Constants.Configuration.ENABLE_SWA, hasAttachments);
+		// When the primary message unit is a Receipt or Error message it could have a specific target URL which may
+		// not have been set in the getProtocolConfig method because the Leg also contained a Protocol with target URL.
+		// So we set the target URL explicitly.
+		if (msgToSend instanceof ISignalMessage) {
+			String targetURL = getSignalTargetURL((ISignalMessage) msgToSend, PModeUtils.getLeg(msgToSend));
+			if (!Utils.isNullOrEmpty(targetURL))
+				messageContext.setProperty(Constants.Configuration.TRANSPORT_URL, targetURL);
+		}
+
+		// Disable use of SOAP Action (=> will result in empty SOAPAction http header for SOAP 1.1)
+		messageContext.setProperty(Constants.Configuration.DISABLE_SOAP_ACTION, "true");
+
+		// If the primary message unit is not a User Message or does not contain any attachments we can disable SwA
+		IMessageUnitEntity primary = procCtx.getPrimaryMessageUnit();
+		boolean hasAttachments = primary != null && (primary instanceof IUserMessage)
+				&& ((IUserMessage) primary).getPayloads() != null && ((IUserMessage) primary).getPayloads().stream()
+						.anyMatch(p -> p.getContainment() == Containment.ATTACHMENT);
+		messageContext.setProperty(Constants.Configuration.ENABLE_SWA, hasAttachments);
+	}
+
+	private String getSignalTargetURL(ISignalMessage msgToSend, ILeg leg) {
+		try {
+           if (msgToSend instanceof IReceipt)
+                return leg.getReceiptConfiguration().getTo();
+           else if (msgToSend instanceof IErrorMessage)
+                return leg.getUserMessageFlow().getErrorHandlingConfiguration().getReceiverErrorsTo();
+           else
+				return null;
+        } catch (NullPointerException npe) {
+        	return null;
+        }
 	}
 }
