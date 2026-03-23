@@ -86,7 +86,7 @@ public class SaveUserMsgAttachmentsTest {
         payload.setPayloadURI("some-att-cid");
         userMessage.addPayload(payload);
 
-        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
         IUserMessageEntity userMsgEntity = HolodeckB2BCore.getStorageManager().storeReceivedMessageUnit(userMessage);
         procCtx.setUserMessage(userMsgEntity);
 
@@ -126,7 +126,7 @@ public class SaveUserMsgAttachmentsTest {
         payload.setPayloadURI("some-att-cid");
         userMessage.addPayload(payload);
 
-        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
         IUserMessageEntity userMsgEntity = HolodeckB2BCore.getStorageManager().storeReceivedMessageUnit(userMessage);
         procCtx.setUserMessage(userMsgEntity);
 

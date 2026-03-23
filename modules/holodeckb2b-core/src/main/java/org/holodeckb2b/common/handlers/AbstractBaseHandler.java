@@ -26,7 +26,6 @@ import org.apache.commons.logging.Log;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.commons.util.Utils;
-import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 
 /**
@@ -43,10 +42,10 @@ public abstract class AbstractBaseHandler extends AbstractHandler {
     protected String 	handledMsgProtocol = null;
     /**
      * Indicator whether the handler is configured to only run when it is responding to a received request. This
-     * should be indicated by setting the handler parameter <i>onlyAsResponder</i> to "true". 
+     * should be indicated by setting the handler parameter <i>onlyAsResponder</i> to "true".
      */
     private	boolean 	runOnlyAsResponder;
-    
+
     /**
      * Initializes the handler by checking it is contained in a Holodeck B2B module that is dealing with a specific
      * messaging protocol, e.g. ebMS V3 or AS2. The protocol handled by the module must be specified in the <i>
@@ -61,7 +60,7 @@ public abstract class AbstractBaseHandler extends AbstractHandler {
         } catch (Exception e) {
     		LogManager.getLogger().warn("Not running inside a Holodeck B2B module for message processing");
         }
-        
+
         Parameter restricted = handlerdesc.getParameter("onlyAsResponder");
         runOnlyAsResponder = restricted != null && JavaUtils.isTrueExplicitly(restricted.getValue());
     }
@@ -81,17 +80,17 @@ public abstract class AbstractBaseHandler extends AbstractHandler {
      */
     @Override
 	public final InvocationResponse invoke(final MessageContext mc) throws AxisFault {
-    	
+
     	// Check if the handler is restricted to run only when responding to a request
     	if (runOnlyAsResponder && !mc.isServerSide())
     		return InvocationResponse.CONTINUE;
-    		
+
     	Logger log = prepareLog(mc);
-    	
+
         // Do actual processing in implementation
         try {
             log.trace("Start processing");
-            final InvocationResponse result = doProcessing(MessageProcessingContext.getFromMessageContext(mc), log);
+            final InvocationResponse result = doProcessing(IMessageProcessingContext.getFromMessageContext(mc), log);
             log.trace("End processing");
             return result;
         } catch (final Throwable t) {
@@ -100,7 +99,7 @@ public abstract class AbstractBaseHandler extends AbstractHandler {
             throw new AxisFault("Internal error", t);
         }
     }
-    
+
     /**
      * Runs when the execution of the flow is completed and if the handler is executed during that flow. Actual
      * processing is only needed when implementation is supposed to run in this flow.
@@ -110,19 +109,19 @@ public abstract class AbstractBaseHandler extends AbstractHandler {
     @Override
     public final void flowComplete(final MessageContext mc) {
         if (!runOnlyAsResponder || mc.isServerSide())
-            doFlowComplete(MessageProcessingContext.getFromMessageContext(mc), prepareLog(mc));
+            doFlowComplete(IMessageProcessingContext.getFromMessageContext(mc), prepareLog(mc));
     }
-    
+
     /**
      * Helper method to prepare a corrected named log.
-     *  
+     *
      * @param mc	The message context
      * @return		The log to be used during this execution of the handler
      */
     private Logger prepareLog(final MessageContext mc) {
         // Determine which flow the handler currently runs is
         String 	currentFlowName = mc.isServerSide() ? "RESPONSE_" : "REQUEST_";
-        
+
         switch (mc.getFLOW()) {
             case MessageContext.IN_FLOW :
                 currentFlowName += "IN_FLOW"; break;
@@ -131,20 +130,20 @@ public abstract class AbstractBaseHandler extends AbstractHandler {
             case MessageContext.OUT_FLOW :
                 currentFlowName += "OUT_FLOW"; break;
             case MessageContext.OUT_FAULT_FLOW :
-                currentFlowName += "OUT_FAULT_FLOW"; 
+                currentFlowName += "OUT_FAULT_FLOW";
         }
-        
+
         // Running in correct flow, create a logger
         return LogManager.getLogger("org.holodeckb2b.msgproc." + (!Utils.isNullOrEmpty(handledMsgProtocol) ?
                                                                 handledMsgProtocol + "." : "")
         													+ currentFlowName + "." + getHandlerDesc().getName());
     }
-    
+
     /**
      * Abstract method that implementations must use to do the actual message processing.
      *
      * @param procCtx       The current Holodeck B2B {@link IMessageProcessingContext}
-     * @param log 			Log to use 
+     * @param log 			Log to use
      * @return              How to continue processing of the message. If message processing should not continue, it is
      *                      RECOMMENDED to throw an AxisFault instead of returning <code>InvocationResponse.ABORT</code>
      *                      because this enables sending a response.
@@ -153,7 +152,7 @@ public abstract class AbstractBaseHandler extends AbstractHandler {
      *                      units in an undefined state! Also ensure that all information needed for a response is set
      *                      in the message context to make it available for handlers in the fault flow!
      */
-    protected abstract InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log) 
+    protected abstract InvocationResponse doProcessing(final IMessageProcessingContext procCtx, final Logger log)
     																								throws Exception;
 
     /**
@@ -165,7 +164,7 @@ public abstract class AbstractBaseHandler extends AbstractHandler {
      * <p>NOTE: A default no-op implementation is provided so sub classes only need to override if action is required.
      *
      * @param procCtx       The current Holodeck B2B {@link IMessageProcessingContext}
-     * @param log 			Log to use 
+     * @param log 			Log to use
      */
     protected void doFlowComplete(final IMessageProcessingContext procCtx, final Logger log) {}
 }

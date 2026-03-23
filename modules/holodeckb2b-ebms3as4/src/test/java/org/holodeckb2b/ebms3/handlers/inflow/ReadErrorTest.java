@@ -108,7 +108,7 @@ public class ReadErrorTest {
         mc.setFLOW(MessageContext.IN_FLOW);
         mc.setEnvelope(soapModelBuilder.getSOAPEnvelope());
 
-        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
         
         try {
             assertEquals(Handler.InvocationResponse.CONTINUE, new ReadError().invoke(mc));
@@ -138,7 +138,7 @@ public class ReadErrorTest {
     	mc.setFLOW(MessageContext.IN_FLOW);
     	mc.setEnvelope(soapModelBuilder.getSOAPEnvelope());
     	
-    	IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+    	IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
     	
     	try {
     		assertEquals(Handler.InvocationResponse.CONTINUE, new ReadError().invoke(mc));
@@ -171,7 +171,7 @@ public class ReadErrorTest {
     	mc.setFLOW(MessageContext.IN_FLOW);
     	mc.setEnvelope(soapModelBuilder.getSOAPEnvelope());
     	
-    	IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+    	IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
     	
     	try {
     		assertEquals(Handler.InvocationResponse.CONTINUE, new ReadError().invoke(mc));

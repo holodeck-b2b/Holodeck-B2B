@@ -95,7 +95,7 @@ public class DetectDuplicateUserMessagesTest {
         
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
-        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(userMessageEntity);
 
         // Do as if message is already delivered

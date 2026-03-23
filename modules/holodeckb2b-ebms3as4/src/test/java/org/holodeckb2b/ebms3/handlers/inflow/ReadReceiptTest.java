@@ -90,7 +90,7 @@ public class ReadReceiptTest {
     	mc.setFLOW(MessageContext.IN_FLOW);
     	mc.setEnvelope(soapModelBuilder.getSOAPEnvelope());
     	
-    	IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+    	IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
     	
     	try {
     		assertEquals(Handler.InvocationResponse.CONTINUE, new ReadReceipt().invoke(mc));
@@ -122,7 +122,7 @@ public class ReadReceiptTest {
         mc.setFLOW(MessageContext.IN_FLOW);
         mc.setEnvelope(soapModelBuilder.getSOAPEnvelope());
 
-        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
         
         try {
             assertEquals(Handler.InvocationResponse.CONTINUE, new ReadReceipt().invoke(mc));

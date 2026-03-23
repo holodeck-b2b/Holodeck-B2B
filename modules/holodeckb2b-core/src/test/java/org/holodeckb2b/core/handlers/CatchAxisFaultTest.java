@@ -30,9 +30,9 @@ import org.holodeckb2b.commons.testing.TestUtils;
 import org.holodeckb2b.commons.util.MessageIdUtils;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
-import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.core.storage.StorageManager;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.interfaces.storage.IReceiptEntity;
 import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
@@ -58,7 +58,7 @@ public class CatchAxisFaultTest {
         mc.setFLOW(MessageContext.IN_FLOW);
         mc.setServerSide(true);
 
-        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
 
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         UserMessage userMessage = new UserMessage();
@@ -89,7 +89,7 @@ public class CatchAxisFaultTest {
         mc.setFLOW(MessageContext.IN_FLOW);
         mc.setServerSide(true);
 
-        MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
 
         StorageManager updateManager = HolodeckB2BCore.getStorageManager();
         UserMessage userMessage = new UserMessage();
@@ -128,7 +128,7 @@ public class CatchAxisFaultTest {
     	mc.setFLOW(MessageContext.IN_FLOW);
     	mc.setServerSide(true);
 
-    	MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+    	IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
 
     	StorageManager updateManager = HolodeckB2BCore.getStorageManager();
     	UserMessage userMessage = new UserMessage();
@@ -160,7 +160,7 @@ public class CatchAxisFaultTest {
     	mc.setFLOW(MessageContext.OUT_FLOW);
     	mc.setServerSide(false);
 
-    	MessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+    	IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
 
     	StorageManager updateManager = HolodeckB2BCore.getStorageManager();
     	UserMessage userMessage = new UserMessage();

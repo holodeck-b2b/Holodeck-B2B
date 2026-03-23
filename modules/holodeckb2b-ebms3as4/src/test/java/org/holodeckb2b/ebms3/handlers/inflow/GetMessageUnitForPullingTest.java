@@ -89,7 +89,7 @@ public class GetMessageUnitForPullingTest {
         pullRequest.setMPC(T_MPC_1);
         IPullRequestEntity pullRequestEntity = storeManager.storeReceivedMessageUnit(pullRequest);
         
-        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
         procCtx.setPullRequest(pullRequestEntity);
 
         procCtx.setProperty(FindPModesForPullRequest.FOUND_PULL_PMODES, Collections.singletonList(pmode));
@@ -135,7 +135,7 @@ public class GetMessageUnitForPullingTest {
         pullRequest.setMessageId(MessageIdUtils.createMessageId());
         IPullRequestEntity pullRequestEntity = storeManager.storeReceivedMessageUnit(pullRequest);
         
-        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
         procCtx.setPullRequest(pullRequestEntity);
 
         procCtx.setProperty(FindPModesForPullRequest.FOUND_PULL_PMODES, Collections.singletonList(pmode));

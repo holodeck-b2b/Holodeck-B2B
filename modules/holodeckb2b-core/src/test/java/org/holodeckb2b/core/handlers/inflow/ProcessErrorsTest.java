@@ -97,7 +97,7 @@ public class ProcessErrorsTest {
 		IErrorMessageEntity errorMessageEntity = storageManager.storeReceivedMessageUnit(errorMessage);
 		storageManager.setProcessingState(errorMessageEntity, ProcessingState.RECEIVED);
 
-		IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+		IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
 		procCtx.addReceivedError(errorMessageEntity);
 
 		try {
@@ -126,7 +126,7 @@ public class ProcessErrorsTest {
 		MessageContext mc = new MessageContext();
 		mc.setFLOW(MessageContext.OUT_FLOW);
 
-		IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+		IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
 		procCtx.setUserMessage(storageManager.storeOutGoingMessageUnit(userMessage));
 				
 		mc.setFLOW(MessageContext.IN_FLOW);

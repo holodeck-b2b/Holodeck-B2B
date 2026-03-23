@@ -86,7 +86,7 @@ public class DecompressionHandlerTest {
 
         // Setting input message property
         IUserMessageEntity userMessageEntity = HolodeckB2BCore.getStorageManager().storeReceivedMessageUnit(userMessage);
-        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(userMessageEntity);
 
         try {

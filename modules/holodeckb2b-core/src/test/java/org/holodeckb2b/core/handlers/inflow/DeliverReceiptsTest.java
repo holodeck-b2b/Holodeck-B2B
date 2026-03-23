@@ -65,7 +65,7 @@ public class DeliverReceiptsTest {
     @Test
     public void testDoProcessing() throws Exception {
     	MessageContext mc = new MessageContext();
-    	IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+    	IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
 
     	for(int i = 0; i < 4; i++) {
 	    	Receipt receipt = new Receipt();
@@ -91,7 +91,7 @@ public class DeliverReceiptsTest {
     @Test
     public void testIgnoreNonReady() throws Exception {
     	MessageContext mc = new MessageContext();
-    	IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+    	IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
     	
     	Receipt receipt = new Receipt();
         receipt.setMessageId(UUID.randomUUID().toString());

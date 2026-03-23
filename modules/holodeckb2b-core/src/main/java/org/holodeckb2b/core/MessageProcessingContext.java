@@ -24,7 +24,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.handlers.AbstractBaseHandler;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
@@ -37,90 +36,60 @@ import org.holodeckb2b.interfaces.storage.IReceiptEntity;
 import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
 
 /**
- * Is the implementation of {@link IMessageProcessingContext} that represents the Holodeck B2B <i>message processing 
+ * Is the implementation of {@link IMessageProcessingContext} that represents the Holodeck B2B <i>message processing
  * context</i> during the execution of the message processing pipe line.
- *  
+ * <p>
+ * The message processing context is instantiated and bound to the Axis2 message context by the {@link
+ * IMessageProcessingContext#getFromMessageContext()} method using Java SPI.
+ *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since  4.1.0
  * @since  5.0.0 Now implements interface extracted from earlier version
- * @see AbstractBaseHandler
  */
 public class MessageProcessingContext implements IMessageProcessingContext {
-	/**
-	 * The name of the Axis2 message context property used to store this Holodeck B2B message processing context
-	 */
-	private static final String	AXIS_MSG_CTX_PROP = "hb2b-msgprocctx";
-        
 	private MessageContext						axisParentCtx;
-	
+
 	private IUserMessageEntity					receivedUserMessage;
 	private IUserMessageEntity					sendingUserMessage;
-	
+
 	private IPullRequestEntity					receivedPullRequest;
 	private IPullRequestEntity					sendingPullRequest;
-	
+
 	private ArrayList<IReceiptEntity>			receivedReceipts = new ArrayList<>();
 	private ArrayList<IReceiptEntity>			sendingReceipts = new ArrayList<>();
-	
+
 	private ArrayList<IErrorMessageEntity>		receivedErrors = new ArrayList<>();
 	private ArrayList<IErrorMessageEntity>		sendingErrors = new ArrayList<>();
-	
+
 	/**
-	 * The errors generated during the processing of a received message, mapped to the messageId of the message in 
+	 * The errors generated during the processing of a received message, mapped to the messageId of the message in
 	 * error. If an error does not reference a message it will be added to the special key {@link #UNREFD_ERRORS}.
-	 * <p>NOTE: As errors that occur during the processing of an outgoing message are reported using {@link 
+	 * <p>NOTE: As errors that occur during the processing of an outgoing message are reported using {@link
 	 * IMessageProcessingEvent}s there is no need to store these in the context.
 	 */
 	private Map<String, Collection<IEbmsError>>		generatedErrors  = new HashMap<>();
-			
+
 	private boolean	needsResponse = false;
-	
+
 	private boolean execDupElimination = false;
-	
+
 	/**
 	 * Stores the results of processing the security tokens available in the incoming message. These may be needed by
-	 * multiple handlers in the pipeline, for example to authorise messages or find a matching P-Mode.  
+	 * multiple handlers in the pipeline, for example to authorise messages or find a matching P-Mode.
 	 */
 	private Collection<ISecurityProcessingResult>	securityResults = new ArrayList<>();
-	
+
 	/**
 	 * Handlers or extension can add custom properties to the processing context so they can pass information to
 	 * other components.
 	 */
 	private Map<String, Object>		properties = new HashMap<>();
-	
-	/**
-	 * Gets the message processing associated with the given Axis2 message context. If the context does not contain a
-	 * processing context, a new one will be created and linked to it. 
-	 * 
-	 * @param mc	The Axis2 message context
-	 * @return		The Holodeck B2B processing context associated with it
-	 */
-	public static MessageProcessingContext getFromMessageContext(final MessageContext mc) {
-		MessageProcessingContext procCtx = (MessageProcessingContext) mc.getProperty(AXIS_MSG_CTX_PROP);
-		if (procCtx == null) 
-			procCtx = new MessageProcessingContext(mc);
-		
-		return procCtx;
-	}
 
-	/**
-	 * Creates a new instance based on the given Axis2 message context.
-	 * 
-	 * @param axisMsgCtx	The Axis2 message context
-	 */
-	private MessageProcessingContext(final MessageContext axisMsgCtx) {
-		this.setParentContext(axisMsgCtx);		
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.holodeckb2b.core.handlers.IMessageProcessingContext#setParentContext(org.apache.axis2.context.MessageContext)
-	 */
+	@Override
 	public void setParentContext(final MessageContext axisMsgCtx) {
 		this.axisParentCtx = axisMsgCtx;
-		axisMsgCtx.setProperty(AXIS_MSG_CTX_PROP, this);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.holodeckb2b.core.handlers.IMessageProcessingContext#getParentContext()
 	 */
@@ -128,7 +97,7 @@ public class MessageProcessingContext implements IMessageProcessingContext {
 	public MessageContext getParentContext() {
 		return axisParentCtx;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.holodeckb2b.core.handlers.IMessageProcessingContext#isHB2BInitiated()
 	 */
@@ -136,85 +105,85 @@ public class MessageProcessingContext implements IMessageProcessingContext {
 	public boolean isHB2BInitiated() {
 		return !axisParentCtx.isServerSide();
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.holodeckb2b.core.handlers.IMessageProcessingContext#removeAllMessages()
 	 */
 	@Override
 	public void removeAllMessages() {
 		receivedUserMessage = null;
-		sendingUserMessage 	= null;		
+		sendingUserMessage 	= null;
 		receivedPullRequest = null;
-		sendingPullRequest 	= null;		
+		sendingPullRequest 	= null;
 		receivedReceipts 	= new ArrayList<>();
-		sendingReceipts 	= new ArrayList<>();		
+		sendingReceipts 	= new ArrayList<>();
 		receivedErrors 		= new ArrayList<>();
 		sendingErrors 		= new ArrayList<>();
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.holodeckb2b.core.handlers.IMessageProcessingContext#setUserMessage(org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity)
 	 */
 	@Override
 	public void setUserMessage(final IUserMessageEntity userMessage) {
-		if (currentFlowIsIn()) 	
+		if (currentFlowIsIn())
 			this.receivedUserMessage = userMessage;
-		else 
-			this.sendingUserMessage = userMessage;				
+		else
+			this.sendingUserMessage = userMessage;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.holodeckb2b.core.handlers.IMessageProcessingContext#setResponseUserMessage(org.holodeckb2b.interfaces.persistency.entities.IUserMessageEntity)
 	 */
 	@Override
 	public void setResponseUserMessage(final IUserMessageEntity userMessage) {
-		this.sendingUserMessage = userMessage;				
+		this.sendingUserMessage = userMessage;
 		this.needsResponse = true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.holodeckb2b.core.handlers.IMessageProcessingContext#getReceivedUserMessage()
 	 */
 	@Override
 	public IUserMessageEntity getReceivedUserMessage() {
-		return receivedUserMessage;		
+		return receivedUserMessage;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.holodeckb2b.core.handlers.IMessageProcessingContext#getSendingUserMessage()
 	 */
 	@Override
 	public IUserMessageEntity getSendingUserMessage() {
-		return sendingUserMessage;		
+		return sendingUserMessage;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.holodeckb2b.core.handlers.IMessageProcessingContext#setPullRequest(org.holodeckb2b.interfaces.persistency.entities.IPullRequestEntity)
 	 */
 	@Override
 	public void setPullRequest(final IPullRequestEntity pullRequest) {
-		if (currentFlowIsIn()) 
-			this.receivedPullRequest = pullRequest;		
-		else 
+		if (currentFlowIsIn())
+			this.receivedPullRequest = pullRequest;
+		else
 			this.sendingPullRequest = pullRequest;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.holodeckb2b.core.handlers.IMessageProcessingContext#getReceivedPullRequest()
 	 */
 	@Override
 	public IPullRequestEntity getReceivedPullRequest() {
-		return receivedPullRequest;		
+		return receivedPullRequest;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.holodeckb2b.core.handlers.IMessageProcessingContext#getSendingPullRequest()
 	 */
 	@Override
 	public IPullRequestEntity getSendingPullRequest() {
-		return sendingPullRequest;		
+		return sendingPullRequest;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.holodeckb2b.core.handlers.IMessageProcessingContext#addReceivedReceipt(org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity)
 	 */
@@ -230,7 +199,7 @@ public class MessageProcessingContext implements IMessageProcessingContext {
 	public Collection<IReceiptEntity> getReceivedReceipts() {
     	return receivedReceipts;
     }
-    
+
     /* (non-Javadoc)
 	 * @see org.holodeckb2b.core.handlers.IMessageProcessingContext#setSendingReceipts(java.util.Collection)
 	 */
@@ -238,7 +207,7 @@ public class MessageProcessingContext implements IMessageProcessingContext {
 	public void setSendingReceipts(final Collection<IReceiptEntity> receiptsToSend) {
     	this.sendingReceipts = new ArrayList<IReceiptEntity>(receiptsToSend);
     }
-    
+
     /* (non-Javadoc)
 	 * @see org.holodeckb2b.core.handlers.IMessageProcessingContext#addSendingReceipt(org.holodeckb2b.interfaces.persistency.entities.IReceiptEntity)
 	 */
@@ -246,7 +215,7 @@ public class MessageProcessingContext implements IMessageProcessingContext {
 	public void addSendingReceipt(final IReceiptEntity receipt) {
     	sendingReceipts.add(receipt);
     }
-    
+
     /* (non-Javadoc)
 	 * @see org.holodeckb2b.core.handlers.IMessageProcessingContext#getSendingReceipts()
 	 */
@@ -254,7 +223,7 @@ public class MessageProcessingContext implements IMessageProcessingContext {
 	public Collection<IReceiptEntity> getSendingReceipts() {
     	return sendingReceipts;
     }
-    
+
     /* (non-Javadoc)
 	 * @see org.holodeckb2b.core.handlers.IMessageProcessingContext#addReceivedError(org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity)
 	 */
@@ -262,7 +231,7 @@ public class MessageProcessingContext implements IMessageProcessingContext {
 	public void addReceivedError(final IErrorMessageEntity error) {
     	receivedErrors.add(error);
     }
-    
+
     /* (non-Javadoc)
 	 * @see org.holodeckb2b.core.handlers.IMessageProcessingContext#getReceivedErrors()
 	 */
@@ -278,7 +247,7 @@ public class MessageProcessingContext implements IMessageProcessingContext {
 	public void setSendingErrors(final Collection<IErrorMessageEntity> errorsToSend) {
     	this.sendingErrors = new ArrayList<IErrorMessageEntity>(errorsToSend);
     }
-    
+
     /* (non-Javadoc)
 	 * @see org.holodeckb2b.core.handlers.IMessageProcessingContext#addSendingError(org.holodeckb2b.interfaces.persistency.entities.IErrorMessageEntity)
 	 */
@@ -286,7 +255,7 @@ public class MessageProcessingContext implements IMessageProcessingContext {
 	public void addSendingError(final IErrorMessageEntity error) {
     	sendingErrors.add(error);
     }
-    
+
     /* (non-Javadoc)
 	 * @see org.holodeckb2b.core.handlers.IMessageProcessingContext#getSendingErrors()
 	 */
@@ -308,9 +277,9 @@ public class MessageProcessingContext implements IMessageProcessingContext {
             messageUnits.add(receivedPullRequest);
         messageUnits.addAll(receivedReceipts);
         messageUnits.addAll(receivedErrors);
-        
+
         return messageUnits;
-    }  
+    }
 
     /* (non-Javadoc)
 	 * @see org.holodeckb2b.core.handlers.IMessageProcessingContext#getReceivedMessageUnit(java.lang.String)
@@ -319,30 +288,30 @@ public class MessageProcessingContext implements IMessageProcessingContext {
 	public IMessageUnitEntity getReceivedMessageUnit(final String messageId) {
     	if (messageId == null)
     		throw new IllegalArgumentException("MessageId to search for must not be null");
-    	
+
     	Optional<IMessageUnitEntity> refdMsgUnit = getReceivedMessageUnits().parallelStream()
     																.filter(mu -> messageId.equals(mu.getMessageId()))
     																.findFirst();
     	return refdMsgUnit.isPresent() ? refdMsgUnit.get() : null;
     }
-    
+
     /* (non-Javadoc)
 	 * @see org.holodeckb2b.core.handlers.IMessageProcessingContext#getSendingMessageUnits()
 	 */
     @Override
 	public Collection<IMessageUnitEntity> getSendingMessageUnits() {
         final Collection<IMessageUnitEntity>   messageUnits = new ArrayList<>();
-        
+
         if (sendingUserMessage != null)
         	messageUnits.add(sendingUserMessage);
         if (sendingPullRequest != null)
             messageUnits.add(sendingPullRequest);
         messageUnits.addAll(sendingReceipts);
         messageUnits.addAll(sendingErrors);
-        
+
         return messageUnits;
     }
-    
+
     /* (non-Javadoc)
 	 * @see org.holodeckb2b.core.handlers.IMessageProcessingContext#getSendingMessageUnit(java.lang.String)
 	 */
@@ -350,13 +319,13 @@ public class MessageProcessingContext implements IMessageProcessingContext {
 	public IMessageUnitEntity getSendingMessageUnit(final String messageId) {
     	if (messageId == null)
     		throw new IllegalArgumentException("MessageId to search for must not be null");
-    	
+
     	Optional<IMessageUnitEntity> refdMsgUnit = getSendingMessageUnits().parallelStream()
     																.filter(mu -> messageId.equals(mu.getMessageId()))
     																.findFirst();
     	return refdMsgUnit.isPresent() ? refdMsgUnit.get() : null;
     }
-    
+
     /* (non-Javadoc)
 	 * @see org.holodeckb2b.core.handlers.IMessageProcessingContext#addGeneratedError(org.holodeckb2b.interfaces.messagemodel.IEbmsError)
 	 */
@@ -372,26 +341,26 @@ public class MessageProcessingContext implements IMessageProcessingContext {
     	}
     	errorsForRefdMsg.add(error);
     }
-    
+
     /* (non-Javadoc)
 	 * @see org.holodeckb2b.core.handlers.IMessageProcessingContext#getGeneratedErrors()
 	 */
     @Override
-	public Map<String, Collection<IEbmsError>> getGeneratedErrors() {    	
+	public Map<String, Collection<IEbmsError>> getGeneratedErrors() {
     	return generatedErrors;
-    }    
-    
+    }
+
     /* (non-Javadoc)
 	 * @see org.holodeckb2b.core.handlers.IMessageProcessingContext#getPrimaryMessageUnit()
 	 */
     @Override
 	public IMessageUnitEntity getPrimaryMessageUnit() {
-    	if (currentFlowIsIn()) 
-    		return getPrimaryReceivedMessageUnit(); 
-    	else 
-    		return getPrimarySentMessageUnit();    	
+    	if (currentFlowIsIn())
+    		return getPrimaryReceivedMessageUnit();
+    	else
+    		return getPrimarySentMessageUnit();
     }
-    
+
 	/* (non-Javadoc)
 	 * @see org.holodeckb2b.core.handlers.IMessageProcessingContext#getPrimaryMessageUnit()
 	 * @since 6.0.0
@@ -404,10 +373,10 @@ public class MessageProcessingContext implements IMessageProcessingContext {
             return receivedReceipts.get(0);
         else if (!Utils.isNullOrEmpty(receivedErrors))
             return receivedErrors.get(0);
-        else 
+        else
         	return receivedPullRequest;
     }
-    
+
     /* (non-Javadoc)
   	 * @see org.holodeckb2b.core.handlers.IMessageProcessingContext#getPrimarySentMessageUnit()
   	 * @since 6.0.0
@@ -423,9 +392,9 @@ public class MessageProcessingContext implements IMessageProcessingContext {
         else if (!Utils.isNullOrEmpty(sendingErrors))
             return sendingErrors.get(0);
         else
-        	return null;    	
+        	return null;
     }
- 
+
     /* (non-Javadoc)
 	 * @see org.holodeckb2b.core.handlers.IMessageProcessingContext#addSecurityProcessingResult(org.holodeckb2b.interfaces.security.ISecurityProcessingResult)
 	 */
@@ -433,7 +402,7 @@ public class MessageProcessingContext implements IMessageProcessingContext {
 	public void addSecurityProcessingResult(final ISecurityProcessingResult result) {
     	securityResults.add(result);
     }
-    
+
     /* (non-Javadoc)
 	 * @see org.holodeckb2b.core.handlers.IMessageProcessingContext#getSecurityProcessingResults(java.lang.Class)
 	 */
@@ -442,7 +411,7 @@ public class MessageProcessingContext implements IMessageProcessingContext {
 	public <T extends ISecurityProcessingResult> Collection<T> getSecurityProcessingResults(final Class<T> type) {
 		if (type == null)
 			throw new IllegalArgumentException("A specific type of result must be specified");
-		
+
 		return (Collection<T>) securityResults.parallelStream().filter(r -> type.isAssignableFrom(r.getClass()))
 															   .collect(Collectors.toList());
 	}
@@ -454,7 +423,7 @@ public class MessageProcessingContext implements IMessageProcessingContext {
 	public Collection<ISecurityProcessingResult> getSecurityProcessingResults() {
     	return securityResults;
     }
-    
+
     /* (non-Javadoc)
 	 * @see org.holodeckb2b.core.handlers.IMessageProcessingContext#setNeedsResponse(boolean)
 	 */
@@ -464,7 +433,7 @@ public class MessageProcessingContext implements IMessageProcessingContext {
     		throw new IllegalStateException("Already responding");
     	this.needsResponse = responseNeeded;
     }
-    
+
     /* (non-Javadoc)
 	 * @see org.holodeckb2b.core.handlers.IMessageProcessingContext#responseNeeded()
 	 */
@@ -472,23 +441,23 @@ public class MessageProcessingContext implements IMessageProcessingContext {
 	public boolean responseNeeded() {
     	return needsResponse;
     }
-    
+
     /* (non-Javadoc)
 	 * @see org.holodeckb2b.core.handlers.IMessageProcessingContext#setDuplicateElimination(boolean)
 	 */
 	@Override
 	public void setDuplicateElimination(boolean useDupElimination) {
-		execDupElimination = useDupElimination;		
+		execDupElimination = useDupElimination;
 	}
-    
+
     /* (non-Javadoc)
 	 * @see org.holodeckb2b.core.handlers.IMessageProcessingContext#eliminateDuplicates()
 	 */
 	@Override
 	public boolean eliminateDuplicates() {
 		return execDupElimination;
-	}    
-    
+	}
+
     /* (non-Javadoc)
 	 * @see org.holodeckb2b.core.handlers.IMessageProcessingContext#setProperty(java.lang.String, java.lang.Object)
 	 */
@@ -507,14 +476,14 @@ public class MessageProcessingContext implements IMessageProcessingContext {
     		v = axisParentCtx.getProperty(name);
     	return v;
     }
-    
+
     /**
-     * Checks if the current flow is incoming or outgoing. 
-     * 
+     * Checks if the current flow is incoming or outgoing.
+     *
      * @return	<code>true</code> if the current flow is incoming,<br><code>false</code> if outgoing
      */
     private boolean currentFlowIsIn() {
-    	return axisParentCtx.getFLOW() == MessageContext.IN_FLOW 
+    	return axisParentCtx.getFLOW() == MessageContext.IN_FLOW
     			|| axisParentCtx.getFLOW() == MessageContext.IN_FAULT_FLOW;
     }
 }

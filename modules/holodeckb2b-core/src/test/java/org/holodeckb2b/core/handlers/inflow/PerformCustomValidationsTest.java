@@ -112,7 +112,7 @@ public class PerformCustomValidationsTest {
 
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
-        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(umEntity);
 
         try {
@@ -147,7 +147,7 @@ public class PerformCustomValidationsTest {
 
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
-        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(umEntity);
 
         try {
@@ -185,7 +185,7 @@ public class PerformCustomValidationsTest {
 
     	MessageContext mc = new MessageContext();
     	mc.setFLOW(MessageContext.IN_FLOW);
-    	IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+    	IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
     	procCtx.setUserMessage(umEntity);
 
     	try {
@@ -220,7 +220,7 @@ public class PerformCustomValidationsTest {
 
     	MessageContext mc = new MessageContext();
     	mc.setFLOW(MessageContext.IN_FLOW);
-    	IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+    	IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
     	procCtx.setUserMessage(umEntity);
 
     	try {

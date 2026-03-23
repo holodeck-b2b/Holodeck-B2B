@@ -122,7 +122,7 @@ public class DetermineErrorReportingTest {
         mc.setServerSide(true);
         mc.setFLOW(MessageContext.IN_FLOW);
 
-        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(userMessageEntity);
 
         // Create the Error Signal referencing the message unit
@@ -172,7 +172,7 @@ public class DetermineErrorReportingTest {
         mc.setServerSide(true);
         mc.setFLOW(MessageContext.IN_FLOW);
 
-        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
         procCtx.setPullRequest(pullRequestEntity);
 
         // Create the Error Signal referencing the message unit
@@ -222,7 +222,7 @@ public class DetermineErrorReportingTest {
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
 
-        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(userMessageEntity);
 
         // Create the Error Signal referencing the message unit
@@ -262,7 +262,7 @@ public class DetermineErrorReportingTest {
         mc.setServerSide(true);
         mc.setFLOW(MessageContext.IN_FLOW);
 
-        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(userMessageEntity);
 
         // Create the Error Signal referencing the message unit
@@ -304,7 +304,7 @@ public class DetermineErrorReportingTest {
         mc.setServerSide(true);
         mc.setFLOW(MessageContext.IN_FLOW);
 
-        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(userMessageEntity);
         procCtx.addReceivedReceipt(rcptEntity);
 
@@ -346,7 +346,7 @@ public class DetermineErrorReportingTest {
         mc.setServerSide(true);
         mc.setFLOW(MessageContext.IN_FLOW);
 
-        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(userMessageEntity);
         procCtx.addReceivedReceipt(rcptEntity);
 
@@ -386,7 +386,7 @@ public class DetermineErrorReportingTest {
         MessageContext mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
 
-        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(userMessageEntity);
 
         // Create the Error Signal referencing the message unit

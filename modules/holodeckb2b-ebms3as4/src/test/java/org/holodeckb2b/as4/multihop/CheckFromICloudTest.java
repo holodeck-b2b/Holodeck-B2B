@@ -67,7 +67,7 @@ public class CheckFromICloudTest {
             fail(axisFault.getMessage());
         }
 
-        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);        
+        IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);        
         IUserMessageEntity userMessageEntity = HolodeckB2BCore.getStorageManager()
         													  .storeReceivedMessageUnit(new UserMessage());
         procCtx.setUserMessage(userMessageEntity);

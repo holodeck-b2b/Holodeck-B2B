@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.apache.axis2.context.MessageContext;
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.messagemodel.IEbmsError;
 import org.holodeckb2b.interfaces.security.ISecurityProcessingResult;
 import org.holodeckb2b.interfaces.storage.IErrorMessageEntity;
@@ -43,7 +44,39 @@ public interface IMessageProcessingContext {
 	/**
 	 * Special key to identify the generated errors which do not reference a message in error.
 	 */
-	String	UNREFD_ERRORS = "unrefd";
+	final String	UNREFD_ERRORS = "unrefd";
+	/**
+	 * The name of the Axis2 message context property used to store this Holodeck B2B message processing context
+	 */
+	final String	AXIS_MSG_CTX_PROP = "hb2b-msgprocctx";
+
+	/**
+	 * Gets the message processing associated with the given Axis2 message context. If the context does not contain a
+	 * processing context, a new one will be created and linked to it.
+	 *
+	 * @param mc	The Axis2 message context
+	 * @return		The Holodeck B2B processing context associated with it
+	 */
+	static IMessageProcessingContext getFromMessageContext(final MessageContext mc) {
+		IMessageProcessingContext procCtx = (IMessageProcessingContext) mc.getProperty(AXIS_MSG_CTX_PROP);
+		if (procCtx == null) {
+			procCtx = Utils.getFirstAvailableProvider(IMessageProcessingContext.class);
+			if (procCtx == null)
+				throw new IllegalStateException("No message processing context implementation available");
+			mc.setProperty(AXIS_MSG_CTX_PROP, procCtx);
+			procCtx.setParentContext(mc);
+		}
+		return procCtx;
+	}
+
+	/**
+	 * Sets the parent Axis2 message context. Note that this method is only intended to be used by this interface when
+	 * binding a new message processing context to the current Axis2 message context.
+	 *
+	 * @return	The current Axis2 {@link MessageContext}
+	 * @since 8.2.0
+	 */
+	void setParentContext(MessageContext axisMsgCtx);
 
 	/**
 	 * Gets the current parent Axis2 message context.

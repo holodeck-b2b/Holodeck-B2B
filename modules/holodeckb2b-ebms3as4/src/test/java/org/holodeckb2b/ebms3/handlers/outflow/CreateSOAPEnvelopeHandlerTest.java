@@ -78,7 +78,7 @@ public class CreateSOAPEnvelopeHandlerTest {
     	UserMessage userMessage = new UserMessage();
     	userMessage.setPModeId(pmode.getId());
     	
-    	IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+    	IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
     	procCtx.setUserMessage(HolodeckB2BCore.getStorageManager().storeOutGoingMessageUnit(userMessage));
     	
     	try {
@@ -106,7 +106,7 @@ public class CreateSOAPEnvelopeHandlerTest {
         UserMessage userMessage = new UserMessage();
         userMessage.setPModeId(pmode.getId());
         
-        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(HolodeckB2BCore.getStorageManager().storeOutGoingMessageUnit(userMessage));
 
         try {
@@ -132,7 +132,7 @@ public class CreateSOAPEnvelopeHandlerTest {
     	UserMessage userMessage = new UserMessage();
     	userMessage.setPModeId(pmode.getId());
     	
-    	IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+    	IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
     	procCtx.setUserMessage(HolodeckB2BCore.getStorageManager().storeOutGoingMessageUnit(userMessage));
     	
     	// Mocking the Axis2 Operation Context

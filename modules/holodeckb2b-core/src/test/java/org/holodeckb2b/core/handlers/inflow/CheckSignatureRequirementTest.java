@@ -79,7 +79,7 @@ public class CheckSignatureRequirementTest {
         mc.setFLOW(MessageContext.IN_FLOW);
         mc.setServerSide(true);
 
-        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(HolodeckB2BCore.getStorageManager().storeReceivedMessageUnit(userMessage));
     }
 
@@ -91,7 +91,7 @@ public class CheckSignatureRequirementTest {
             fail("Unexpected exception: " + e.getClass().getSimpleName() + "/" + e.getMessage());
         }
 
-        assertTrue(Utils.isNullOrEmpty(MessageProcessingContext.getFromMessageContext(mc).getGeneratedErrors()));
+        assertTrue(Utils.isNullOrEmpty(IMessageProcessingContext.getFromMessageContext(mc).getGeneratedErrors()));
     }
 
     @Test
@@ -99,7 +99,7 @@ public class CheckSignatureRequirementTest {
 
     	pmode.getInitiator().getSecurityConfiguration().setSignatureConfiguration(new SigningConfig());
 
-    	IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+    	IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
         ISignatureProcessingResult  signatureResult = mock(ISignatureProcessingResult.class);
         procCtx.addSecurityProcessingResult(signatureResult);
 
@@ -126,7 +126,7 @@ public class CheckSignatureRequirementTest {
         }
 
         Map<String, Collection<IEbmsError>> generatedErrors =
-        										MessageProcessingContext.getFromMessageContext(mc).getGeneratedErrors();
+        										IMessageProcessingContext.getFromMessageContext(mc).getGeneratedErrors();
 
         assertFalse(Utils.isNullOrEmpty(generatedErrors));
         assertEquals(PolicyNoncompliance.ERROR_CODE,

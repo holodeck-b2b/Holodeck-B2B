@@ -81,7 +81,7 @@ public class AuthorizeMessageTest {
     public void setUp() throws Exception {
         mc = new MessageContext();
         mc.setFLOW(MessageContext.IN_FLOW);
-        procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        procCtx = IMessageProcessingContext.getFromMessageContext(mc);
 
         UserMessage userMessage = new UserMessage();
         userMessage.setPModeId(pmodeAuth.getId());

@@ -78,7 +78,7 @@ public class DeliverUserMessageTest {
 
 		storageManager.setProcessingState(umEntity, ProcessingState.READY_FOR_DELIVERY);
 		
-		IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+		IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
 		procCtx.setUserMessage(umEntity);
 
 		try {
@@ -102,7 +102,7 @@ public class DeliverUserMessageTest {
 
 		storageManager.setProcessingState(umEntity, ProcessingState.PROCESSING);
 		
-		IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+		IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
 		procCtx.setUserMessage(umEntity);
 
 		try {
@@ -126,7 +126,7 @@ public class DeliverUserMessageTest {
 
 		storageManager.setProcessingState(umEntity, ProcessingState.READY_FOR_DELIVERY);
 		
-		IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+		IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
 		procCtx.setUserMessage(umEntity);
 		
 		try {

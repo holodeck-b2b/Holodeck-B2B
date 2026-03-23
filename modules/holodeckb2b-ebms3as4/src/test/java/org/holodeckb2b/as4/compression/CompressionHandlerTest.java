@@ -40,8 +40,8 @@ import org.holodeckb2b.common.pmode.UserMessageFlow;
 import org.holodeckb2b.common.testhelpers.HB2BTestUtils;
 import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.commons.testing.TestUtils;
-import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.general.IProperty;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.pmode.ILeg.Label;
@@ -94,7 +94,7 @@ public class CompressionHandlerTest {
         attachments.addDataHandler(payload.getPayloadURI(), attDataHandler);
         mc.setAttachmentMap(attachments);
 
-        MessageProcessingContext.getFromMessageContext(mc).setUserMessage(userMessageEntity);
+        IMessageProcessingContext.getFromMessageContext(mc).setUserMessage(userMessageEntity);
 
         assertEquals(Handler.InvocationResponse.CONTINUE, assertDoesNotThrow(() -> new CompressionHandler().invoke(mc)));
 

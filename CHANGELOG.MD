@@ -8,6 +8,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Server startup is now aborted when one of the configured transports for receiving messages cannot be started
 * Improved logging of errors that prevented Holodeck B2B to start 
 * Generalised the HTTP transport sender so it can be used to send other information than Message Units
+* Moved `getFromMessageContext()` from `org.holodeckb2b.core.MessageProcessingContext` to 
+  `org.holodeckb2b.interfaces.core.IMessageProcessingContext`
 * Moved `TLSCertificateTrustManager` from `org.holodeckb2b.core.axis2` to `org.holodeckb2b.interfaces.security.trust` package
 
 ### Fixed

@@ -303,7 +303,7 @@ public class HTTPWorker implements Worker {
             charSetEnc = MessageContext.DEFAULT_CHAR_SET_ENCODING;
         msgContext.setProperty(Constants.Configuration.CHARACTER_SET_ENCODING, charSetEnc);
         msgContext.setProperty(MessageContext.TRANSPORT_OUT, response.getOutputStream());
-        MessageProcessingContext.getFromMessageContext(msgContext);
+        IMessageProcessingContext.getFromMessageContext(msgContext);
 	}
 
 }

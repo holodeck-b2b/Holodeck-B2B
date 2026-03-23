@@ -64,7 +64,7 @@ public class CheckSentResultTest {
         
     	MessageContext mc = new MessageContext();
     	mc.setFLOW(MessageContext.OUT_FLOW);
-    	IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+    	IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
         
     	PMode pmode = HB2BTestUtils.create1WaySendPushPMode();        
         HolodeckB2BCore.getPModeSet().add(pmode);
@@ -92,7 +92,7 @@ public class CheckSentResultTest {
         
     	MessageContext mc = new MessageContext();
     	mc.setFLOW(MessageContext.OUT_FLOW);
-    	IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+    	IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
         
     	PMode pmode = HB2BTestUtils.create1WaySendPushPMode();        
         Leg leg = pmode.getLeg(Label.REQUEST);
@@ -118,7 +118,7 @@ public class CheckSentResultTest {
     	
     	MessageContext mc = new MessageContext();
     	mc.setFLOW(MessageContext.OUT_FLOW);
-    	IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+    	IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
     	
     	PMode pmode = HB2BTestUtils.create1WaySendPushPMode();        
         Leg leg = pmode.getLeg(Label.REQUEST);

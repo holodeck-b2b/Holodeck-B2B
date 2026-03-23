@@ -67,7 +67,7 @@ public class AddPayloadsTest {
 		userMessage.addPayload(payload);
 
 		// Setting input message property
-		IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+		IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
 		procCtx.setUserMessage(HolodeckB2BCore.getStorageManager().storeOutGoingMessageUnit(userMessage));
 
 		assertDoesNotThrow(() -> new AddPayloads().invoke(mc));
@@ -94,7 +94,7 @@ public class AddPayloadsTest {
 		userMessage.addPayload(payload);
 
 		// Setting input message property
-		IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+		IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
 		procCtx.setUserMessage(HolodeckB2BCore.getStorageManager().storeOutGoingMessageUnit(userMessage));
 
 		assertDoesNotThrow(() -> new AddPayloads().invoke(mc));

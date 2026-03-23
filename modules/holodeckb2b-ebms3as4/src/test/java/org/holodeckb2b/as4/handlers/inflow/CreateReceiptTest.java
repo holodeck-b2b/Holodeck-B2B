@@ -207,7 +207,7 @@ public class CreateReceiptTest {
         mc.setServerSide(true);
         mc.setEnvelope(soapModelBuilder.getSOAPEnvelope());
 
-        IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+        IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
         new ReadUserMessage().invoke(mc);
 
         IUserMessageEntity userMessage = procCtx.getReceivedUserMessage();
@@ -249,7 +249,7 @@ public class CreateReceiptTest {
     	mc.setServerSide(true);
     	mc.setEnvelope(soapModelBuilder.getSOAPEnvelope());
 
-    	IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(mc);
+    	IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(mc);
     	new ReadUserMessage().invoke(mc);
 
     	IUserMessageEntity userMessage = procCtx.getReceivedUserMessage();

@@ -139,7 +139,7 @@ public class Axis2Sender {
 	        oc.addMessageContext(msgCtx);
 
 	        log.trace("Create an empty IMessageProcessingContext for message with current configuration");
-            final IMessageProcessingContext procCtx = MessageProcessingContext.getFromMessageContext(msgCtx);
+            final IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(msgCtx);
             if (messageUnit instanceof IUserMessage)
                 procCtx.setUserMessage((IUserMessageEntity) messageUnit);
             else if (messageUnit instanceof IPullRequest)

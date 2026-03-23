@@ -38,8 +38,8 @@ import org.holodeckb2b.common.testhelpers.HolodeckB2BTestCore;
 import org.holodeckb2b.commons.util.MessageIdUtils;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
-import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
+import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.general.ReplyPattern;
 import org.holodeckb2b.interfaces.messagemodel.IPayload;
 import org.holodeckb2b.interfaces.pmode.ILeg.Label;
@@ -65,7 +65,7 @@ public class CheckSignatureCompletenessTest {
 
 	private static PMode pmode;
 
-	private MessageProcessingContext 	procCtx;
+	private IMessageProcessingContext 	procCtx;
 
     @BeforeAll
     public static void setUpClass() throws Exception {
@@ -101,7 +101,7 @@ public class CheckSignatureCompletenessTest {
         pl1.setContainment(IPayload.Containment.BODY);
         userMessage.addPayload(pl3);
 
-		procCtx = MessageProcessingContext.getFromMessageContext(mc);
+		procCtx = IMessageProcessingContext.getFromMessageContext(mc);
         procCtx.setUserMessage(HolodeckB2BCore.getStorageManager().storeReceivedMessageUnit(userMessage));
     }
 
