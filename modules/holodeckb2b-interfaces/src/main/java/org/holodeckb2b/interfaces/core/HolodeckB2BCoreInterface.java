@@ -157,7 +157,6 @@ public class HolodeckB2BCoreInterface {
     	return coreImplementation.registerEventHandler(eventConfiguration);
     }
 
-
     /**
      * Removes a <i>global</i> event handler configuration.
      *
@@ -193,7 +192,7 @@ public class HolodeckB2BCoreInterface {
 
 
     /**
-     * Gets the active Axis2 Module with the given name. This can for example be used by protocol extension to get
+     * Gets the active Axis2 Module with the given name. This can for example be used by protocol extensions to get
      * access to "their" module for protocol specific settings.
      *
      * @param name	the requested module's name
