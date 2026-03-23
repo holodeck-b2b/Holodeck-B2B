@@ -1,20 +1,20 @@
-/**
+/*
  * Copyright (C) 2025 The Holodeck B2B Team, Sander Fieten
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.core.axis2;
+package org.holodeckb2b.interfaces.security.trust;
 
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -30,20 +30,19 @@ import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.pmode.ITLSConfiguration;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
-import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
-import org.holodeckb2b.interfaces.security.trust.IValidationResult;
 import org.holodeckb2b.interfaces.security.trust.IValidationResult.Trust;
-import org.holodeckb2b.interfaces.security.trust.SecurityLevel;
 
 /**
  * Is an implementation of {@link X509TrustManager} for the validation of TLS server certificates. It will use the
  * installed Holodeck B2B <i>Certificate Manager</i> to perform the actual trust validation.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since 8.0.0
+ * @since 8.0.0 added in package org.holodeckb2b.core.axis2
+ * @since 8.1.0 moved to in org.holodeckb2b.common.security.trust
+ * @since 8.2.0 moved to in org.holodeckb2b.interfaces.security.trust
  * @see ICertificateManager
  */
-final class TLSCertificateTrustManager implements X509TrustManager {
+public final class TLSCertificateTrustManager implements X509TrustManager {
 	private static final Logger log = LogManager.getLogger();
 
 	/*
