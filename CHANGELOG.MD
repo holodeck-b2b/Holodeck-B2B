@@ -2,8 +2,8 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## 8.1.1
-##### 
+## 8.2.0
+#####
 ### Changed
 * Server startup is now aborted when one of the configured transports for receiving messages cannot be started
 * Improved logging of errors that prevented Holodeck B2B to start 
