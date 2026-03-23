@@ -92,12 +92,17 @@
 		<!-- This version of Holodeck B2B requires at least JDK 11 -->
 		<maven.compiler.source>11</maven.compiler.source>
 		<maven.compiler.target>11</maven.compiler.target>
+		<!-- Set file encoding to UTF-8 to avoid platform-dependent builds -->
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
 		<hb2b-utils-version>2.0.0</hb2b-utils-version>
 		<axis2-version>1.8.2</axis2-version>
 		<axiom-version>1.4.0</axiom-version>
 		<netbeans.hint.license>gpl30</netbeans.hint.license>
 		<log4j.version>2.23.1</log4j.version>
+		<junit.version>5.9.3</junit.version>
+		<mockito.version>5.14.2</mockito.version>
 	</properties>
 
 	<modules>
@@ -110,7 +115,7 @@
 		<module>modules/holodeckb2b-default-psp</module>
 		<module>modules/holodeckb2b-ui</module>
 		<module>modules/holodeckb2b-distribution</module>
-		<!--        <module>modules/holodeckb2b-it</module> -->
+		<module>modules/holodeckb2b-it</module>
 	</modules>
 
 	<licenses>
@@ -178,10 +183,10 @@
 				<version>${axis2-version}</version>
 				<exclusions>
 					<exclusion>
-				    	<groupId>commons-io</groupId>
-				    	<artifactId>commons-io</artifactId>					
+						<groupId>commons-io</groupId>
+						<artifactId>commons-io</artifactId>
 					</exclusion>
-				</exclusions>				
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.axis2</groupId>
@@ -253,44 +258,44 @@
 			<dependency>
 				<groupId>org.apache.logging.log4j</groupId>
 				<artifactId>log4j-core</artifactId>
-	            <scope>runtime</scope>
+				<scope>runtime</scope>
 				<version>${log4j.version}</version>
 			</dependency>
-			
+
 			<!--===============================================================
                 Test dependencies
             =============================================================== -->
-		    <dependency>
-		        <groupId>org.junit.jupiter</groupId>
-		        <artifactId>junit-jupiter</artifactId>
-		        <version>5.9.3</version>
-		        <scope>test</scope>
-		    </dependency>
-		    <dependency>
-		        <groupId>org.junit.vintage</groupId>
-		        <artifactId>junit-vintage-engine</artifactId>
-		        <version>5.7.2</version>
-		        <scope>test</scope>
-		    </dependency>
-	        <dependency>
-	            <groupId>com.sun.activation</groupId>
-	            <artifactId>jakarta.activation</artifactId>
-	            <version>1.2.1</version>
-	            <scope>test</scope>
-	        </dependency>		    
+			<dependency>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter</artifactId>
+				<version>${junit.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.junit.vintage</groupId>
+				<artifactId>junit-vintage-engine</artifactId>
+				<version>${junit.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>com.sun.activation</groupId>
+				<artifactId>jakarta.activation</artifactId>
+				<version>1.2.1</version>
+				<scope>test</scope>
+			</dependency>
 			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-junit-jupiter</artifactId>
-				<version>5.14.2</version>
+				<version>${mockito.version}</version>
 				<scope>test</scope>
-			</dependency>		    
-	        <dependency>
-	            <groupId>${project.groupId}</groupId>
-	            <artifactId>holodeckb2b-core</artifactId>
-	            <version>${project.version}</version>
-	            <type>test-jar</type>
-	            <scope>test</scope>
-	        </dependency>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>holodeckb2b-core</artifactId>
+				<version>${project.version}</version>
+				<type>test-jar</type>
+				<scope>test</scope>
+			</dependency>
 			<dependency>
 				<groupId>org.holodeckb2b.commons</groupId>
 				<artifactId>generic-utils</artifactId>
@@ -305,8 +310,28 @@
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.11.0</version>
+				<configuration>
+					<encoding>UTF-8</encoding>
+					<release>11</release>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.3.1</version>
+				<configuration>
+					<encoding>UTF-8</encoding>
+				</configuration>
+			</plugin>
+			<plugin>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>3.2.2</version>
+				<configuration>
+					<argLine>-javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar</argLine>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
