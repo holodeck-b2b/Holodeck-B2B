@@ -19,6 +19,7 @@ package org.holodeckb2b.interfaces.core;
 import java.util.List;
 
 import org.apache.axis2.description.AxisService;
+import org.apache.axis2.kernel.TransportSender;
 import org.apache.axis2.modules.Module;
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.delivery.IDeliveryManager;
@@ -213,6 +214,18 @@ public class HolodeckB2BCoreInterface {
     public static AxisService getService(final String name) {
     	assertInitialized();
     	return coreImplementation.getService(name);
+    }
+
+    /**
+     * Gets the Axis2 Transport Sender with the given name (as set in the Holodeck B2B configuration).
+     *
+     * @param name	the requested transport sender's name
+     * @return 		the transport sender if it exists in this Holodeck B2B instance,<br><code>null</code> otherwise
+     * @since 8.2.0
+     */
+    public static TransportSender getTransportSender(final String name) {
+    	assertInitialized();
+    	return coreImplementation.getTransportSender(name);
     }
 
     /**
