@@ -561,8 +561,6 @@ public class DefaultCertManager implements ICertificateManager {
 					log.info("Certficate path is trusted!");
 				return new ValidationResult(Trust.OK, cpToCheck);
 			} catch (CertPathValidatorException validationException) {
-				// If reason is "unspecified" or "undetermined" this could be caused by a problem in the OCSP check, so
-				// try again without
 				Reason reason = validationException.getReason();
 				log.warn("Certificate path validation failed - Reason: {}, Message: {}, Certificate: {}, Trace: {}",
 						 reason,
@@ -574,11 +572,12 @@ public class DefaultCertManager implements ICertificateManager {
                          Utils.getExceptionTrace(validationException)
                 );
 
-				// Only fallback for OCSP infrastructure issues, NOT for actual revocation
+				// If reason is "unspecified" or "undetermined" this could indicate either that the certificate is not
+				// valid, or that there was a problem in executing the OCSP check. In the latter case, try again without
 				if (performRevocationCheck
-				    && (reason == BasicReason.UNSPECIFIED || reason == BasicReason.UNDETERMINED_REVOCATION_STATUS)
-				    && ! (validationException.getMessage() !== null && validationException.getMessage().toLowerCase().contains("certificate revoked"))
-                ) {
+					&& (reason == BasicReason.UNDETERMINED_REVOCATION_STATUS
+						|| (reason == BasicReason.UNSPECIFIED && validationException.getCause() != null
+								&& (validationException.getCause() instanceof IOException)))) {
 					try {
 						log.debug("Validation with revocation check failed ({}), retry without",
 									validationException.getMessage());
