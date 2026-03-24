@@ -16,8 +16,14 @@
  */
 package org.holodeckb2b.security.trust;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,10 +31,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.security.KeyStore;
+import java.security.Security;
+import java.security.cert.CertPathValidatorException.BasicReason;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.List;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.holodeckb2b.commons.testing.TestUtils;
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
@@ -36,6 +45,7 @@ import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
 import org.holodeckb2b.interfaces.security.trust.IValidationResult;
 import org.holodeckb2b.interfaces.security.trust.IValidationResult.Trust;
 import org.holodeckb2b.interfaces.security.trust.SecurityLevel;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -57,6 +67,7 @@ import org.junit.jupiter.api.io.TempDir;
 class DefaultCertManagerTest {
 
     private static final String VALID_CONFIG = "valid-config.xml";
+    private static final String OCSP_CONFIG = "ocsp-config.xml";
     private static final String KEYSTORES_DIR = "keystores/";
     private static final String PRIVATE_KEYSTORE = "privatekeys.jks";
     private static final String KEYPAIR_ALIAS = "testkey";
@@ -397,6 +408,101 @@ class DefaultCertManagerTest {
             // The default implementation does not support additional validation parameters
             assertFalse(certManager.supportsConfigBasedValidation());
         }
+    }
+
+    // ==================================================================================
+    // OCSP validation tests
+    // ==================================================================================
+    @Nested
+    @DisplayName("When executing the OCSP check")
+    class OCSPChecks {
+    	private OCSPTestProvider provider;
+
+    	@BeforeEach
+    	void setupTestProvider() throws Exception {
+    		certManager.init(setupEnvironment(OCSP_CONFIG));
+
+    		Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME);
+    		Security.addProvider(provider = new OCSPTestProvider(loadCertFromKeystore(
+                    TRUST_KEYSTORE, TRUSTANCHOR_PASSWORD, TRUSTANCHOR_ALIAS)));
+
+    	}
+
+    	@AfterEach
+    	void resetProvider() {
+    		Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME);
+    		Security.addProvider(new BouncyCastleProvider());
+    	}
+
+    	@Test
+    	@DisplayName("it should mark the certificate valid when all fine")
+    	void markValid() throws Exception {
+    		X509Certificate cert = loadCertFromKeystore(
+                    PRIVATE_KEYSTORE, KEYPAIR_PASSWORD, CHAIN_ALIAS);
+
+    		provider.validateNextResponse();
+
+    		IValidationResult result = assertDoesNotThrow(() ->
+    										certManager.validateCertificate(List.of(cert), SecurityLevel.MLS));
+
+    		assertEquals(Trust.OK, result.getTrust());
+    	}
+
+    	@Test
+    	@DisplayName("it should mark the certificate invalid when revoked")
+    	void rejectOnRevoked() throws Exception {
+    		X509Certificate cert = loadCertFromKeystore(
+                    PRIVATE_KEYSTORE, KEYPAIR_PASSWORD, CHAIN_ALIAS);
+
+    		provider.rejectNextResponse(BasicReason.REVOKED, null);
+
+    		IValidationResult result = assertDoesNotThrow(() ->
+											certManager.validateCertificate(List.of(cert), SecurityLevel.MLS));
+
+    		assertEquals(Trust.NOK, result.getTrust());
+    	}
+
+    	@Test
+    	@DisplayName("it should mark the certificate invalid on unspecified reason and no error")
+    	void rejectOnUnspecifiedWithoutError() throws Exception {
+    		X509Certificate cert = loadCertFromKeystore(
+                    PRIVATE_KEYSTORE, KEYPAIR_PASSWORD, CHAIN_ALIAS);
+
+    		provider.rejectNextResponse(BasicReason.UNSPECIFIED, null);
+
+    		IValidationResult result = assertDoesNotThrow(() ->
+											certManager.validateCertificate(List.of(cert), SecurityLevel.MLS));
+
+    		assertEquals(Trust.NOK, result.getTrust());
+    	}
+
+    	@Test
+    	@DisplayName("it should mark the certificate valid with warning on unspecified reason with error")
+    	void rejectOnUnspecifiedWithError() throws Exception {
+    		X509Certificate cert = loadCertFromKeystore(
+                    PRIVATE_KEYSTORE, KEYPAIR_PASSWORD, CHAIN_ALIAS);
+
+    		provider.rejectNextResponse(BasicReason.UNSPECIFIED, new IOException("Conn refused"));
+
+    		IValidationResult result = assertDoesNotThrow(() ->
+											certManager.validateCertificate(List.of(cert), SecurityLevel.MLS));
+
+    		assertEquals(Trust.WITH_WARNINGS, result.getTrust());
+    	}
+
+    	@Test
+    	@DisplayName("it should mark the certificate valid with warning on undetermined")
+    	void rejectOnUndetermined() throws Exception {
+    		X509Certificate cert = loadCertFromKeystore(
+                    PRIVATE_KEYSTORE, KEYPAIR_PASSWORD, CHAIN_ALIAS);
+
+    		provider.rejectNextResponse(BasicReason.UNDETERMINED_REVOCATION_STATUS, null);
+
+    		IValidationResult result = assertDoesNotThrow(() ->
+											certManager.validateCertificate(List.of(cert), SecurityLevel.MLS));
+
+    		assertEquals(Trust.WITH_WARNINGS, result.getTrust());
+    	}
     }
 
     // ==================================================================================
