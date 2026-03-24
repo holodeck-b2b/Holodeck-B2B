@@ -16,18 +16,9 @@
  */
 package org.holodeckb2b.core.axis2;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.StringReader;
-import java.io.StringWriter;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
-import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMXMLBuilderFactory;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.AxisFault;
@@ -39,8 +30,8 @@ import org.apache.axis2.description.Parameter;
 import org.apache.axis2.util.MessageContextBuilder;
 import org.apache.axis2.wsdl.WSDLConstants;
 import org.holodeckb2b.common.VersionInfo;
+import org.holodeckb2b.commons.xml.AxiomDOMConvertor;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 /**
  * This class contains helper functions related to the Axis2 framework
@@ -51,19 +42,19 @@ public final class Axis2Utils {
 
 	/**
 	 * The parameter name to be used in the Service description to specify which <i>Message Builder</i> should be used
-	 * to prepare the message processing 
+	 * to prepare the message processing
 	 */
 	public static final String SVC_BUILDER_PARAM = "hb2b:builder";
 
 	/**
 	 * Value for the HTTP "Server" and "User-Agent" headers used to identify the product that created the HTTP message
 	 */
-	public static final String HTTP_PRODID_HEADER = "HolodeckB2B/" + VersionInfo.majorVersion 
+	public static final String HTTP_PRODID_HEADER = "HolodeckB2B/" + VersionInfo.majorVersion
 																   + "." + VersionInfo.minorVersion;
 	/**
 	 * Checks if the executed Service has specified its own <i>Message Builder</i> and if so returns an instance of that
-	 * builder.   
-	 * 
+	 * builder.
+	 *
 	 * @param service		The executed Service
 	 * @return				An instance of the custom message builder that should be used if specified,<br>
 	 * 						<code>null</code> if no custom builder is specified
@@ -78,11 +69,11 @@ public final class Axis2Utils {
 				msgBuilder = (Builder) Class.forName(builderClass).newInstance();
 			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | ClassCastException e) {
 				throw new AxisFault("Specified builder (" + builderParameter.getValue() + ") not available!");
-			}		
+			}
 		}
 		return msgBuilder;
 	}
-	
+
     /**
      * Creates the {@link MessageContext} for the response to message currently being processed.
      *
@@ -122,14 +113,8 @@ public final class Axis2Utils {
 	 */
 	public static Document convertAxiomSOAPEnvToDOM(final MessageContext mc) {
 	    try {
-	    	final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-	        mc.getEnvelope().serialize(baos);
-	        final ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-	
-	        final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-	        factory.setNamespaceAware(true);
-	        return factory.newDocumentBuilder().parse(bais);
-	    } catch (final Exception e) {
+	    	return AxiomDOMConvertor.toDOM(mc.getEnvelope()).getOwnerDocument();
+	    } catch (TransformerException e) {
 	        // If anything goes wrong converting the document, just return null
 	        return null;
 	    }
@@ -144,37 +129,10 @@ public final class Axis2Utils {
 	 */
 	public static SOAPEnvelope convertDOMSOAPEnvToAxiom(final Document document) {
 	    try {
-    		Transformer transformer = TransformerFactory.newInstance().newTransformer();
-    		// initialize StreamResult with File object to save to file
-    		StreamResult result = new StreamResult(new StringWriter());
-    		DOMSource source = new DOMSource(document);
-    		transformer.transform(source, result);
-    		String xmlString = result.getWriter().toString();
-	    	
-	        final SOAPEnvelope env = OMXMLBuilderFactory.createSOAPModelBuilder(new StringReader(xmlString))
-	        																						.getSOAPEnvelope();
-	        env.build();
-	        return env;
+	    	return OMXMLBuilderFactory.createSOAPModelBuilder(new DOMSource(document)).getSOAPEnvelope();
 	    } catch (final Exception e) {
 	        // If anything goes wrong converting the document, just return null
 	    	return null;
-	    }
-	}
-
-	/**
-	 * Converts the DOM representation of an Element to the Axiom one.
-	 *
-	 * @param element   The DOM representation of the element
-	 * @return          The Axiom representation of the same element
-	 */
-	public static OMElement convertDOMElementToAxiom(final Element element) {
-		try {
-	        final OMElement omElement = OMXMLBuilderFactory.createOMBuilder(element, false).getDocumentElement();
-	        omElement.build();
-	        return omElement;
-	    } catch (final Exception e) {
-	        // If anything goes wrong converting the document, just return null
-	        return null;
 	    }
 	}
 }

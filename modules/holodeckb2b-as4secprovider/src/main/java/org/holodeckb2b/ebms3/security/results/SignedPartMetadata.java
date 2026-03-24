@@ -22,9 +22,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.xml.transform.TransformerException;
+
 import org.apache.axiom.om.OMElement;
 import org.holodeckb2b.commons.util.Utils;
-import org.holodeckb2b.core.axis2.Axis2Utils;
+import org.holodeckb2b.commons.xml.AxiomDOMConvertor;
 import org.holodeckb2b.ebms3.security.SecurityConstants;
 import org.holodeckb2b.interfaces.security.ISignedPartMetadata;
 import org.w3c.dom.Element;
@@ -129,7 +131,10 @@ public class SignedPartMetadata implements ISignedPartMetadata {
                 for (int i = 0; i < children.getLength(); i++) {
                     Node child = children.item(i);
                     if (child instanceof Element)
-                        paramElems.add(Axis2Utils.convertDOMElementToAxiom((Element) child));
+                    	try {
+                    		paramElems.add(AxiomDOMConvertor.toAxiom((Element) child));
+                    	} catch (TransformerException e) {
+                    	}
                 }
             }
             if (!Utils.isNullOrEmpty(paramElems))
