@@ -568,7 +568,9 @@ public class DefaultCertManager implements ICertificateManager {
 						 reason,
 						 validationException.getMessage(),
 						 validationException.getCertPath() != null && validationException.getIndex() >= 0 ?
-							 validationException.getCertPath().getCertificates().get(validationException.getIndex()) : "N/A",
+								 CertificateUtils.getSubjectCN((X509Certificate) validationException.getCertPath()
+									 							.getCertificates().get(validationException.getIndex()))
+								 : "N/A",
                          Utils.getExceptionTrace(validationException)
                 );
 
