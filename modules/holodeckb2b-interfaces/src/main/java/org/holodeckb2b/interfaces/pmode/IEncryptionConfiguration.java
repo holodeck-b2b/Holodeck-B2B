@@ -16,6 +16,11 @@
  */
 package org.holodeckb2b.interfaces.pmode;
 
+import java.util.Collections;
+import java.util.Map;
+
+import org.holodeckb2b.commons.util.Utils;
+
 /**
  * Defines the configuration for encrypting and decrypting the ebMS message depending on the direction (outgoing or
  * incoming) of the message.
@@ -28,26 +33,53 @@ package org.holodeckb2b.interfaces.pmode;
 public interface IEncryptionConfiguration {
 
     /**
-     * Gets the Java keystore <i>alias</i> that identifies the X509 certificate that should be used for encryption /
-     * decryption.
-     * <p>The current implementation of Holodeck B2B uses Java keystores to store certificates. Two keystores are used
-     * to storing private and public certificates and another for storing CA certificates (the trust store). Depending
-     * what this configuration applies to the certificate must exist in either the private (when decrypting incoming
-     * messages) or public (when encrypting outgoing messages) keystore.
+     * Gets the <i>alias</i> that the X509 certificate/key pair which is used for encryption/decryption of the messages
+     * is registered under with the installed <i>Certificate Manager</i>.
      *
      * @return  The alias that identifies the certificate to use for the encryption.
+     * @deprecated {@link #getDecryptionKeypairs()} and {@link #getEncryptionCertificate()} should be implemented and
+     *  			used to provide/get the keypair(s)/certificate for decryption/encryption of messages.
      */
-    String getKeystoreAlias();
+	@Deprecated(since = "8.2.0", forRemoval = true)
+    default String getKeystoreAlias() {
+		throw new UnsupportedOperationException();
+	}
 
     /**
-     * Gets the password to access the private key hold by the certififcate. Only applies to configurations that are
-     * used to decrypt messages.
-     * <p>Current implementation of Holodeck B2B requires that result is the password in clear text. Future version may
-     * change this to get better secured passwords.
+     * Gets the password to access the private key hold by the key pair. Only applies to configurations that are used to
+     * decrypt messages.
      *
      * @return  The password to get access to the private key
+     * @deprecated {@link #getDecryptionKeypairs()} should be implemented and used instead
      */
-    String getCertificatePassword();
+    @Deprecated(since = "8.2.0", forRemoval = true)
+    default String getCertificatePassword() {
+    	throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Gets the list of <i>aliases</i> and associated <i>passwords</i> under which the key pair(s) that can used for
+     * decryption of the messages are registered with the installed <i>Certificate Manager</i>.
+     *
+     * @return  A map of alias and password combinations that identify the key pairs to use for decryption.
+     * @since 8.2.0	for backwards compatibility a default implementation is provided that will return the
+	 * 				single alias/password combination provided by the old methods.
+     */
+    default Map<String, String> getDecryptionKeypairs() {
+    	return !Utils.isNullOrEmpty(getKeystoreAlias()) ? Map.of(getKeystoreAlias(), getCertificatePassword()) :
+    			Collections.emptyMap();
+	}
+
+    /**
+     * Gets the alias of the <i>partner certificate</i> that should be used for the encryption of the message.
+     *
+     * @return  The alias that identifies the certificate to use for the encryption
+     * @since 8.2.0 for backwards compatibility a default implementation is provided that will return the alias provided
+     * 				by the old method.
+     */
+    default String getEncryptionCertificate() {
+    	return getKeystoreAlias();
+    }
 
     /**
      * Gets the symmetric encryption algorithm (to be) used for the encryption of the message.

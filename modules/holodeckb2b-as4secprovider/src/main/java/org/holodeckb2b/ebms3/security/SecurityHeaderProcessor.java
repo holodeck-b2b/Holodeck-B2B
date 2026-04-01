@@ -284,8 +284,9 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
         PasswordCallbackHandler pwcb = new PasswordCallbackHandler();
         final IEncryptionConfiguration encConfig = receiverConfig != null ? receiverConfig.getEncryptionConfiguration()
                                                                           : null;
-        if (encConfig != null)
-            pwcb.addUser(encConfig.getKeystoreAlias().toLowerCase(), encConfig.getCertificatePassword());
+        Map<String, String> decryptionKeypairs;
+        if (encConfig != null && !Utils.isNullOrEmpty(decryptionKeypairs = encConfig.getDecryptionKeypairs()))
+        	decryptionKeypairs.forEach((k, v) -> pwcb.addUser(k.toLowerCase(), v));
         reqData.setCallbackHandler(pwcb);
         reqData.setAllowRSA15KeyTransportAlgorithm(false);
         reqData.setRequireSignedEncryptedDataElements(false);

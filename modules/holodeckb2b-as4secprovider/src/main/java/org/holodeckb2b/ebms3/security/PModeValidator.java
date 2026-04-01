@@ -21,6 +21,8 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
@@ -199,15 +201,15 @@ public class PModeValidator implements IPModeValidator {
 		Collection<PModeValidationError> errors = new ArrayList<>();
 		if (encConfig != null) {
 			IEncryptionConfiguration config = new EncryptionConfigWithDefaults(encConfig);
-			String alias = config.getKeystoreAlias();
-			if (Utils.isNullOrEmpty(alias))
-				errors.add(new PModeValidationError(tpRoleName + ".Encryption.KeyAlias", "A reference to the "
-									+ (forDecryption ? "private key" : "certificate") + " must be specified"));
 			if (!forDecryption) {
-				X509Certificate cert = alias != null ? getCertificate(config.getKeystoreAlias()) : null;
+				String alias = config.getEncryptionCertificate();
+				if (Utils.isNullOrEmpty(alias))
+					errors.add(new PModeValidationError(tpRoleName + ".Encryption.Certificate",
+														"A reference to the certificate must be specified"));
+				X509Certificate cert = alias != null ? getCertificate(config.getEncryptionCertificate()) : null;
 				if (cert == null)
-					errors.add(new PModeValidationError(tpRoleName + ".Encryption",
-							"The specified certificate for encryption is not available"));
+					errors.add(new PModeValidationError(tpRoleName + ".Encryption.Certificate",
+								"The specified certificate for encryption is not available"));
 				IKeyTransport keyTransport = config.getKeyTransport();
 				if (keyTransport != null) {
 					if (cert != null && !"RSA".equalsIgnoreCase(cert.getPublicKey().getAlgorithm()))
@@ -227,13 +229,20 @@ public class PModeValidator implements IPModeValidator {
 									"The specified certificate is not compatible with the key agreement algorithm"));
 				}
 			} else {
-				String pwd = config.getCertificatePassword();
-				if (Utils.isNullOrEmpty(pwd))
-					errors.add(new PModeValidationError(tpRoleName + ".Encryption.KeyPassword",
-								"A password for the private key must be specified"));
-				else if (!Utils.isNullOrEmpty(alias) && getKeyPair(alias, pwd) == null)
-					errors.add(new PModeValidationError(tpRoleName + ".Encryption",
-								"The specified key pair for decryption is not available"));
+				Map<String, String> keypairs = config.getDecryptionKeypairs();
+				if (Utils.isNullOrEmpty(keypairs)) {
+					errors.add(new PModeValidationError(tpRoleName + ".Encryption.Keypair",
+								"At least one keypair for decryption must be specified"));
+				} else {
+					for(Entry<String, String> kp : keypairs.entrySet()) {
+						if (Utils.isNullOrEmpty(kp.getValue()))
+							errors.add(new PModeValidationError(tpRoleName + ".Encryption.KeypairPassword",
+									"A password for the keypair (" + kp.getKey() + ") must be specified"));
+						else if (!Utils.isNullOrEmpty(kp.getKey()) && getKeyPair(kp.getKey(), kp.getValue()) == null)
+							errors.add(new PModeValidationError(tpRoleName + ".Encryption",
+									"The specified key pair (" + kp.getKey() + ") for decryption is not available"));
+					}
+				}
 			}
 		}
 		return errors;

@@ -38,6 +38,21 @@ class KeystoreAlias implements Serializable {
     @Attribute(required = false)
     String  password;
 
+	public KeystoreAlias() {
+	}
+
+    /**
+     * Creates a new <code>KeystoreAlias</code> instance with the given name and password.
+     *
+     * @param name		name to set in the new instance
+     * @param password  password to set in the new instance
+     * @since 8.2.0
+     */
+	public KeystoreAlias(String name, String password) {
+		this.name = name;
+		this.password = password;
+	}
+
     @Override
     public boolean equals(Object obj) {
     	if (this == obj)

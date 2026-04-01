@@ -16,6 +16,8 @@
  */
 package org.holodeckb2b.ebms3.security.util;
 
+import java.util.Map;
+
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.ebms3.security.DefaultSecurityAlgorithms;
 import org.holodeckb2b.interfaces.pmode.IEncryptionConfiguration;
@@ -57,13 +59,13 @@ public class EncryptionConfigWithDefaults implements IEncryptionConfiguration {
     }
 
     @Override
-    public String getKeystoreAlias() {
-        return original.getKeystoreAlias();
+    public Map<String, String> getDecryptionKeypairs() {
+    	return original.getDecryptionKeypairs();
     }
 
     @Override
-    public String getCertificatePassword() {
-        return original.getCertificatePassword();
+    public String getEncryptionCertificate() {
+    	return original.getEncryptionCertificate();
     }
 
     @Override

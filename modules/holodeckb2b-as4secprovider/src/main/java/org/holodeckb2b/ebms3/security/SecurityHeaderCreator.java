@@ -337,7 +337,7 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
         // Symmetric encryption algorithms to use
         processingParams.put(ConfigurationConstants.ENC_SYM_ALGO, encryptionConfig.getAlgorithm());
         // The alias of the certificate to use for encryption
-        processingParams.put(ConfigurationConstants.ENCRYPTION_USER, encryptionConfig.getKeystoreAlias());
+        processingParams.put(ConfigurationConstants.ENCRYPTION_USER, encryptionConfig.getEncryptionCertificate());
 
         // The symmetric encryption key can be either included in the message using a key transport method or be
         // derived from the trading partner's certificates using a key agreement method
@@ -661,7 +661,7 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
                                                    .forEach(p -> encryptedPayloads.add(p)));
 
         // Get the Certificate used for encryption
-        final X509Certificate cert = certManager.getPartnerCertificate(encryptionConfig.getKeystoreAlias());
+        final X509Certificate cert = certManager.getPartnerCertificate(encryptionConfig.getEncryptionCertificate());
         final IKeyTransport ktCfg = encryptionConfig.getKeyTransport();
         final IKeyAgreement kaCfg = encryptionConfig.getKeyAgreement();
         X509ReferenceType certRef;

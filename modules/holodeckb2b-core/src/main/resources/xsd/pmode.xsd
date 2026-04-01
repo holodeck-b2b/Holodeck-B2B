@@ -20,7 +20,7 @@
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
 	targetNamespace="http://holodeck-b2b.org/schemas/2014/10/pmode"
 	attributeFormDefault="unqualified" xmlns:tns="http://holodeck-b2b.org/schemas/2014/10/pmode"
-	version="8.0.0">
+	version="8.2.0">
 	<xs:annotation>
 		<xs:documentation><p>The ebMS specification only defines an abstract P-Mode model, the actual P-Mode definition is left up to implementations. This schema defines the XML structure for the representation of a P-Mode as used by the default implementation for maintaining the P-Mode set. In this implementation the P-Mode set consists of all XML documents in a directory. Each XML document represents one P-Mode and must conform to this schema. See the package <code>org.holodeckb2b.pmode.xml</code> for more info on the default implementation of P-Modes.</p></xs:documentation>
 		<xs:documentation><p>In version 2.1.0 of the schema the <code>EventHandler</code> and <code>AddActorOrRoleAttribute</code> elements were added. As these are optional elements P-Mode documents constructed using the old version are still valid and result in unchanged processing. Therefore the same namespace is used and only the version has been increased</p></xs:documentation>
@@ -44,6 +44,7 @@
 			<li><code>//Protocol/TLSConfiguration</code> : allows to specify the settings to be used when establishing a secure [transport level] connection to the trading partner's MSH</li>
 		</ol>The (forbidden) <code>//SignatureConfiguration/enableRevocationCheck</code> element was removed. When using the default <i>Certificate Manager</i>, OCSP revocation checking is managed in its configuration file.</p>
 		</xs:documentation>
+		<xs:documentation><p>In version 8.2.0 of the schema the maximum number of <code>KeystoreAlias</code> child elements of <code>EncryptionConfiguration</code> is set to unbounded so multiple keypairs can be configured for decryption of messages.</p></xs:documentation>
 	</xs:annotation>
 	<xs:element name="PMode" type="tns:PMode">
 		<xs:annotation>
@@ -789,11 +790,11 @@ As this authorization is also based on WS-Security headers this type uses the ge
 		<xs:sequence>
 			<xs:element minOccurs="0" name="KeystoreAlias" type="tns:KeystoreAliasType">
 				<xs:annotation>
-					<xs:documentation><p>This element contains the reference to the certificate in the Java keystore and MUST be used when Holodeck B2B is sending the message for this trading partner. It MUST contain the alias name that is used to store the certificate in the keystore. The OPTIONAL password attribute is used for accessing the private key in a certificate. This is only required when Holodeck B2B has to create the signature.</p>
-
+					<xs:documentation><p>This element contains the reference to the keypair as managed by the installed <i>Certificate Manager</i> and must be used for signing the messages. It MUST contain the alias name and password [in the <code>password</code> attribute] that is used to register the keypair with the <i>Certificate Manager</i>.
+</p>
 <p>NOTE: When the password contains special characters they may need to be encoded to get a well formed XML document!</p></xs:documentation>
 				</xs:annotation>
-			</xs:element>			
+			</xs:element>
 			<xs:element default="IssuerSerial" minOccurs="0" name="KeyReferenceMethod"
 				type="tns:KeyReferenceMethods">
 				<xs:annotation>
@@ -906,13 +907,16 @@ As this authorization is also based on WS-Security headers this type uses the ge
 		<xs:annotation>
 			<xs:documentation><p>This type specifies the configuration settings for encrypting the message as specified in WS-Security. The settings in this element correspond with the P-Mode parameter group PMode[1].Security.X509.Encryption.</p>
 
-<p>Most of the configuration contained in this element is only required when encrypting the message, i.e. when Holodeck B2B is the sender of the message. For incoming message the keystore alias and password MUST be provided to give Holodeck B2B access to the private key required for decryption. Further information to decrypt the message is retrieved from security header in the message itself.</p></xs:documentation>
+<p>Most of the configuration contained in this element is only used when encrypting the message, i.e. when Holodeck B2B is the sender of the message as the information to decrypt the message is retrieved from security header in the message itself.<br/>
+When this element configures the encryption of outgoing messages one and exactly one <code>KeystoreAlias</code> child element MUST be provided which reference the certificate managed by the <i>Certificate Manager</i> and which should be used for encryption.<br/>
+When the element configures the decryption of received messages at least one <code>KeystoreAlias</code> element MUST be provided to give Holodeck B2B access to the private key required for decryption. Additional <code>KeystoreAlias</code> elements can be provided to allow senders to use different certificates for encryption. This allows for seemless renewal of certificates.
+</p></xs:documentation>
 		</xs:annotation>
 		<xs:sequence>
-			<xs:element name="KeystoreAlias" type="tns:KeystoreAliasType">
+			<xs:element name="KeystoreAlias" type="tns:KeystoreAliasType" maxOccurs="unbounded">
 				<xs:annotation>
-					<xs:documentation><p>This REQUIRED element contains the reference to the certificate in the Java keystore. It MUST contain the alias name that is used to store the certificate in the keystore. The OPTIONAL password attribute is used for accessing the private key in a certificate. This is only required when Holodeck B2B has to decrypt the message.</p>
-
+					<xs:documentation><p>This element contains the reference to the certificate as managed by the installed <i>Certificate Manager</i>. It MUST contain the alias name that is used to register the certificate with the <i>Certificate Manager</i> and when it is used for accessing the private key also the <code>password</code> attribute MUST be provided.
+</p>
 <p>NOTE: When the password contains special characters they may need to be encoded to get a well formed XML document!</p></xs:documentation>
 				</xs:annotation>
 			</xs:element>

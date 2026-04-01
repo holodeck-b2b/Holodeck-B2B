@@ -17,10 +17,17 @@
 package org.holodeckb2b.common.pmode;
 
 import java.io.Serializable;
+import java.security.KeyPair;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.pmode.IEncryptionConfiguration;
 import org.holodeckb2b.interfaces.pmode.IKeyAgreement;
 import org.simpleframework.xml.Element;
+import org.simpleframework.xml.ElementList;
 
 /**
  * Contains the parameters related to the message level encryption.
@@ -31,8 +38,8 @@ import org.simpleframework.xml.Element;
 public class EncryptionConfig implements IEncryptionConfiguration, Serializable {
 	private static final long serialVersionUID = -3364424899897499432L;
 
-    @Element(name = "KeystoreAlias")
-    private KeystoreAlias keyStoreRef;
+    @ElementList(entry = "KeystoreAlias", type = KeystoreAlias.class, inline = true, required = true)
+    private List<KeystoreAlias> keyStoreRefs = new ArrayList<>();
 
     // encryption algorithm
     @Element(name = "Algorithm", required = false)
@@ -57,42 +64,65 @@ public class EncryptionConfig implements IEncryptionConfiguration, Serializable 
      * @param source The source object to copy the parameters from
      */
     public EncryptionConfig(final IEncryptionConfiguration source) {
-    	if (source.getKeystoreAlias() != null) {
-	        this.keyStoreRef = new KeystoreAlias();
-	        this.keyStoreRef.name = source.getKeystoreAlias();
-	        this.keyStoreRef.password = source.getCertificatePassword();
-    	} else
-    		this.keyStoreRef = null;
-        this.keyStoreRef.name = source.getKeystoreAlias();
-        this.keyStoreRef.password = source.getCertificatePassword();
-        this.algorithm = source.getAlgorithm();
-        this.keytransportCfg = source.getKeyTransport() != null ? new KeyTransportConfig(source.getKeyTransport())
+    	if (!Utils.isNullOrEmpty(source.getDecryptionKeypairs()))
+    		source.getDecryptionKeypairs().forEach((a, p) -> keyStoreRefs.add(new KeystoreAlias(a,p)));
+    	else if (!Utils.isNullOrEmpty(source.getEncryptionCertificate()))
+    		keyStoreRefs.add(new KeystoreAlias(source.getEncryptionCertificate(), null));
+
+        algorithm = source.getAlgorithm();
+        keytransportCfg = source.getKeyTransport() != null ? new KeyTransportConfig(source.getKeyTransport())
         														: null;
-        this.keyAgreementCfg = source.getKeyAgreement() != null ? new KeyAgreementConfig(source.getKeyAgreement())
+        keyAgreementCfg = source.getKeyAgreement() != null ? new KeyAgreementConfig(source.getKeyAgreement())
         														: null;
     }
 
     @Override
-    public String getKeystoreAlias() {
-        return keyStoreRef != null ? keyStoreRef.name : null;
+    public String getEncryptionCertificate() {
+    	return keyStoreRefs.size() > 0 ? keyStoreRefs.get(0).name : null;
     }
 
-    public void setKeystoreAlias(final String alias) {
-        if (this.keyStoreRef == null)
-        	this.keyStoreRef = new KeystoreAlias();
-        this.keyStoreRef.name = alias;
+    /**
+     * Sets the reference to the certificate managed by the <i>Certificate Manager</i> to be used for encryption.
+     *
+     * @param alias	the alias of the certificate
+     * @since 8.2.0
+     */
+    public void setEncryptionCertificate(final String alias) {
+        keyStoreRefs = List.of(new KeystoreAlias(alias, null));
     }
 
     @Override
-    public String getCertificatePassword() {
-        return keyStoreRef != null ? keyStoreRef.password : null;
+    public Map<String, String> getDecryptionKeypairs() {
+    	return keyStoreRefs.stream().collect(Collectors.toMap(ka -> ka.name, ka -> ka.password));
     }
 
-    public void setCertificatePassword(final String password) {
-        if (this.keyStoreRef == null)
-        	this.keyStoreRef = new KeystoreAlias();
-        this.keyStoreRef.password = password;
-    }
+    /**
+     * Sets the reference(s) to the keypair(s) managed by the <i>Certificate Manager</i> to be used for decryption.
+     *
+     * @param keypairs	map of keypair references consisting of the alias and password to access the keypair
+     * @since 8.2.0
+     */
+	public void setDecryptionKeypairs(final Map<String, String> keypairs) {
+		if (keypairs == null)
+			keyStoreRefs = new ArrayList<>();
+		else
+			keyStoreRefs = keypairs.entrySet().stream().map(e -> new KeystoreAlias(e.getKey(), e.getValue()))
+															.collect(Collectors.toList());
+	}
+
+	/**
+	 * Adds a reference to a keypair managed by the <i>Certificate Manager</i> to be used for decryption.
+	 *
+	 * @param alias		the alias the keypair is registered with in the <i>Certificate Manager</i>
+	 * @param password	the password to access the {@link KeyPair}
+	 * @since 8.2.0
+	 */
+	public void addDecryptionKeypair(final String alias, final String password) {
+		if (Utils.isNullOrEmpty(alias))
+			throw new IllegalArgumentException("Keypair alias cannot be null or empty");
+
+		keyStoreRefs.add(new KeystoreAlias(alias, password));
+	}
 
     @Override
     public String getAlgorithm() {

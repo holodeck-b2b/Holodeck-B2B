@@ -248,13 +248,15 @@ public class PModeValidatorTest {
 		SecurityConfig secConfig = new SecurityConfig();
 		partnerConfig.setSecurityConfiguration(secConfig);
 
+		final String alias = "alias";
+
 		EncryptionConfig encConfig = new EncryptionConfig();
-		encConfig.setKeystoreAlias("alias");
+		encConfig.setEncryptionCertificate(alias);
 
 		assertDoesNotThrow(() ->
 					certManager().registerPartnerCertificate((X509Certificate) KeystoreUtils.readKeyPairFromPKCS12(
 												TestUtils.getTestResource("keypairs/rsa.p12"), "test").getCertificate(),
-							encConfig.getKeystoreAlias()));
+															alias));
 
 		assertTrue(new PModeValidator().validatePMode(pmode).isEmpty());
 	}
@@ -267,8 +269,10 @@ public class PModeValidatorTest {
 		SecurityConfig secConfig = new SecurityConfig();
 		partnerConfig.setSecurityConfiguration(secConfig);
 
+		final String alias = "alias";
+
 		EncryptionConfig encConfig = new EncryptionConfig();
-		encConfig.setKeystoreAlias("alias");
+		encConfig.setEncryptionCertificate(alias);
 
 		KeyAgreementConfig kaConfig = new KeyAgreementConfig();
 		kaConfig.setAgreementMethod("http://www.w3.org/2009/xmlenc11#ECDH-ES");
@@ -283,7 +287,7 @@ public class PModeValidatorTest {
 		assertDoesNotThrow(() ->
 		certManager().registerPartnerCertificate((X509Certificate) KeystoreUtils.readKeyPairFromPKCS12(
 												TestUtils.getTestResource("keypairs/ec.p12"), "test").getCertificate(),
-												encConfig.getKeystoreAlias()));
+												alias));
 
 		assertTrue(new PModeValidator().validatePMode(pmode).isEmpty());
 	}
@@ -296,8 +300,10 @@ public class PModeValidatorTest {
 		SecurityConfig secConfig = new SecurityConfig();
 		partnerConfig.setSecurityConfiguration(secConfig);
 
+		final String alias = "alias";
+
 		EncryptionConfig encConfig = new EncryptionConfig();
-		encConfig.setKeystoreAlias("alias");
+		encConfig.setEncryptionCertificate(alias);
 		secConfig.setEncryptionConfiguration(encConfig);
 
 		KeyAgreementConfig kaConfig = new KeyAgreementConfig();
@@ -313,7 +319,7 @@ public class PModeValidatorTest {
 		assertDoesNotThrow(() ->
 		certManager().registerPartnerCertificate((X509Certificate) KeystoreUtils.readKeyPairFromPKCS12(
 				TestUtils.getTestResource("keypairs/rsa.p12"), "test").getCertificate(),
-				encConfig.getKeystoreAlias()));
+				alias));
 
 		assertEquals(3, new PModeValidator().validatePMode(pmode).size());
 	}
@@ -326,15 +332,17 @@ public class PModeValidatorTest {
 		SecurityConfig secConfig = new SecurityConfig();
 		partnerConfig.setSecurityConfiguration(secConfig);
 
+		final String alias = "alias";
+		final String pwd = "password";
+
 		EncryptionConfig encConfig = new EncryptionConfig();
-		encConfig.setKeystoreAlias("alias");
-		encConfig.setCertificatePassword("password");
+		encConfig.addDecryptionKeypair(alias, pwd);
 		secConfig.setEncryptionConfiguration(encConfig);
 
 		assertDoesNotThrow(() ->
 		certManager().registerKeyPair(KeystoreUtils.readKeyPairFromPKCS12(
 												TestUtils.getTestResource("keypairs/rsa.p12"), "test"),
-												encConfig.getKeystoreAlias(), encConfig.getCertificatePassword()));
+												alias, pwd));
 
 		assertTrue(new PModeValidator().validatePMode(pmode).isEmpty());
 	}
@@ -352,7 +360,7 @@ public class PModeValidatorTest {
 
 		PModeValidator validator = new PModeValidator();
 
-		assertEquals(2, validator.validatePMode(pmode).size());
+		assertEquals(1, validator.validatePMode(pmode).size());
 	}
 
 	@Test
@@ -364,8 +372,7 @@ public class PModeValidatorTest {
 		partnerConfig.setSecurityConfiguration(secConfig);
 
 		EncryptionConfig encConfig = new EncryptionConfig();
-		encConfig.setKeystoreAlias("alias");
-		encConfig.setCertificatePassword("password");
+		encConfig.addDecryptionKeypair("alias", "password");
 		secConfig.setEncryptionConfiguration(encConfig);
 
 		PModeValidator validator = new PModeValidator();

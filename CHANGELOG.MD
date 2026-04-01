@@ -13,6 +13,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Functional tests for security and trust components (thanks to @ckaaber)
 
 ### Changed
+* `org.holodeckb2b.interfaces.pmode.IEncryptionConfiguration` has been refactored to allow specification of multiple keypairs
+  that can be used for decryption of messages. The old `getKeystoreAlias()` and `getCertificatePassword()` methods have been
+  replaced by `getDecryptionKeypairs()` and `getEncryptionCertificate()`.
 * Server startup is now aborted when one of the configured transports for receiving messages cannot be started
 * Improved logging of errors that prevented Holodeck B2B to start 
 * Generalised the HTTP transport sender so it can be used to send other information than Message Units
@@ -25,6 +28,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * File locking issues on Windows in `PayloadContentTest` (thanks to @ckaaber for reporting and fixing this)
 * Revocation check fails on superseded certificates [#161](https://github.com/holodeck-b2b/Holodeck-B2B/issues/161) (thanks to @BernhardK91 for contributing to this fix)
 
+### Deprecated
+* Methods `getKeystoreAlias()` and `getCertificatePassword()` in `org.holodeckb2b.interfaces.pmode.IEncryptionConfiguration`
 
 ## 8.1.0
 ##### 2025-12-29
