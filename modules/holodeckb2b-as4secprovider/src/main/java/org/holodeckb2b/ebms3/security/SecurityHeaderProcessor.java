@@ -19,7 +19,9 @@ package org.holodeckb2b.ebms3.security;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -221,11 +223,12 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
             log.debug("Mark security headers as processed");
             final SOAPHeader header = SOAPenv.getHeader();
             if (header != null) {
-                final ArrayList<?> wsseHdrs = header.getHeaderBlocksWithNSURI(SecurityConstants.WSS_NAMESPACE_URI);
-                wsseHdrs.stream().map(h -> (SOAPHeaderBlock) h)
-                                 .filter(soapHdr -> Utils.isNullOrEmpty(soapHdr.getRole())
-                                                    || soapHdr.getRole().equals(SecurityHeaderTarget.EBMS.id()))
-                                 .forEach(secHdr -> secHdr.setProcessed());
+                for(Iterator<SOAPHeaderBlock> wsseHdrs =
+            	   header.getHeaderBlocksWithNamespaceURI(SecurityConstants.WSS_NAMESPACE_URI); wsseHdrs.hasNext();) {
+                	SOAPHeaderBlock secHdr = wsseHdrs.next();
+                	if (Utils.isNullOrEmpty(secHdr.getRole()) || secHdr.getRole().equals(SecurityHeaderTarget.EBMS.id()))
+                		secHdr.setProcessed();
+                }
             }
         } catch (AxisFault ex) {
             SOAPenv = null;
@@ -328,7 +331,7 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
         Element securityHeader = SecurityUtils.getSecurityHeaderElement(target, domEnvelope);
         if (securityHeader == null) {
             log.debug("Message does not contain WS-Security header targeted to {} role.", target);
-            return new ArrayList();
+            return Collections.emptyList();
         }
 
         // Handle all childs in the securty header, but only process the ones relevant for ebMS
@@ -440,7 +443,8 @@ public class SecurityHeaderProcessor implements ISecurityHeaderProcessor {
                                           (X509Certificate) decResult.get(WSSecurityEngineResult.TAG_X509_CERTIFICATE);
                 final X509ReferenceType refMethod = SecurityUtils.getKeyReferenceType(
                 			(STRParser.REFERENCE_TYPE) decResult.get(WSSecurityEngineResult.TAG_X509_REFERENCE_TYPE));
-                final List<WSDataRef> refs = (List<WSDataRef>) decResult.get(WSSecurityEngineResult.TAG_DATA_REF_URIS);
+                @SuppressWarnings("unchecked")
+				final List<WSDataRef> refs = (List<WSDataRef>) decResult.get(WSSecurityEngineResult.TAG_DATA_REF_URIS);
                 final String ktAlgorithm =
                                      (String) decResult.get(WSSecurityEngineResult.TAG_ENCRYPTED_KEY_TRANSPORT_METHOD);
                 final Collection<IPayloadEntity>  payloads = new ArrayList<>();

@@ -32,8 +32,9 @@ import org.holodeckb2b.interfaces.security.SecurityProcessingException;
  * @since 5.0.0
  */
 public class HeaderProcessingFailure extends SecurityProcessingException {
+    private static final long serialVersionUID = 3400296646952450751L;
 
-    /**
+	/**
      * Indication in which action the problem occurred
      */
     private final Action  action;

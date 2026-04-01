@@ -25,6 +25,7 @@ import java.security.cert.X509Certificate;
 import java.security.spec.AlgorithmParameterSpec;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -497,15 +498,12 @@ public class SignatureProcessor implements Processor {
 				if (se == null) {
 					Data dereferencedData = siRef.getDereferencedData();
 					if (dereferencedData instanceof NodeSetData) {
-						NodeSetData data = (NodeSetData) dereferencedData;
-						java.util.Iterator<?> iter = data.iterator();
-
-						while (iter.hasNext()) {
-							Node n = (Node) iter.next();
-							if (n instanceof Element) {
+						@SuppressWarnings("unchecked")
+						NodeSetData<Node> data = (NodeSetData<Node>) dereferencedData;
+						for(Iterator<Node> iter = data.iterator(); iter.hasNext() && se == null;) {
+							Node n = iter.next();
+							if (n instanceof Element)
 								se = (Element) n;
-								break;
-							}
 						}
 					} else if (dereferencedData instanceof OctetStreamData) {
 						se = doc.createElementNS("http://docs.oasis-open.org/wss/oasis-wss-SwAProfile-1.1",
@@ -526,7 +524,6 @@ public class SignatureProcessor implements Processor {
 				ref.setAttachment(attachment);
 
 				// Set the Transform algorithms as well
-				@SuppressWarnings("unchecked")
 				List<Transform> transforms = siRef.getTransforms();
 				List<String> transformAlgorithms = new ArrayList<>(transforms.size());
 				for (Transform transform : transforms) {
@@ -553,17 +550,14 @@ public class SignatureProcessor implements Processor {
 			Transform transform = (Transform) transformObject;
 
 			if (STRTransform.TRANSFORM_URI.equals(transform.getAlgorithm())) {
-				NodeSetData data = (NodeSetData) siRef.getDereferencedData();
+				@SuppressWarnings("unchecked")
+				NodeSetData<Node> data = (NodeSetData<Node>) siRef.getDereferencedData();
 				if (data != null) {
-					java.util.Iterator<?> iter = data.iterator();
-
 					Node securityTokenReference = null;
-					while (iter.hasNext()) {
-						Node node = (Node) iter.next();
-						if ("SecurityTokenReference".equals(node.getLocalName())) {
+					for (Iterator<Node> iter = data.iterator(); iter.hasNext() && securityTokenReference == null;) {
+						Node node = iter.next();
+						if ("SecurityTokenReference".equals(node.getLocalName()))
 							securityTokenReference = node;
-							break;
-						}
 					}
 
 					if (securityTokenReference != null) {

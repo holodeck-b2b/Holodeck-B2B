@@ -82,8 +82,8 @@ public final class SecurityUtils {
             case DIRECT_REF     : return BSTReference;
             case KEY_IDENTIFIER : return KeyIdentifier;
             case ISSUER_SERIAL  : return IssuerAndSerial;
+			default             : return null;
         }
-        return null;
     }
 
    /**
