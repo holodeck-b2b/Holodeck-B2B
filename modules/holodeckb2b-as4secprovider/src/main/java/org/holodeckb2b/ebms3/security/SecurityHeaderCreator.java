@@ -53,6 +53,9 @@ import org.apache.wss4j.dom.message.WSSecHeader;
 import org.apache.wss4j.dom.util.WSSecurityUtil;
 import org.apache.xml.security.encryption.params.ConcatKDFParams;
 import org.apache.xml.security.encryption.params.ConcatKDFParams.Builder;
+import org.apache.xml.security.encryption.params.HKDFParams;
+import org.apache.xml.security.exceptions.XMLSecurityException;
+import org.apache.xml.security.stax.ext.XMLSecurityConstants;
 import org.apache.xml.security.utils.EncryptionConstants;
 import org.holodeckb2b.common.VersionInfo;
 import org.holodeckb2b.common.security.results.EncryptionProcessingResult;
@@ -167,7 +170,8 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
     /**
      * {@inheritDoc}
      */
-    @Override
+    @SuppressWarnings("incomplete-switch")
+	@Override
     public Collection<ISecurityProcessingResult> createHeaders(IMessageProcessingContext procCtx,
                                                                ISecurityConfiguration senderConfig,
                                                                ISecurityConfiguration receiverConfig)
@@ -362,8 +366,11 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
 			processingParams.put(ConfigurationConstants.ENC_KEY_TRANSPORT, keyEncAlgo);
 			// The key agreement algorithm, for now must be ECDH-ES
 			String agreementMethod = kaConfig.getAgreementMethod();
-			if (!DefaultSecurityAlgorithms.KEY_AGREEMENT.equals(agreementMethod))
-				throw new SecurityProcessingException("Only ECDH-ES key agreement is supported!");
+			if (!(DefaultSecurityAlgorithms.KEY_AGREEMENT.equals(agreementMethod)
+				  || SecurityConstants.X25519_KEY_AGREEMENT_URI.equals(agreementMethod))) {
+				log.error("Unsupported key agreement method: {}", agreementMethod);
+				throw new SecurityProcessingException("Unsupported key agreement method");
+			}
 			processingParams.put(ConfigurationConstants.ENC_KEY_AGREEMENT_METHOD, agreementMethod);
 	        processingParams.put(ConfigurationConstants.ENC_KEY_ID,
                     								SecurityUtils.getWSS4JX509KeyId(kaConfig.getCertReferenceMethod()));
@@ -376,10 +383,10 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
 			IKeyDerivationMethod kdfConfig = kaConfig.getKeyDerivationMethod();
 			String kdf = kdfConfig.getAlgorithm();
 			processingParams.put(WSHandlerConstants.ENC_KEY_DERIVATION_FUNCTION, kdf);
-			if (DefaultSecurityAlgorithms.KEY_DERIVATION.equals(kdf)) {
+			Map<String, ?> kdfParameters = kdfConfig.getParameters();
+			if (WSS4JConstants.KEYDERIVATION_CONCATKDF.equals(kdf)) {
 				Builder kdfPBuilder = ConcatKDFParams.createBuilder(getKeyLengthKeyEncAlg(keyEncAlgo),
 																  	kdfConfig.getDigestAlgorithm());
-				Map<String, ?> kdfParameters = kdfConfig.getParameters();
 				if (!Utils.isNullOrEmpty(kdfParameters)) {
 					kdfPBuilder.algorithmID(getKDFParameter(kdfParameters, PModeParameters.CONCAT_KDF_ALGORITHMID))
 							   .partyUInfo(getKDFParameter(kdfParameters, PModeParameters.CONCAT_KDF_PARTY_U))
@@ -388,6 +395,25 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
 							   .suppPrivInfo(getKDFParameter(kdfParameters, PModeParameters.CONCAT_KDF_PRIVINFO));
 				}
 				processingParams.put(WSHandlerConstants.ENC_KEY_DERIVATION_PARAMS, kdfPBuilder.build());
+			} else if (WSS4JConstants.KEYDERIVATION_HKDF.equals(kdf)) {
+				int keyBitLength = getKeyLengthKeyEncAlg(keyEncAlgo);
+				org.apache.xml.security.encryption.params.HKDFParams.Builder kdfPBuilder =
+													HKDFParams.createBuilder(keyBitLength, WSS4JConstants.HMAC_SHA256);
+
+				log.trace("Generate a random salt for HKDF");
+				try {
+					kdfPBuilder.salt(XMLSecurityConstants.generateBytes(keyBitLength / 8));
+				} catch (XMLSecurityException randomiseError) {
+					log.warn("Could not generate random salt for HKDF, using default salt! Error : {}", randomiseError);
+				}
+				String ctxInfo = getKDFParameter(kdfParameters, PModeParameters.HKDF_CTX_INFO);
+				if (ctxInfo != null)
+					kdfPBuilder.info(ctxInfo.getBytes());
+
+                processingParams.put(WSHandlerConstants.ENC_KEY_DERIVATION_PARAMS, kdfPBuilder.build());
+			} else {
+				log.error("Unsupported key derivation method: {}", kdf);
+				throw new SecurityProcessingException("Unsupported key derivation method");
 			}
 		} else {
 			log.error("No key transport or key agreement configuration found!");
@@ -566,9 +592,6 @@ public class SecurityHeaderCreator extends WSHandler implements ISecurityHeaderC
         reqData.setAttachmentCallbackHandler(new AttachmentCallbackHandler(msgContext));
         // Register the callback handler for passwords (needed for UT and signing)
         reqData.setCallbackHandler((CallbackHandler) processingParams.get(ConfigurationConstants.PW_CALLBACK_REF));
-
-        // Are we processing a request or response?
-        final boolean isRequest = !msgContext.isServerSide();
 
         WSSecHeader secHeader = new WSSecHeader(target.id(), domEnvelope);
         secHeader.insertSecurityHeader();

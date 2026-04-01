@@ -5,6 +5,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## 8.2.0
 #####
 ### Added
+* Support for the _X25519 key agreement algorithm_ as specified in [RFC 7748](https://tools.ietf.org/html/rfc7748)
+* Support for the _HMAC-based Extract-and-Expand Key Derivation Function_ (HKDF) as specified in [RFC 5869](https://tools.ietf.org/html/rfc5869)
 * `getService()` to public Holodeck B2B Core interface 
 * `getTransportSender()` to public Holodeck B2B Core interface 
 * `createServiceClient()` to public Holodeck B2B Core interface

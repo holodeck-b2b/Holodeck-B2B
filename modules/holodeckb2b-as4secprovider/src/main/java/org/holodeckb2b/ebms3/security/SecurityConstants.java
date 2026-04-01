@@ -132,5 +132,13 @@ public final class SecurityConstants {
      * header failed
      */
     public static final String WSS4J_FAILURE_INDICATION = "hb2b:def:sec:failure";
+    /**
+     * The URI to identify the X25519 key agreement method in XML Encryption as described in <a href=
+     * "https://www.ietf.org/archive/id/draft-eastlake-rfc9231bis-xmlsec-uris-05.html#section-2.7">section 2.7 of
+     * RFC9231bis</a>.
+     *
+     * @since 8.2.0
+     */
+    public static final String X25519_KEY_AGREEMENT_URI = "http://www.w3.org/2021/04/xmldsig-more#x25519";
 }
 

@@ -26,7 +26,6 @@ import org.apache.wss4j.common.SecurityActionToken;
 import org.apache.wss4j.common.crypto.Crypto;
 import org.apache.wss4j.common.crypto.CryptoType;
 import org.apache.wss4j.common.ext.WSSecurityException;
-import org.apache.wss4j.common.ext.WSSecurityException.ErrorCode;
 import org.apache.wss4j.common.util.KeyUtils;
 import org.apache.wss4j.dom.WSConstants;
 import org.apache.wss4j.dom.action.Action;
@@ -80,18 +79,12 @@ public class EncryptionAction implements Action {
         if (encryptionToken.getMgfAlgorithm() != null)
         	wsEncrypt.setMGFAlgorithm(encryptionToken.getMgfAlgorithm());
 
-        if (encryptionToken.getKeyAgreementMethodAlgorithm() != null) {
-        	// Key Agreement method and KDF are currently fixed to ECDH-ES with ConcatKDF, check if these are used
-            if (!DefaultSecurityAlgorithms.KEY_AGREEMENT.equals(encryptionToken.getKeyAgreementMethodAlgorithm())
-            	|| !DefaultSecurityAlgorithms.KEY_DERIVATION.equals(encryptionToken.getKeyDerivationFunction()))
-            	throw new WSSecurityException(ErrorCode.UNSUPPORTED_ALGORITHM, "unsupportedKeyAgreementMethod");
-            else {
-	            wsEncrypt.setKeyAgreementMethod(encryptionToken.getKeyAgreementMethodAlgorithm());
-	            wsEncrypt.setKeyDerivationMethod(encryptionToken.getKeyDerivationFunction());
-	            wsEncrypt.setKeyDerivationParameters(encryptionToken.getKeyDerivationParameters());
-	            wsEncrypt.setRecipientCertInSecRef(Utils.isTrue(
-            									(String) handler.getOption(PModeParameters.KA_RCPT_CERT_AS_WSSECREF)));
-			}
+        if (!Utils.isNullOrEmpty(encryptionToken.getKeyAgreementMethodAlgorithm())) {
+            wsEncrypt.setKeyAgreementMethod(encryptionToken.getKeyAgreementMethodAlgorithm());
+            wsEncrypt.setKeyDerivationMethod(encryptionToken.getKeyDerivationFunction());
+            wsEncrypt.setKeyDerivationParameters(encryptionToken.getKeyDerivationParameters());
+            wsEncrypt.setRecipientCertInSecRef(Utils.isTrue(
+        									(String) handler.getOption(PModeParameters.KA_RCPT_CERT_AS_WSSECREF)));
         }
 
         wsEncrypt.setIncludeEncryptionToken(encryptionToken.isIncludeToken());

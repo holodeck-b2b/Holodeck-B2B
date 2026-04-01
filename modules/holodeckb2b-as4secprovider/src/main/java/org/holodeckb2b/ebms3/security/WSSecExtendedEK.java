@@ -137,7 +137,7 @@ public class WSSecExtendedEK extends WSSecEncrypt {
 	@Override
 	protected void createEncryptedKeyElement(X509Certificate remoteCert, Crypto crypto, KeyAgreementParameters dhSpec)
 			throws WSSecurityException {
-		if (!WSConstants.AGREEMENT_METHOD_ECDH_ES.equals(getKeyAgreementMethod()) || rcptCertInSecRef)
+		if (Utils.isNullOrEmpty(getKeyAgreementMethod()) || rcptCertInSecRef)
 			// The default implementation includes the certificate in a WS-Security Token Reference, so we re-use it
 			super.createEncryptedKeyElement(remoteCert, crypto, dhSpec);
 		else {

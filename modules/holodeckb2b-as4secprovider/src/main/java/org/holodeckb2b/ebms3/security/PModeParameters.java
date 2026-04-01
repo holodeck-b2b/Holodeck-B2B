@@ -60,5 +60,11 @@ public final class PModeParameters {
 	 */
 	public static final String  CONCAT_KDF_PRIVINFO = "SuppPrivInfo";
 
-
+	/**
+	 * The Key Derivation parameter to specify the value of the <i>Info</i> element to include in the
+	 * <code>HKDFParams</code>.
+	 *
+	 * @since 8.2.0
+	 */
+	public static final String	HKDF_CTX_INFO = "ContextInfo";
 }
