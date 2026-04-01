@@ -40,7 +40,7 @@ public class DefaultMessageReceiver implements MessageReceiver {
     	if (hb2bCtx.responseNeeded()) {
             final MessageContext outMsgContext = MessageContextBuilder.createOutMessageContext(messageCtx);
             // Copy the HB2B message processing context to the outgoing context
-            hb2bCtx.setParentContext(outMsgContext);
+            hb2bCtx.addToMessageContext(outMsgContext);
             // Handle protocol specific requirement (if any)
             prepareOutMessageContext(outMsgContext);
             // Start the outgoing flow

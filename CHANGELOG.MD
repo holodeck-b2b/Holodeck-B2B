@@ -8,6 +8,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * `getService()` to public Holodeck B2B Core interface 
 * `getTransportSender()` to public Holodeck B2B Core interface 
 * `createServiceClient()` to public Holodeck B2B Core interface
+* `addToMessageContext()` and `setParentContext()` to `org.holodeckb2b.interfaces.core.IMessageProcessingContext` so the message 
+  processing context can be copied to the response message context
 * Functional tests for security and trust components (thanks to @ckaaber)
 
 ### Changed

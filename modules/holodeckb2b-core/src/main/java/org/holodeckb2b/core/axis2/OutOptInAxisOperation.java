@@ -188,7 +188,7 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
 
             // Copy RESPONSE properties which the transport set onto the request message context when it processed
             // the incoming response received in reply to an outgoing request.
-            IMessageProcessingContext.getFromMessageContext(msgContext).setParentContext(responseMessageContext);
+            IMessageProcessingContext.getFromMessageContext(msgContext).addToMessageContext(responseMessageContext);
             // We convert the http headers to lowercase for unambigious processing
             @SuppressWarnings("unchecked")
 			final Map<String, String> httpHeaders = (Map<String, String>)

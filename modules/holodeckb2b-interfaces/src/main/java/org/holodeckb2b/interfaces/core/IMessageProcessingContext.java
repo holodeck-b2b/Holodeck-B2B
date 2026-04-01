@@ -70,6 +70,17 @@ public interface IMessageProcessingContext {
 	}
 
 	/**
+	 * Adds the Holodeck B2B message processing context to the Axis2 message context.
+	 *
+	 * @param mc		The Axis2 message context
+	 * @param procCtx	The Holodeck B2B message processing context
+	 */
+	default void addToMessageContext(final MessageContext mc) {
+		mc.setProperty(AXIS_MSG_CTX_PROP, this);
+		this.setParentContext(mc);
+	}
+
+	/**
 	 * Sets the parent Axis2 message context. Note that this method is only intended to be used by this interface when
 	 * binding a new message processing context to the current Axis2 message context.
 	 *
