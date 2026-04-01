@@ -32,11 +32,8 @@ import org.holodeckb2b.interfaces.security.X509ReferenceType;
 public interface ISigningConfiguration {
 
     /**
-     * Gets the Java keystore <i>alias</i> that identifies the X509 certificate that should be used for signing.
-     * <p>The current implementation of Holodeck B2B uses Java keystores to store certificates. Two keystores are used
-     * to storing private and public certificates and another for storing CA certificates (the trust store). Depending
-     * what this configuration applies to the certificate must exist in either the private (when signing outgoing
-     * messages) or public (when validating incoming messages) keystore.
+     * Gets the <i>alias</i> that is used to register the X509 certificate/key pair that should be used for signing with
+     * the installed <i>Certificate Manager</i>.
      *
      * @return  The alias that identifies the certificate to use for signing.
      */
@@ -45,8 +42,6 @@ public interface ISigningConfiguration {
     /**
      * Gets the password to access the private key hold by the certificate. Only applies to configurations that are
      * used to sign messages.
-     * <p>Current implementation of Holodeck B2B requires that result is the password in clear text. Future version may
-     * change this to get better secured passwords.
      *
      * @return  The password to get access to the private key
      */

@@ -46,12 +46,10 @@ import org.holodeckb2b.interfaces.security.SecurityProcessingException;
  * configuration section of the P-Mode. How key pairs and partner certificates are registered with the Certificate
  * Manager is not defined by this interface and left up to the implementation.
  * <p>
- * This interface specifies separate methods for validating trust in message and transport level certificates. For the
- * validation of a TLS certificate there is just one method, but for the validation of MLS certificate there are two,
- * one for generic validation of trust according to the Certificate Manager's trust policy and one that uses additional
- * configuration that applies to the signature for which the certificate (path) was used. The implementation of the
- * latter is optional and whether it is supported can be checked using the {@link #supportsConfigBasedValidation()}
- * method.<br/>
+ * This interface two methods for validating trust in message and transport level certificates, one for generic
+ * validation of trust according to the Certificate Manager's trust policy and one that uses additional configuration
+ * that applies to the context in which the certificate (path) was used. The implementation of the latter is optional
+ * and whether it is supported can be checked using the {@link #supportsConfigBasedValidation()} method.<br/>
  * How the validation of trust in a certificate (path) is established is implementation dependent and therefore the
  * only defined methods are to validate the trust.
  * <p>
@@ -267,7 +265,7 @@ public interface ICertificateManager {
      * already registered trusted certificates to perform the actual trust validation.
      *
      * @param certs		List of certificates that form the path to validate trust in. Must be in forward order.
-     * @param parameters	Validation parameters that should be used to validate the trust. May be <code>null</code> if 
+     * @param parameters	Validation parameters that should be used to validate the trust. May be <code>null</code> if
      * 						there are no parameters to take into account.
      * @param secLevel	Security level on which the certificate (path) to validate is used
      * @return			An instance of {@link IValidationResult} describing the validation result
@@ -313,7 +311,7 @@ public interface ICertificateManager {
      * not necessarily issue the certificates of end users but could just be the root CA's.
      *
      * @param secLevel		Security level for which the CA certificates are required
-     * @param parameters	Validation parameters that should be used to determine the trusted CA's. May be 
+     * @param parameters	Validation parameters that should be used to determine the trusted CA's. May be
      * 						<code>null</code> if there are no parameters to take into account.
      * @return collection containing the X509 certificates of all trusted CA's
      * @throws SecurityProcessingException when the CA certificates cannot be retrieved
@@ -322,5 +320,5 @@ public interface ICertificateManager {
     Collection<X509Certificate> getAllTrustedCertificates(final SecurityLevel secLevel,
     													  final IValidationParameters parameters)
     																				throws SecurityProcessingException;
-    
+
 }
