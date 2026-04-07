@@ -513,12 +513,16 @@ public class DefaultCertManager implements ICertificateManager {
 
 		log.trace("Calculate cert path to validate (i.e. find first trust anchor)");
 		// We only validate the given certificate path up to the first certificate that is listed as a trust anchor,
-		// so remove any certificate from the given path that is already in the set of trust anchors
+		// so remove any certificate from the given path that is already in the set of trust anchors.
+		// Match by subject + public key instead of exact certificate equality, so that cross-signed
+		// certificates (same key, different issuer/signature) are recognized as trust anchors.
 		List<X509Certificate> cpToCheck = new ArrayList<>();
 		boolean foundAnchor = false;
 		for(int i = 0; !foundAnchor && i < certs.size(); i++) {
 			X509Certificate c = certs.get(i);
-			if (!(foundAnchor = trustAnchors.parallelStream().anyMatch(a -> a.getTrustedCert().equals(c))))
+			if (!(foundAnchor = trustAnchors.parallelStream().anyMatch(a ->
+					a.getTrustedCert().getSubjectX500Principal().equals(c.getSubjectX500Principal()) &&
+					a.getTrustedCert().getPublicKey().equals(c.getPublicKey()))))
 				cpToCheck.add(c);
 		}
 
