@@ -571,11 +571,15 @@ public class DefaultCertManager implements ICertificateManager {
 						Utils.getExceptionTrace(validationException));
 
 				// If reason is "unspecified" or "undetermined" this could indicate either that the certificate is not
-				// valid, or that there was a problem in executing the OCSP check. In the latter case, try again without
+				// valid, or that there was a problem in executing the revocation check. In the latter case, try again
+				// without. This covers OCSP infrastructure issues (IOException cause) and missing CRL distribution
+				// points (RecoverableCertPathValidatorException with "No CRLs found" message).
 				if (performRevocationCheck
 					&& (reason == BasicReason.UNDETERMINED_REVOCATION_STATUS
 					|| (reason == BasicReason.UNSPECIFIED && validationException.getCause() != null
-							&& (validationException.getCause() instanceof IOException)))) {
+							&& (validationException.getCause() instanceof IOException))
+					|| (reason == BasicReason.UNSPECIFIED && validationException.getMessage() != null
+							&& validationException.getMessage().contains("No CRLs found")))) {
 					try {
 						log.debug("Validation with revocation check failed ({}), retry without",
 								validationException.getMessage());
