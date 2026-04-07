@@ -18,6 +18,7 @@ package org.holodeckb2b.as4.multihop;
 
 import java.util.Collection;
 
+import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.addressing.AddressingConstants;
 import org.apache.axis2.addressing.EndpointReference;
@@ -83,8 +84,10 @@ public class ConfigureMultihop extends AbstractBaseHandler {
             else {
                 // This is a multi-hop message, set the multi-hop target on the eb:Messaging element
                 log.debug("Primary message is a multi-hop UserMessage -> set multi-hop target");
-                final SOAPHeaderBlock ebHeader = Messaging.getElement(procCtx.getParentContext().getEnvelope());
-                ebHeader.setRole(MultiHopConstants.NEXT_MSH_TARGET);
+                final SOAPEnvelope envelope = procCtx.getParentContext().getEnvelope();
+                final SOAPHeaderBlock ebHeader = Messaging.getElement(envelope);
+                final String roleAttr = envelope.getVersion().getRoleAttributeQName().getLocalPart();
+                ebHeader.addAttribute(roleAttr, MultiHopConstants.NEXT_MSH_TARGET, envelope.getNamespace());
             }
         } else if (primMU instanceof IPullRequest) {
             // If the primary message unit is a PullRequest the message is not sent using multi-hop as this is not

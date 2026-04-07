@@ -17,13 +17,17 @@
 package org.holodeckb2b.ebms3.packaging;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 
+import org.apache.axiom.soap.SOAPConstants;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeader;
 import org.apache.axiom.soap.SOAPHeaderBlock;
+import org.holodeckb2b.as4.multihop.MultiHopConstants;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
 import org.junit.Test;
 
@@ -64,5 +68,40 @@ public class MessagingTest {
         assertEquals(soapHeaderBlock.getRole(), newSoapHeaderBlock.getRole());
         assertEquals(soapHeaderBlock.getVersion(),
                 newSoapHeaderBlock.getVersion());
+    }
+
+    @Test
+    public void testMustUnderstandSerializesCleanly() throws Exception {
+        SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
+        Messaging.createElement(env);
+
+        assertNoRedundantNamespace(env, SOAPConstants.ATTR_MUSTUNDERSTAND);
+    }
+
+    @Test
+    public void testRoleAttributeSerializesCleanly() throws Exception {
+        SOAPEnvelope env = SOAPEnv.createEnvelope(SOAPEnv.SOAPVersion.SOAP_12);
+        SOAPHeaderBlock messaging = Messaging.createElement(env);
+
+        String roleAttr = env.getVersion().getRoleAttributeQName().getLocalPart();
+        messaging.addAttribute(roleAttr, MultiHopConstants.NEXT_MSH_TARGET, env.getNamespace());
+
+        assertNoRedundantNamespace(env, roleAttr);
+    }
+
+    private static String serializeToString(SOAPEnvelope env) throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        env.serialize(baos);
+        return baos.toString("UTF-8");
+    }
+
+    private static void assertNoRedundantNamespace(SOAPEnvelope env, String attrName) throws Exception {
+        String xml = serializeToString(env);
+        assertFalse("Redundant namespace declaration 'xmlns:" + attrName + "=' breaks c14n"
+                    + " interoperability.\nActual XML:\n" + xml,
+                    xml.contains("xmlns:" + attrName + "="));
+        assertFalse("Wrongly-prefixed attribute '" + attrName + ":" + attrName + "=' breaks c14n"
+                    + " interoperability.\nActual XML:\n" + xml,
+                    xml.contains(attrName + ":" + attrName + "="));
     }
 }

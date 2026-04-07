@@ -18,6 +18,7 @@ package org.holodeckb2b.ebms3.packaging;
 
 import javax.xml.namespace.QName;
 
+import org.apache.axiom.soap.SOAPConstants;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.holodeckb2b.interfaces.general.EbMSConstants;
@@ -52,8 +53,16 @@ public class Messaging {
             // No existing messaging element, so create a new one
             messaging = env.getHeader().addHeaderBlock(Q_ELEMENT_NAME.getLocalPart(), SOAPEnv.getEbms3Namespace(env));
 
-            // The messaging header must be understood by the MSH (see 5.2.1 core spec)
-            messaging.setMustUnderstand(true);
+            /*
+             * The mustUnderstand attribute is explicitly added here because setting
+             * the mustUnderstand flag on the object results in a redundant namespace
+             * declaration and prefix, e.g. xmlns:mustUnderstand="...."
+             * mustUnderstand:mustUnderstand="true"
+             * Although this isn't incorrect, this additional declaration can confuse
+             * other SOAP processors when performing c14n.
+             */
+            messaging.addAttribute(SOAPConstants.ATTR_MUSTUNDERSTAND,
+                                    SOAPConstants.ATTR_MUSTUNDERSTAND_TRUE, env.getNamespace());
         }
 
         return messaging;
