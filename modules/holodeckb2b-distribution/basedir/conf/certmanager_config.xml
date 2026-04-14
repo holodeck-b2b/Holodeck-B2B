@@ -24,17 +24,34 @@ As in some environments the certificates of trading partner are directly trusted
 <i>direct trust</i> mode can be enabled in which case the trading partner certificates 
 are handled like trust anchors, with the exception that they are checked for validity. 
 <p>Another feature of this Certificate Manager is the option to perform a revocation 
-check using OCSP on certificates. This check is disabled by default for back-ward 
-compatibility and can be enabled in the configuration. Note however that when enabled and 
-used in an environment where certificates don't provide OCSP information this will result 
-in a lot of <code>ISignatureVerifiedWithWarning</code> events as the revocation check 
-could not be executed.
+check on certificates. This check is disabled by default for back-ward compatibility and 
+can be enabled in the configuration. Note however that when enabled and used in an 
+environment where certificates don't provide revocation information this will result 
+in a lot of rejections (if set to <i>mandatory</i>) or 
+<code>ISignatureVerifiedWithWarning</code> events as the revocation check could not be 
+executed (if set to <i>optional</i>).
 ===================================================================================== -->
 <CertManagerConfiguration xmlns="http://holodeck-b2b.org/schemas/2019/09/config/certmanager"
  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
  xsi:schemaLocation="http://holodeck-b2b.org/schemas/2019/09/config/certmanager ../repository/xsd/hb2b-certmanager-cfg.xsd">
+    <!-- 
+        The value set in the PerformRevocationCheck element specified whether 
+        the Certificate Manager should perform a revocation check when
+        validating trust in a certificate path. 
+        Possible settings are:<ul>
+        <li>"mandatory" : revocation checks MUST be executed. If the revocation check cannot 
+                be performed because the certificate to check does not contain the required 
+                extensions or the revocation data cannot be retrieved this will lead to 
+                rejection of the certificate path being checked.</li>
+        <li>"optional" : revocation checks SHOULD be executed, buf if they cannot be executed 
+                the certificate path is "trusted with warnings"</li>
+        <li>"never" : revecocation checks ARE NOT executed, only the correctness and validaty 
+                (in terms of time) of the certificate path is checked.</li>
+        </ul>
+        For backward compatibility the default setting is "never". 
+    -->
+    <PerformRevocationCheck>never</PerformRevocationCheck>
     <!--
-    <PerformRevocationCheck>false</PerformRevocationCheck>
     <DirectTrustPartnerCertificates>false</DirectTrustPartnerCertificates>        
     -->
     <!--

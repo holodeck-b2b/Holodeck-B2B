@@ -99,6 +99,7 @@
 		<hb2b-utils-version>2.1.0</hb2b-utils-version>
 		<axis2-version>1.8.2</axis2-version>
 		<axiom-version>1.4.0</axiom-version>
+		<bc-version>1.83</bc-version>
 		<netbeans.hint.license>gpl30</netbeans.hint.license>
 		<log4j.version>2.23.1</log4j.version>
 		<junit.version>5.9.3</junit.version>
@@ -214,6 +215,15 @@
 				<version>${axiom-version}</version>
 			</dependency>
 
+			<!--===============================================================
+                Bouncy Castle is used as crypto library 
+            =============================================================== -->
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+  				<artifactId>bcprov-jdk18on</artifactId>
+  				<version>${bc-version}</version>
+			</dependency>
+		
 			<!--===============================================================
                 XML Processing libraries
             =============================================================== -->

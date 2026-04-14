@@ -17,45 +17,58 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
-    targetNamespace="http://holodeck-b2b.org/schemas/2019/09/config/certmanager"
-    version="8.0.0" xmlns="http://holodeck-b2b.org/schemas/2019/09/config/certmanager">
+    targetNamespace="http://holodeck-b2b.org/schemas/2019/09/config/certmanager" version="8.2.0"
+    xmlns="http://holodeck-b2b.org/schemas/2019/09/config/certmanager">
     <xs:annotation>
         <xs:documentation>This XML schema defines the structure of the configuration file of the default <i>Certificate Manager</i> of Holodeck B2B.
         It configures the access to the three key stores of the Certificate Manager and includes two optional elements to configure OCSP revocation
         checks and "direct trust" in trading partner certificates.</xs:documentation>
         <xs:documentation>In version 7.0.0 the type attribute was added to the Password element to enable retrieving the password from a Java system 
-        property or system environment variable.</xs:documentation>        
-        <xs:documentation>In version 8.0.0 the <code></code></xs:documentation>
+        property or system environment variable.</xs:documentation>
+        <xs:documentation>In version 8.0.0 the <code/></xs:documentation>
     </xs:annotation>
     <xs:element name="CertManagerConfiguration" type="CertManagerConfigurationType"/>
     <xs:complexType name="CertManagerConfigurationType">
         <xs:sequence>
-        	<xs:element name="PerformRevocationCheck" type="xs:boolean" minOccurs="0" default="false">
-        		<xs:annotation>
-        			<xs:documentation>This OPTIONAL element indicates whether the Certificate Manager should perform a revocation check using OCSP when
-        			 validating trust in a certificate (path). If the OSCP check cannot be performed, it will fall back to a regular validation without
-        			 revocation check. This will be indicated as <i>"trusted with warnings"</i>.</xs:documentation>
-        			 <xs:documentation>The default is value is <i>false</i> so the behaviour is the same as in earlier versions</xs:documentation>
-        		</xs:annotation>
-        	</xs:element>
-        	<xs:element name="DirectTrustPartnerCertificates" type="xs:boolean" minOccurs="0" default="false">
-        		<xs:annotation>
-        			<xs:documentation>This OPTIONAL element indicates whether the Certificate Manager should use the trading partner certificate as
+            <xs:element name="PerformRevocationCheck" type="revocation-options" minOccurs="0"
+                default="never">
+                <xs:annotation>
+                    <xs:documentation>This OPTIONAL element indicates whether the Certificate Manager should perform a revocation check when
+        			 validating trust in a certificate path. Possible settings are:<ul>
+        			 <li>"mandatory" : revocation checks MUST be executed. If the revocation check cannot be performed because the certificate to 
+        			         check does not contain the required extensions or the revocation data cannot be retrieved this will lead to 
+        			         rejection of the certificate path being checked.</li>
+        			 <li>"optional" : revocation checks SHOULD be executed, buf if they cannot be executed the certificate path is "trusted with 
+        			         warnings"</li>
+        			 <li>"never" : revecocation checks ARE NOT executed, only the correctness and validaty (in terms of time) of the certificate 
+        			         path is checked.</li></ul>
+        			 </xs:documentation>
+                    <xs:documentation>The default is value is <i>never</i> so the behaviour is the same as in earlier versions</xs:documentation>
+                    <xs:documentation>The enumeration is new in version 8.2.0 and for backward compatibility the values <i>true</i> and <i>false</i> 
+                        are still accepted and mapped to <i>optional</i> resp <i>never</i>. These values however are <b>deprecated</b> and SHOULD NOT
+                        be used any more.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="DirectTrustPartnerCertificates" type="xs:boolean" minOccurs="0"
+                default="false">
+                <xs:annotation>
+                    <xs:documentation>This OPTIONAL element indicates whether the Certificate Manager should use the trading partner certificate as
         			 as trust anchors when validating trust in a certificate (path).</xs:documentation>
-        			 <xs:documentation>The default value <i>false</i> results in the same behaviour as in version 4.x. Setting the value to <i>true</i>
+                    <xs:documentation>The default value <i>false</i> results in the same behaviour as in version 4.x. Setting the value to <i>true</i>
         			 results in the same behaviour as in version 3 and before. The default is considered safer as the correct issuing of the certificates
         			 will be checked. </xs:documentation>
-        		</xs:annotation>
-        	</xs:element>        	
-        	<xs:element name="IncludeDefaultTrustStore" type="default-trust-options" minOccurs="0" default="tlsOnly">
-        		<xs:annotation>
-        			<xs:documentation>This OPTIONAL element indicates whether the Certificate Manager should include the certificates of the well-known
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="IncludeDefaultTrustStore" type="default-trust-options" minOccurs="0"
+                default="tlsOnly">
+                <xs:annotation>
+                    <xs:documentation>This OPTIONAL element indicates whether the Certificate Manager should include the certificates of the well-known
         			 and generically trusted Certificate Authorities as stored in the Java runtime's default trust store for the trust validation of
         			 certificates.</xs:documentation>
-        			 <xs:documentation>The default value <i>tlsOnly</i> results in the same behaviour as in previous versions where the default trust
+                    <xs:documentation>The default value <i>tlsOnly</i> results in the same behaviour as in previous versions where the default trust
         			 store is only used for the validation of TLS certificates.</xs:documentation>
-        		</xs:annotation>
-        	</xs:element>        	
+                </xs:annotation>
+            </xs:element>
             <xs:element name="Keystores" type="KeystoresType">
                 <xs:annotation>
                     <xs:documentation>This element contains the information needed to access the three JKS key stores used by Holodeck B2B's default Certificate Manager.</xs:documentation>
@@ -63,13 +76,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             </xs:element>
         </xs:sequence>
     </xs:complexType>
+    <xs:simpleType name="revocation-options">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="mandatory"/>
+            <xs:enumeration value="optional"/>
+            <xs:enumeration value="never"/>
+            <xs:enumeration value="true"/>
+            <xs:enumeration value="false"/>
+        </xs:restriction>
+    </xs:simpleType>
     <xs:simpleType name="default-trust-options">
-		<xs:restriction base="xs:string">
-			<xs:enumeration value="never"/>
-			<xs:enumeration value="tlsOnly"/>
-			<xs:enumeration value="mlsOnly"/>			
-			<xs:enumeration value="always"/>
-		</xs:restriction>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="never"/>
+            <xs:enumeration value="tlsOnly"/>
+            <xs:enumeration value="mlsOnly"/>
+            <xs:enumeration value="always"/>
+        </xs:restriction>
     </xs:simpleType>
     <xs:complexType name="KeystoresType">
         <xs:sequence>
@@ -109,19 +131,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         </xs:sequence>
     </xs:complexType>
     <xs:complexType name="PasswordType">
-    	<xs:simpleContent>
-    		<xs:extension base="non-empty-string">
-				<xs:attribute name="type" default="literal">
-					<xs:simpleType>
-						<xs:restriction base="xs:string">
-							<xs:enumeration value="literal"/>
-							<xs:enumeration value="sys"/>
-							<xs:enumeration value="env"/>
-						</xs:restriction>
-					</xs:simpleType>
-				</xs:attribute>
-    		</xs:extension>
-    	</xs:simpleContent>
+        <xs:simpleContent>
+            <xs:extension base="non-empty-string">
+                <xs:attribute name="type" default="literal">
+                    <xs:simpleType>
+                        <xs:restriction base="xs:string">
+                            <xs:enumeration value="literal"/>
+                            <xs:enumeration value="sys"/>
+                            <xs:enumeration value="env"/>
+                        </xs:restriction>
+                    </xs:simpleType>
+                </xs:attribute>
+            </xs:extension>
+        </xs:simpleContent>
     </xs:complexType>
     <xs:simpleType name="non-empty-string">
         <xs:restriction base="xs:string">

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<certmanager xmlns="http://holodeck-b2b.org/schemas/2022/10/certmanager">
-    <keypairs>
-        <keystore>
-            <path>keystores/privatekeys.jks</path>
-            <password>test123</password>
-        </keystore>
-    </keypairs>
-</certmanager>
+<CertManagerConfiguration xmlns="http://holodeck-b2b.org/schemas/2019/09/config/certmanager">
+    <Keystores>
+        <PrivateKeys>
+            <Path>keystores/privatekeys.jks</Path>
+            <Password>test123</Password>
+        </PrivateKeys>
+    </Keystores>
+</CertManagerConfiguration>

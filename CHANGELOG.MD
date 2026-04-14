@@ -5,6 +5,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## 8.2.0
 #####
 ### Added
+* Support for automatic downloading of CRLs from the CRL distribution point indicated in the certificate
 * Support for the _X25519 key agreement algorithm_ as specified in [RFC 7748](https://tools.ietf.org/html/rfc7748)
 * Support for the _HMAC-based Extract-and-Expand Key Derivation Function_ (HKDF) as specified in [RFC 5869](https://tools.ietf.org/html/rfc5869)
 * `getService()` to public Holodeck B2B Core interface 
@@ -15,6 +16,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Functional tests for security and trust components (thanks to @ckaaber)
 
 ### Changed
+* Configuration of revocation checks which can be specified to be _mandatory_, _optional_ or _never_. 
 * `org.holodeckb2b.interfaces.pmode.IEncryptionConfiguration` has been refactored to allow specification of multiple keypairs
   that can be used for decryption of messages. The old `getKeystoreAlias()` and `getCertificatePassword()` methods have been
   replaced by `getDecryptionKeypairs()` and `getEncryptionCertificate()`.

@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CertManagerConfiguration xmlns="http://holodeck-b2b.org/schemas/2019/09/config/certmanager">
-	<PerformRevocationCheck>always</PerformRevocationCheck>
-	<DirectTrustPartnerCertificates>true</DirectTrustPartnerCertificates>
-	<IncludeDefaultTrustStore>mlsOnly</IncludeDefaultTrustStore>
     <Keystores>
         <PrivateKeys>
             <Path>keystores/privatekeys.jks</Path>

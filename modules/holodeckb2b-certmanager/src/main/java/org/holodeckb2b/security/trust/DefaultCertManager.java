@@ -31,28 +31,29 @@ import java.security.NoSuchProviderException;
 import java.security.PublicKey;
 import java.security.Security;
 import java.security.UnrecoverableEntryException;
-import java.security.cert.CertPath;
+import java.security.cert.CertPathBuilder;
+import java.security.cert.CertPathBuilderException;
 import java.security.cert.CertPathValidator;
 import java.security.cert.CertPathValidatorException;
-import java.security.cert.CertPathValidatorException.BasicReason;
 import java.security.cert.CertPathValidatorException.Reason;
+import java.security.cert.CertStore;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateExpiredException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.CertificateNotYetValidException;
-import java.security.cert.PKIXCertPathValidatorResult;
-import java.security.cert.PKIXParameters;
+import java.security.cert.CollectionCertStoreParameters;
+import java.security.cert.PKIXBuilderParameters;
+import java.security.cert.PKIXCertPathBuilderResult;
 import java.security.cert.TrustAnchor;
+import java.security.cert.X509CertSelector;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.security.auth.x500.X500Principal;
 import javax.xml.bind.JAXBContext;
@@ -79,6 +80,8 @@ import org.holodeckb2b.interfaces.security.trust.SecurityLevel;
 import org.holodeckb2b.security.trust.config.CertManagerConfigurationType;
 import org.holodeckb2b.security.trust.config.DefaultTrustOptions;
 import org.holodeckb2b.security.trust.config.PasswordType;
+import org.holodeckb2b.security.trust.config.RevocationOptions;
+
 
 /**
  * Is the default implementation of the {@link ICertificateManager} which manages the storage of private keys and
@@ -126,6 +129,14 @@ public class DefaultCertManager implements ICertificateManager {
     private final Logger log = LogManager.getLogger(DefaultCertManager.class);
 
     /**
+     * Class reference to the BC exception class that indicates that the revocation check failure is recoverable, i.e.
+     * that the checked certificate isn't revoked, but that there was a problem with the revocation check itself.
+     * We need to use this class variable because the exception class is not public and therefore needs to be retrieved
+     * dynamically.
+     */
+    @SuppressWarnings("rawtypes")
+	private Class recoverableCertPathExceptionClss;
+    /**
      * Path to the keystore holding the key pairs used for signing and decryption
      */
     private Path  privateKeystorePath;
@@ -153,7 +164,7 @@ public class DefaultCertManager implements ICertificateManager {
     /**
      * Indicator whether a revocation check should be performed
      */
-    private boolean performRevocationCheck;
+    private RevocationOptions performRevocationCheck;
     /**
      * Indicator whether the trading partners' certificates should be used as trust anchors.
      */
@@ -192,8 +203,16 @@ public class DefaultCertManager implements ICertificateManager {
             					jaxbUnmarshaller.unmarshal(new StreamSource(fis), CertManagerConfigurationType.class);
             CertManagerConfigurationType certMgrConfig = rootConfigElement.getValue();
             // Check revocation check and direct trust parameters
-            performRevocationCheck = certMgrConfig.isPerformRevocationCheck() == null ? false :
-            															certMgrConfig.isPerformRevocationCheck();
+            performRevocationCheck = certMgrConfig.getPerformRevocationCheck() == null ? RevocationOptions.NEVER :
+            															certMgrConfig.getPerformRevocationCheck();
+            if (performRevocationCheck == RevocationOptions.TRUE || performRevocationCheck == RevocationOptions.FALSE) {
+            	log.warn("{} is deprecated for the PerformRevocationCheck parameter. Please use {} instead.",
+	            		performRevocationCheck.value(),
+	            		performRevocationCheck == RevocationOptions.FALSE ? RevocationOptions.NEVER.value()
+	            				: RevocationOptions.MANDATORY + " or " + RevocationOptions.OPTIONAL);
+            	performRevocationCheck = performRevocationCheck == RevocationOptions.FALSE ? RevocationOptions.NEVER
+            																			: RevocationOptions.OPTIONAL;
+            }
             enableDirectTrust = certMgrConfig.isDirectTrustPartnerCertificates() == null ? false :
             														certMgrConfig.isDirectTrustPartnerCertificates();
             includeJDKTrustAnchors = new HashSet<SecurityLevel>();
@@ -239,16 +258,20 @@ public class DefaultCertManager implements ICertificateManager {
 				log.debug("Adding BouncyCastle JCE provider");
 				Security.addProvider(new BouncyCastleProvider());
 			}
+			recoverableCertPathExceptionClss =
+								Class.forName("org.bouncycastle.jce.provider.RecoverableCertPathValidatorException");
 		} catch (Throwable bcUnavailable) {
 			log.fatal("Required BouncyCastle provider is not available! Details: {}", bcUnavailable.getMessage());
 			throw new SecurityProcessingException("BouncyCastle provider not available!");
 		}
-        // We enable OCSP by default, even if revocation checking is disabled
-        Security.setProperty("ocsp.enable", "true");
+        // Enable OCSP and automatic CRL downloads to ensure that revocation checks are performed
+		Security.setProperty("ocsp.enable", "true");
+        Security.setProperty("org.bouncycastle.x509.enableCRLDP", "true");
+
 
         if (log.isDebugEnabled()) {
             StringBuilder logMsg = new StringBuilder("Completed initialisation of the Default Certificate Manager:\n");
-            logMsg.append("\tRevocation check    : ").append(performRevocationCheck).append('\n')
+            logMsg.append("\tRevocation check    : ").append(performRevocationCheck.value()).append('\n')
             	  .append("\tDirect trust        : ").append(enableDirectTrust).append('\n')
             	  .append("\tTrust default CA for: ").append(includeJDKTrustAnchors.toString()).append('\n')
                   .append("\tKey stores: ").append('\n')
@@ -405,6 +428,10 @@ public class DefaultCertManager implements ICertificateManager {
 			}
 			certs.addAll(getCertsFromKeyStore(jdkTrustStore, "changeit"));
 		}
+		if (enableDirectTrust) {
+			log.trace("Direct trust in partner certificates is enabled, add as trust anchors");
+			certs.addAll(getCertsFromKeyStore(partnerKeystorePath, partnerKeystorePwd));
+		}
 		return certs;
     }
 
@@ -489,120 +516,82 @@ public class DefaultCertManager implements ICertificateManager {
 			throw new SecurityProcessingException("Empty certificate path");
 		}
 
-		if (log.isDebugEnabled()) {
-			if (certs.size() == 1)
-				log.debug("Validate trust of single certificate for Subject: {}",
-																				certs.get(0).getSubjectDN().getName());
-			else {
-				StringBuilder sb = new StringBuilder("Validate trust in cert path: Leaf cert for Subject: ");
-				sb.append(certs.get(0).getSubjectDN().getName());
-				for (int i = 1; i < certs.size(); i++)
-					sb.append("\n\tNext: ").append(certs.get(i).getSubjectDN().getName());
-				log.debug(sb.toString());
-			}
-		}
-
-		log.trace("Create the set of trust anchors");
-		Set<TrustAnchor> trustAnchors = new HashSet<TrustAnchor>();
-		getAllTrustedCertificates(secLevel).forEach(c -> trustAnchors.add(new TrustAnchor(c, null)));
-		if (enableDirectTrust) {
-			log.debug("Direct trust in partner certificates is enabled, add as trust anchors");
-			getCertsFromKeyStore(partnerKeystorePath, partnerKeystorePwd)
-								.forEach(c -> trustAnchors.add(new TrustAnchor(c, null)));
-		}
-
-		log.trace("Calculate cert path to validate (i.e. find first trust anchor)");
-		// We only validate the given certificate path up to the first certificate that is listed as a trust anchor,
-		// so remove any certificate from the given path that is already in the set of trust anchors
-		List<X509Certificate> cpToCheck = new ArrayList<>();
-		boolean foundAnchor = false;
-		for(int i = 0; !foundAnchor && i < certs.size(); i++) {
-			X509Certificate c = certs.get(i);
-			if (!(foundAnchor = trustAnchors.parallelStream().anyMatch(a -> a.getTrustedCert().equals(c))))
-				cpToCheck.add(c);
-		}
-
-		if (cpToCheck.isEmpty()) {
-			X509Certificate cert = certs.get(0);
-			log.trace("Leaf certificate is directly trusted, check validity");
-			try {
-				cert.checkValidity();
-				log.debug("Valid directly trusted leaf certificate (Subject={})", CertificateUtils.getSubjectCN(cert));
-				return new ValidationResult(Trust.OK, cpToCheck, "Leaf certificate is registered a trust anchor");
-			} catch (CertificateExpiredException | CertificateNotYetValidException validationException) {
-				log.error("Invalid directly trusted leaf certificate (Subject={}) : {}",
-						  CertificateUtils.getSubjectCN(cert), validationException.getMessage());
-				return new ValidationResult(Trust.NOK, cpToCheck, "Invalid directly trusted leaf certificate");
-			}
-		}
-
-		if (log.isTraceEnabled()) {
-			StringBuilder sb = new StringBuilder("Cert path to check: [");
-			sb.append(cpToCheck.get(0).getSubjectDN().getName());
-			for (int i = 1; i < cpToCheck.size(); i++)
-				sb.append(" << ").append(cpToCheck.get(i).getSubjectDN().getName());
-			sb.append(']');
-			log.trace(sb.toString());
+		final Collection<X509Certificate> trustedCerts = getAllTrustedCertificates(secLevel, param);
+		// Check if the leaf certificate is directly trusted
+		if (trustedCerts.contains(certs.get(0))) {
+			log.debug("Leaf certificate (Subject={}) is directly trusted", CertificateUtils.getSubjectName(certs.get(0)));
+			return new ValidationResult(Trust.OK, Collections.singletonList(certs.get(0)),
+										"Leaf certificate is registered a trust anchor");
 		}
 
 		try {
-			CertPath cp = CertificateFactory.getInstance("X.509").generateCertPath(cpToCheck);
-			PKIXParameters params = new PKIXParameters(trustAnchors);
-			params.setRevocationEnabled(performRevocationCheck);
+			log.trace("Calculate cert path to validate (i.e. find first trust anchor)");
+			X509CertSelector certSelect = new X509CertSelector();
+            certSelect.setCertificate(certs.get(0));
+            PKIXBuilderParameters params = new PKIXBuilderParameters(trustedCerts.stream()
+            															.map(c -> new TrustAnchor(c, null))
+            															.collect(Collectors.toSet()),
+            														   certSelect);
+			// When building the cert path we do not want to check for revocation because this is done separately so
+			// we get information about the trust anchor and can handle a possible fallback more easily
+			params.setRevocationEnabled(false);
+			// Try to build the cert path
+			params.addCertStore(CertStore.getInstance("Collection", new CollectionCertStoreParameters(certs)));
+			final CertPathBuilder cpBuilder = CertPathBuilder.getInstance("PKIX", BouncyCastleProvider.PROVIDER_NAME);
+			final PKIXCertPathBuilderResult cpBuildResult = (PKIXCertPathBuilderResult) cpBuilder.build(params);
+			@SuppressWarnings("unchecked")
+			List<X509Certificate> fullchain = new ArrayList<>((List<X509Certificate>) cpBuildResult.getCertPath().getCertificates());
+			fullchain.add(cpBuildResult.getTrustAnchor().getTrustedCert());
 
-			CertPathValidator validator = CertPathValidator.getInstance("PKIX", BouncyCastleProvider.PROVIDER_NAME);
-			try {
-				PKIXCertPathValidatorResult validation = (PKIXCertPathValidatorResult) validator.validate(cp, params);
-				// Add the found trust anchor to cert path to include in result
-				cpToCheck.add(validation.getTrustAnchor().getTrustedCert());
-				if (log.isDebugEnabled())
-					log.debug("Certificate path is trusted! {}", getValidatedPath(cpToCheck));
-				else
-					log.info("Certficate path is trusted!");
-				return new ValidationResult(Trust.OK, cpToCheck);
-			} catch (CertPathValidatorException validationException) {
-				Reason reason = validationException.getReason();
-				log.warn("Certificate path validation failed - Reason: {}, Message: {}, Certificate: {}, Trace: {}",
-						 reason,
-						 validationException.getMessage(),
-						 validationException.getCertPath() != null && validationException.getIndex() >= 0 ?
-								 CertificateUtils.getSubjectCN((X509Certificate) validationException.getCertPath()
-									 							.getCertificates().get(validationException.getIndex()))
-								 : "N/A",
-                         Utils.getExceptionTrace(validationException)
-                );
+			if (log.isDebugEnabled())
+				log.debug("Found cert path to trust anchor: {}", getCertPathString(fullchain, true));
 
-				// If reason is "unspecified" or "undetermined" this could indicate either that the certificate is not
-				// valid, or that there was a problem in executing the OCSP check. In the latter case, try again without
-				if (performRevocationCheck
-					&& (reason == BasicReason.UNDETERMINED_REVOCATION_STATUS
-						|| (reason == BasicReason.UNSPECIFIED && validationException.getCause() != null
-								&& (validationException.getCause() instanceof IOException)))) {
-					try {
-						log.debug("Validation with revocation check failed ({}), retry without",
-									validationException.getMessage());
-						params.setRevocationEnabled(false);
-						PKIXCertPathValidatorResult validation = (PKIXCertPathValidatorResult) validator.validate(cp, params);
-						// Add the found trust anchor to cert path to include in result
-						cpToCheck.add(validation.getTrustAnchor().getTrustedCert());
-						log.warn("Certificate path could only be validated without revocation check! {}",
-						getValidatedPath(cpToCheck));
-						return new ValidationResult(Trust.WITH_WARNINGS, cpToCheck, "Revocation could not be checked",
-													new SecurityProcessingException("Revocaction check failed",
-																					validationException));
-					} catch (CertPathValidatorException persistentError) {
-						// Even without revocation check it failed...
+			if (performRevocationCheck == RevocationOptions.NEVER) {
+				log.info("Certificate path is trusted");
+				return new ValidationResult(Trust.OK, fullchain, "Certificate path validated successfully");
+			} else {
+				log.trace("Perform revocation checks for certificate path");
+				try {
+					params.setRevocationEnabled(true);
+					CertPathValidator.getInstance("PKIX", BouncyCastleProvider.PROVIDER_NAME)
+									 .validate(cpBuildResult.getCertPath(), params);
+					log.info("Certificate path is trusted");
+					return new ValidationResult(Trust.OK, fullchain, "Certificate path validated successfully");
+				} catch (CertPathValidatorException validationException) {
+					Reason reason = validationException.getReason();
+					log.warn("Certificate path validation failed - Reason: {}, Message: {}, Certificate: {}, Trace: {}",
+							 reason,
+							 validationException.getMessage(),
+							 validationException.getCertPath() != null && validationException.getIndex() >= 0 ?
+									 CertificateUtils.getSubjectCN((X509Certificate) validationException.getCertPath()
+										 							.getCertificates().get(validationException.getIndex()))
+									 : "N/A",
+	                         Utils.getExceptionTrace(validationException)
+	                );
+					// If the revocation check is optional, check if the exception indicates that the check itself
+					// hasn't been executed and therefore the revocation status is unknown
+					if (performRevocationCheck == RevocationOptions.OPTIONAL
+							&& recoverableCertPathExceptionClss.isInstance(validationException)) {
+						log.warn("Certificate path trusted with warnings!");
+						return  new ValidationResult(Trust.WITH_WARNINGS, fullchain, "Revocation could not be checked",
+														new SecurityProcessingException("Revocaction check failed",
+																						validationException));
+					} else {
+						log.error("Certificate path is not trusted!");
+						return new ValidationResult(certs, new SecurityProcessingException("Revocation check failed",
+																						validationException));
 					}
 				}
-				log.error("Trust validation failed! Details: {}", validationException.getMessage());
-				return new ValidationResult(cpToCheck, new SecurityProcessingException("Untrusted cert path",
-																							validationException));
-
 			}
-		} catch (InvalidAlgorithmParameterException | CertificateException | NoSuchAlgorithmException
-				| NoSuchProviderException ex) {
+		} catch (CertPathBuilderException validationException) {
+			log.error("Failed to find certificate path to a trust anchor! Checked path = {} ; Error message = {}",
+					 getCertPathString(certs, false), validationException.getMessage());
+			return new ValidationResult(certs, new SecurityProcessingException("Invalid cert path",
+																				validationException));
+		} catch (InvalidAlgorithmParameterException | NoSuchAlgorithmException | NoSuchProviderException ex) {
 			// These indicate some generic problem occured during the validation which is not related to the trust,
 			// so report as exception too
+			log.error("Error during trust validation : {}", ex.getMessage());
 			throw new SecurityProcessingException("Error during trust validation", ex);
 		}
 	}
@@ -631,19 +620,19 @@ public class DefaultCertManager implements ICertificateManager {
 	}
 
 	/**
-	 * Helper method to create log message with the certificate path that was validated.
+	 * Helper method to create a string representing the given certificate path.
 	 *
-	 * @param cp	List of certificate representing the validated cert path with the last one the found trust anchor
-	 * @return		The log message with the validated path
+	 * @param cp	List of certificate representing the cert path
+	 * @param lastIsTrustAnchor indicates if the last certificate is the found trust anchor
+	 * @return		string representing the path
 	 */
-	private String getValidatedPath(final List<X509Certificate> cp) {
-		StringBuilder sb = new StringBuilder("Validated path = [");
-		sb.append(cp.get(0).getSubjectDN().getName());
-		for (int i = 1; i < cp.size() - 1; i++)
-			sb.append(" << ").append(cp.get(i).getSubjectDN().getName());
-		sb.append(" <{trustanchor}< ")
-		  .append(cp.get(cp.size() -1).getSubjectDN().getName())
-		  .append(']');
+	private String getCertPathString(final List<X509Certificate> cp, boolean lastIsTrustAnchor) {
+		StringBuilder sb = new StringBuilder("[");
+		sb.append(CertificateUtils.getSubjectName(cp.get(0)));
+		for (int i = 1; i < cp.size(); i++)
+			sb.append(i < cp.size() - 1 || !lastIsTrustAnchor ? " << " : " <{trustanchor}< ")
+			  .append(CertificateUtils.getSubjectName(cp.get(i)));
+		sb.append(']');
 		return sb.toString();
 	}
 

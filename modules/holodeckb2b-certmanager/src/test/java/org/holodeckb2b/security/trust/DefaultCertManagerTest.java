@@ -26,18 +26,19 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.security.KeyStore;
 import java.security.Security;
-import java.security.cert.CertPathValidatorException.BasicReason;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.holodeckb2b.commons.security.KeystoreUtils;
 import org.holodeckb2b.commons.testing.TestUtils;
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
@@ -50,7 +51,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 
 /**
  * Functional tests for the Certificate Manager component.
@@ -67,20 +67,23 @@ import org.junit.jupiter.api.io.TempDir;
 class DefaultCertManagerTest {
 
     private static final String VALID_CONFIG = "valid-config.xml";
-    private static final String OCSP_CONFIG = "ocsp-config.xml";
-    private static final String KEYSTORES_DIR = "keystores/";
-    private static final String PRIVATE_KEYSTORE = "privatekeys.jks";
-    private static final String KEYPAIR_ALIAS = "testkey";
-    private static final String KEYPAIR_PASSWORD = "test123";
-    private static final String CHAIN_ALIAS = "chainkey";
-    private static final String PARTNER_KEYSTORE = "partnercerts.jks";
-    private static final String PARTNER_ALIAS = "partnercert";
-    private static final String TRUST_KEYSTORE = "trustanchors.jks";
-    private static final String TRUSTANCHOR_ALIAS = "trustanchor";
-    private static final String TRUSTANCHOR_PASSWORD = "trust123";
+    private static final String REVO_OPT_CONFIG = "opt-revocation-config.xml";
+    private static final String REVO_MAN_CONFIG = "man-revocation-config.xml";
 
-    @TempDir
-    Path tempDir;
+    private static final String KEYSTORES_DIR = "keystores/";
+    private static final String PRIVATE_KEYSTORE = KEYSTORES_DIR + "privatekeys.jks";
+    private static final String PARTNER_KEYSTORE = KEYSTORES_DIR + "partnercerts.jks";
+    private static final String TRUST_KEYSTORE = KEYSTORES_DIR + "trustanchors.jks";
+    private static final String KEYSTORE_PWD = "test123";
+
+    private static final String SELFSIGNED_ALIAS = "partye";
+    private static final String CHAIN_ALIAS = "partyz";
+
+    private static final String KEYPAIR_PASSWORD = "test123";
+
+    private static final String PARTNER_ALIAS = "partyf";
+
+    private static final String ROOT_CA_ALIAS = "root-ca";
 
     private ICertificateManager certManager;
 
@@ -93,38 +96,29 @@ class DefaultCertManagerTest {
      * Sets up a test environment with the necessary keystores and configuration.
      */
     private IConfiguration setupEnvironment(String configFile) throws IOException {
-        Path confDir = tempDir.resolve("conf");
+        Path confDir = TestUtils.getTestResource("conf");
         Files.createDirectories(confDir);
-        Path keystoresDir = tempDir.resolve("keystores");
-        Files.createDirectories(keystoresDir);
-
-        // Copy test keystores
-        copyIfExists(TestUtils.getTestResource(KEYSTORES_DIR + PRIVATE_KEYSTORE), keystoresDir.resolve(PRIVATE_KEYSTORE));
-        copyIfExists(TestUtils.getTestResource(KEYSTORES_DIR + PARTNER_KEYSTORE), keystoresDir.resolve(PARTNER_KEYSTORE));
-        copyIfExists(TestUtils.getTestResource(KEYSTORES_DIR + TRUST_KEYSTORE), keystoresDir.resolve(TRUST_KEYSTORE));
 
         // Copy config file
         Files.copy(TestUtils.getTestResource("config/" + configFile),
                    confDir.resolve("certmanager_config.xml"), StandardCopyOption.REPLACE_EXISTING);
 
         IConfiguration config = mock(IConfiguration.class);
-        when(config.getHolodeckB2BHome()).thenReturn(tempDir);
+        when(config.getHolodeckB2BHome()).thenReturn(TestUtils.getTestClassBasePath());
         return config;
     }
 
-    private void copyIfExists(Path source, Path target) throws IOException {
-        if (Files.exists(source)) {
-            Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
-        }
+    private X509Certificate loadCertFromKeystore(String keystore, String alias) throws Exception {
+    	return (X509Certificate) KeystoreUtils.load(TestUtils.getTestResource(keystore), KEYSTORE_PWD).getCertificate(alias);
     }
 
-    private X509Certificate loadCertFromKeystore(String keystoreName, String password, String alias) throws Exception {
-        Path ksPath = tempDir.resolve(KEYSTORES_DIR + keystoreName);
-        KeyStore ks = KeyStore.getInstance("JKS");
-        try (InputStream is = Files.newInputStream(ksPath)) {
-            ks.load(is, password.toCharArray());
-        }
-        return (X509Certificate) ks.getCertificate(alias);
+    private List<X509Certificate> loadCertPathFromKeystore() throws Exception {
+    	KeyStore keystore = KeystoreUtils.load(TestUtils.getTestResource(PRIVATE_KEYSTORE), KEYSTORE_PWD);
+		return Arrays.stream(keystore.getCertificateChain(CHAIN_ALIAS)).map(c -> (X509Certificate) c).collect(Collectors.toList());
+    }
+
+    private int countCertsInKeystore(Path keystorePath, String password) throws Exception {
+    	return KeystoreUtils.load(keystorePath, password).size();
     }
 
     // ==================================================================================
@@ -136,19 +130,41 @@ class DefaultCertManagerTest {
     class Startup {
 
         @Test
-        @DisplayName("it should start successfully with valid keystores configured")
-        void startsWithValidConfiguration() throws Exception {
+        @DisplayName("it should start successfully with valid configuration")
+        void startsWithCompleteConfiguration() throws Exception {
             IConfiguration config = setupEnvironment(VALID_CONFIG);
 
             assertDoesNotThrow(() -> certManager.init(config));
+
+            int defaults = countCertsInKeystore(Path.of(System.getProperty("java.home"), "lib", "security", "cacerts"),
+            									"changeit");
+            int partners = countCertsInKeystore(TestUtils.getTestResource(PARTNER_KEYSTORE), KEYSTORE_PWD);
+            int trusted = countCertsInKeystore(TestUtils.getTestResource(TRUST_KEYSTORE), KEYSTORE_PWD);
+
+            assertEquals(partners + trusted, certManager.getAllTrustedCertificates(SecurityLevel.TLS).size());
+            assertEquals(defaults + partners + trusted, certManager.getAllTrustedCertificates(SecurityLevel.MLS).size());
+        }
+
+        @Test
+        @DisplayName("it should use default settings if no configuration is provided")
+        void startsWithDefaults() throws Exception {
+            IConfiguration config = setupEnvironment("minimal-config.xml");
+
+            assertDoesNotThrow(() -> certManager.init(config));
+
+            int defaults = countCertsInKeystore(Path.of(System.getProperty("java.home"), "lib", "security", "cacerts"),
+            									"changeit");
+            int trusted = countCertsInKeystore(TestUtils.getTestResource(TRUST_KEYSTORE), KEYSTORE_PWD);
+
+            assertEquals(defaults + trusted, certManager.getAllTrustedCertificates(SecurityLevel.TLS).size());
+            assertEquals(trusted, certManager.getAllTrustedCertificates(SecurityLevel.MLS).size());
         }
 
         @Test
         @DisplayName("it should fail to start when configuration file is missing")
         void failsWhenConfigMissing() throws Exception {
-            Files.createDirectories(tempDir.resolve("conf"));
             IConfiguration config = mock(IConfiguration.class);
-            when(config.getHolodeckB2BHome()).thenReturn(tempDir);
+            when(config.getHolodeckB2BHome()).thenReturn(TestUtils.getTestClassBasePath().resolve("not-there"));
 
             assertThrows(SecurityProcessingException.class, () -> certManager.init(config));
         }
@@ -167,6 +183,13 @@ class DefaultCertManagerTest {
             IConfiguration config = setupEnvironment("wrong-password.xml");
 
             assertThrows(SecurityProcessingException.class, () -> certManager.init(config));
+        }
+
+        @Test
+        @DisplayName("it should fail to start when not all key stores are configured")
+        void failsWhenMissingKeyStoreConig() throws Exception {
+        	IConfiguration config = setupEnvironment("keypairs-only.xml");
+        	assertThrows(SecurityProcessingException.class, () -> certManager.init(config));
         }
 
         @Test
@@ -193,18 +216,9 @@ class DefaultCertManagerTest {
         }
 
         @Test
-        @DisplayName("it should provide the certificate chain for a registered key pair")
-        void providesCertificateChainForKeyPair() throws Exception {
-            List<X509Certificate> certs = certManager.getKeyPairCertificates(KEYPAIR_ALIAS);
-
-            assertNotNull(certs, "Certificate chain should be returned");
-            assertFalse(certs.isEmpty(), "Certificate chain should not be empty");
-        }
-
-        @Test
         @DisplayName("it should provide the private key when correct password is given")
         void providesPrivateKeyWithCorrectPassword() throws Exception {
-            KeyStore.PrivateKeyEntry entry = certManager.getKeyPair(KEYPAIR_ALIAS, KEYPAIR_PASSWORD);
+            KeyStore.PrivateKeyEntry entry = certManager.getKeyPair(SELFSIGNED_ALIAS, KEYPAIR_PASSWORD);
 
             assertNotNull(entry, "Key pair should be returned");
             assertNotNull(entry.getPrivateKey(), "Private key should be accessible");
@@ -214,7 +228,7 @@ class DefaultCertManagerTest {
         @DisplayName("it should reject access to private key with wrong password")
         void rejectsPrivateKeyWithWrongPassword() {
             assertThrows(SecurityProcessingException.class,
-                () -> certManager.getKeyPair(KEYPAIR_ALIAS, "wrongpassword"));
+                () -> certManager.getKeyPair(SELFSIGNED_ALIAS, "wrongpassword"));
         }
 
         @Test
@@ -239,33 +253,33 @@ class DefaultCertManagerTest {
         @Test
         @DisplayName("it should find key pair by its certificate")
         void findsKeyPairByCertificate() throws Exception {
-            List<X509Certificate> certs = certManager.getKeyPairCertificates(KEYPAIR_ALIAS);
+            List<X509Certificate> certs = certManager.getKeyPairCertificates(SELFSIGNED_ALIAS);
             X509Certificate cert = certs.get(0);
 
             String alias = certManager.findKeyPair(cert);
 
-            assertEquals(KEYPAIR_ALIAS, alias);
+            assertEquals(SELFSIGNED_ALIAS, alias);
         }
 
         @Test
         @DisplayName("it should find key pair by its public key")
         void findsKeyPairByPublicKey() throws Exception {
-            List<X509Certificate> certs = certManager.getKeyPairCertificates(KEYPAIR_ALIAS);
+            List<X509Certificate> certs = certManager.getKeyPairCertificates(SELFSIGNED_ALIAS);
 
             String alias = certManager.findKeyPair(certs.get(0).getPublicKey());
 
-            assertEquals(KEYPAIR_ALIAS, alias);
+            assertEquals(SELFSIGNED_ALIAS, alias);
         }
 
         @Test
         @DisplayName("it should find key pair by certificate issuer and serial number")
         void findsKeyPairByIssuerAndSerial() throws Exception {
-            List<X509Certificate> certs = certManager.getKeyPairCertificates(KEYPAIR_ALIAS);
+            List<X509Certificate> certs = certManager.getKeyPairCertificates(SELFSIGNED_ALIAS);
             X509Certificate cert = certs.get(0);
 
             String alias = certManager.findKeyPair(cert.getIssuerX500Principal(), cert.getSerialNumber());
 
-            assertEquals(KEYPAIR_ALIAS, alias);
+            assertEquals(SELFSIGNED_ALIAS, alias);
         }
     }
 
@@ -322,7 +336,7 @@ class DefaultCertManagerTest {
         @Test
         @DisplayName("it should not find key pair certificate in partner store")
         void doesNotMixKeyPairsWithPartners() throws Exception {
-            List<X509Certificate> keypairCerts = certManager.getKeyPairCertificates(KEYPAIR_ALIAS);
+            List<X509Certificate> keypairCerts = certManager.getKeyPairCertificates(SELFSIGNED_ALIAS);
 
             String alias = certManager.findCertificate(keypairCerts.get(0));
 
@@ -360,8 +374,7 @@ class DefaultCertManagerTest {
         @Test
         @DisplayName("it should trust a certificate that is a registered trust anchor")
         void trustsRegisteredTrustAnchor() throws Exception {
-            X509Certificate trustAnchor = loadCertFromKeystore(
-                TRUST_KEYSTORE, TRUSTANCHOR_PASSWORD, TRUSTANCHOR_ALIAS);
+            X509Certificate trustAnchor = loadCertFromKeystore(TRUST_KEYSTORE, ROOT_CA_ALIAS);
 
             IValidationResult result = certManager.validateCertificate(List.of(trustAnchor), SecurityLevel.MLS);
 
@@ -371,20 +384,30 @@ class DefaultCertManagerTest {
         @Test
         @DisplayName("it should trust a certificate path that links to a registered trust anchor")
         void trustsCertificatePathToTrustAnchor() throws Exception {
-            X509Certificate leafCert = loadCertFromKeystore(
-                PRIVATE_KEYSTORE, KEYPAIR_PASSWORD, CHAIN_ALIAS);
+            List<X509Certificate> certPath = loadCertPathFromKeystore();
 
-            IValidationResult result = certManager.validateCertificate(List.of(leafCert), SecurityLevel.MLS);
+            IValidationResult result = certManager.validateCertificate(certPath, SecurityLevel.MLS);
 
-            assertEquals(Trust.OK, result.getTrust(),
-                "Certificate signed by trust anchor should be trusted");
+            assertEquals(Trust.OK, result.getTrust(), "Certificate signed by trust anchor should be trusted");
+            assertEquals(certPath.get(certPath.size() - 1).getIssuerDN(),
+            			 result.getValidatedCertPath().get(result.getValidatedCertPath().size() - 1).getSubjectDN());
+        }
+
+        @Test
+        @DisplayName("it should trust an out-of-order certificate path that links to a registered trust anchor")
+        void trustsOutOfOrderPathToTrustAnchor() throws Exception {
+			List<X509Certificate> certPath = loadCertPathFromKeystore();
+			certPath.add(1, loadCertFromKeystore(TRUST_KEYSTORE, ROOT_CA_ALIAS));
+
+            IValidationResult result = certManager.validateCertificate(certPath, SecurityLevel.MLS);
+
+            assertEquals(Trust.OK, result.getTrust(), "Certificate signed by trust anchor should be trusted");
         }
 
         @Test
         @DisplayName("it should reject a certificate that does not link to any trust anchor")
         void rejectsUntrustedCertificate() throws Exception {
-            X509Certificate untrustedCert = loadCertFromKeystore(
-                PRIVATE_KEYSTORE, KEYPAIR_PASSWORD, KEYPAIR_ALIAS);
+            X509Certificate untrustedCert = loadCertFromKeystore(PRIVATE_KEYSTORE, SELFSIGNED_ALIAS);
 
             IValidationResult result = certManager.validateCertificate(
                 List.of(untrustedCert), SecurityLevel.MLS);
@@ -411,21 +434,21 @@ class DefaultCertManagerTest {
     }
 
     // ==================================================================================
-    // OCSP validation tests
+    // Revocation check tests
     // ==================================================================================
     @Nested
-    @DisplayName("When executing the OCSP check")
-    class OCSPChecks {
-    	private OCSPTestProvider provider;
+    @DisplayName("The certificate path should be marked as")
+    class Revocation {
+    	private RevocationCheckTestProvider provider;
+    	private List<X509Certificate> certpath;
 
     	@BeforeEach
     	void setupTestProvider() throws Exception {
-    		certManager.init(setupEnvironment(OCSP_CONFIG));
-
+    		certManager.init(setupEnvironment(REVO_OPT_CONFIG));
     		Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME);
-    		Security.addProvider(provider = new OCSPTestProvider(loadCertFromKeystore(
-                    TRUST_KEYSTORE, TRUSTANCHOR_PASSWORD, TRUSTANCHOR_ALIAS)));
-
+    		Security.addProvider(provider = new RevocationCheckTestProvider(
+    															loadCertFromKeystore(TRUST_KEYSTORE, ROOT_CA_ALIAS)));
+    		certpath = loadCertPathFromKeystore();
     	}
 
     	@AfterEach
@@ -435,73 +458,49 @@ class DefaultCertManagerTest {
     	}
 
     	@Test
-    	@DisplayName("it should mark the certificate valid when all fine")
+    	@DisplayName("valid when no exceptions are thrown")
     	void markValid() throws Exception {
-    		X509Certificate cert = loadCertFromKeystore(
-                    PRIVATE_KEYSTORE, KEYPAIR_PASSWORD, CHAIN_ALIAS);
-
-    		provider.validateNextResponse();
+    		provider.validateNextRequest();
 
     		IValidationResult result = assertDoesNotThrow(() ->
-    										certManager.validateCertificate(List.of(cert), SecurityLevel.MLS));
+    										certManager.validateCertificate(certpath, SecurityLevel.MLS));
 
     		assertEquals(Trust.OK, result.getTrust());
     	}
 
     	@Test
-    	@DisplayName("it should mark the certificate invalid when revoked")
+    	@DisplayName("as invalid when revoked")
     	void rejectOnRevoked() throws Exception {
-    		X509Certificate cert = loadCertFromKeystore(
-                    PRIVATE_KEYSTORE, KEYPAIR_PASSWORD, CHAIN_ALIAS);
-
-    		provider.rejectNextResponse(BasicReason.REVOKED, null);
+    		provider.invalidateNextRequest();
 
     		IValidationResult result = assertDoesNotThrow(() ->
-											certManager.validateCertificate(List.of(cert), SecurityLevel.MLS));
+											certManager.validateCertificate(certpath, SecurityLevel.MLS));
 
     		assertEquals(Trust.NOK, result.getTrust());
     	}
 
     	@Test
-    	@DisplayName("it should mark the certificate invalid on unspecified reason and no error")
-    	void rejectOnUnspecifiedWithoutError() throws Exception {
-    		X509Certificate cert = loadCertFromKeystore(
-                    PRIVATE_KEYSTORE, KEYPAIR_PASSWORD, CHAIN_ALIAS);
-
-    		provider.rejectNextResponse(BasicReason.UNSPECIFIED, null);
+    	@DisplayName("as valid with warning on a failed check and check is set optional")
+    	void warningOnFailedOptionalCheck() throws Exception {
+    		provider.failNextRequest();
 
     		IValidationResult result = assertDoesNotThrow(() ->
-											certManager.validateCertificate(List.of(cert), SecurityLevel.MLS));
+											certManager.validateCertificate(certpath, SecurityLevel.MLS));
+
+    		assertEquals(Trust.WITH_WARNINGS, result.getTrust());
+    	}
+
+    	@Test
+    	@DisplayName("as invalid on a failed check and check is set mandatory")
+    	void rejectOnFailedMandatoryCheck() throws Exception {
+    		certManager.init(setupEnvironment(REVO_MAN_CONFIG));
+
+    		provider.failNextRequest();
+
+    		IValidationResult result = assertDoesNotThrow(() ->
+											certManager.validateCertificate(certpath, SecurityLevel.MLS));
 
     		assertEquals(Trust.NOK, result.getTrust());
-    	}
-
-    	@Test
-    	@DisplayName("it should mark the certificate valid with warning on unspecified reason with error")
-    	void rejectOnUnspecifiedWithError() throws Exception {
-    		X509Certificate cert = loadCertFromKeystore(
-                    PRIVATE_KEYSTORE, KEYPAIR_PASSWORD, CHAIN_ALIAS);
-
-    		provider.rejectNextResponse(BasicReason.UNSPECIFIED, new IOException("Conn refused"));
-
-    		IValidationResult result = assertDoesNotThrow(() ->
-											certManager.validateCertificate(List.of(cert), SecurityLevel.MLS));
-
-    		assertEquals(Trust.WITH_WARNINGS, result.getTrust());
-    	}
-
-    	@Test
-    	@DisplayName("it should mark the certificate valid with warning on undetermined")
-    	void rejectOnUndetermined() throws Exception {
-    		X509Certificate cert = loadCertFromKeystore(
-                    PRIVATE_KEYSTORE, KEYPAIR_PASSWORD, CHAIN_ALIAS);
-
-    		provider.rejectNextResponse(BasicReason.UNDETERMINED_REVOCATION_STATUS, null);
-
-    		IValidationResult result = assertDoesNotThrow(() ->
-											certManager.validateCertificate(List.of(cert), SecurityLevel.MLS));
-
-    		assertEquals(Trust.WITH_WARNINGS, result.getTrust());
     	}
     }
 
