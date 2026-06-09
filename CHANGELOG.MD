@@ -8,11 +8,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Support for automatic downloading of CRLs from the CRL distribution point indicated in the certificate
 * Support for the _X25519 key agreement algorithm_ as specified in [RFC 7748](https://tools.ietf.org/html/rfc7748)
 * Support for the _HMAC-based Extract-and-Expand Key Derivation Function_ (HKDF) as specified in [RFC 5869](https://tools.ietf.org/html/rfc5869)
-* `getService()` to public Holodeck B2B Core interface 
-* `getTransportSender()` to public Holodeck B2B Core interface 
-* `createServiceClient()` to public Holodeck B2B Core interface
 * Support for _PUT_ and _DELETE_ http methods for REST based services. Operations can be selected based on request method
 * Services and operations can be bound to specific transports (service level only) and transport methods
+* `getService(String)` to public Holodeck B2B Core interface to get meta-data of a configured service
+* `getTransport(String)` to public Holodeck B2B Core interface to get meta-data of a configured transport
+* `executeSendProcess(MessageContext)` and `executeSendProcess(MessageContext, AxisService)` methods to public Holodeck B2B 
+  Core interface which can be used to trigger the message sending process
 * `addToMessageContext()` and `setParentContext()` to `org.holodeckb2b.interfaces.core.IMessageProcessingContext` so the message 
   processing context can be copied to the response message context
 * Functional tests for security and trust components (thanks to @ckaaber)

@@ -24,13 +24,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.description.TransportOutDescription;
 import org.apache.axis2.modules.Module;
 import org.holodeckb2b.common.VersionInfo;
 import org.holodeckb2b.commons.testing.TestUtils;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCoreImpl;
 import org.holodeckb2b.core.config.InternalConfiguration;
-import org.holodeckb2b.core.pmode.PModeManager;
 import org.holodeckb2b.core.storage.QueryManager;
 import org.holodeckb2b.core.storage.StorageManager;
 import org.holodeckb2b.core.validation.DefaultValidationExecutor;
@@ -43,7 +43,6 @@ import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcess
 import org.holodeckb2b.interfaces.eventprocessing.MessageProccesingEventHandlingException;
 import org.holodeckb2b.interfaces.general.IVersionInfo;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
-import org.holodeckb2b.interfaces.pmode.PModeSetException;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
 import org.holodeckb2b.interfaces.storage.IMetadataStorageProvider;
@@ -160,7 +159,7 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl implements IHolodec
 			pmodes = new TestPModeManager();
 		return pmodes;
 	}
-	
+
 	public void setPModeManager(final IPModeSet manager) {
 		this.pmodes = manager;
 	}
@@ -297,5 +296,10 @@ public class HolodeckB2BTestCore extends HolodeckB2BCoreImpl implements IHolodec
 
 	public void setModule(String name, Module module) {
 		modules.put(name, module);
+	}
+
+	@Override
+	public TransportOutDescription getTransport(String name) {
+		return configuration.getTransportOut(name);
 	}
 }

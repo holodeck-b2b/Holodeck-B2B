@@ -19,18 +19,16 @@ package org.holodeckb2b.interfaces.core;
 import java.util.List;
 
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.client.ServiceClient;
+import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisService;
-import org.apache.axis2.kernel.TransportSender;
+import org.apache.axis2.description.TransportOutDescription;
 import org.apache.axis2.modules.Module;
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.delivery.IDeliveryManager;
-import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEvent;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventConfiguration;
 import org.holodeckb2b.interfaces.eventprocessing.IMessageProcessingEventProcessor;
 import org.holodeckb2b.interfaces.eventprocessing.MessageProccesingEventHandlingException;
 import org.holodeckb2b.interfaces.general.IVersionInfo;
-import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IPModeSet;
 import org.holodeckb2b.interfaces.security.trust.ICertificateManager;
 import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
@@ -41,194 +39,105 @@ import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
 import org.holodeckb2b.interfaces.workerpool.WorkerPoolException;
 
 /**
- * Defines the interface the Holodeck B2B Core implementation has to provide to the outside world, like submitters
+ * Defines the interface the Holodeck B2B Core implementation has to provide to the outside world, like submitters,
  * delivery methods and extensions for dynamic configuration.
+ * <p>
+ * NOTE: This interface is for <b>internal use only</b> to allow a loose coupling of the Core and interfaces modules. It
+ * SHOULD NOT be used by other code. Use the static methods of the {@link HolodeckB2BCoreInterface} class instead.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
+ * @see HolodeckB2BCoreInterface
  */
 public interface IHolodeckB2BCore {
 
-    /**
-     * Gets the current configuration of this Holodeck B2B instance. The configuration parameters can be used by
-     * extensions to integrate their functionality with the core.
-     *
-     * @return  The current configuration as a {@link IConfiguration}
-     */
+	/**
+	 * See {@link HolodeckB2BCoreInterface#getConfiguration()}
+	 */
     IConfiguration getConfiguration();
 
-    /**
-     * Gets the active Axis2 Module with the given name. This can for example be used by protocol extension to get
-     * access to "their" module for protocol specific settings.
-     *
-     * @param name	the requested module's name
-     * @return 		the active Axis2 module if it exists in this Holodeck B2B instance,<br><code>null</code> otherwise
-     * @since 5.0.0
-     */
+	/**
+	 * See {@link HolodeckB2BCoreInterface#getModule()}
+	 */
     Module getModule(final String name);
 
-    /**
-     * Gets the active Axis2 Service with the given name. This can for example be used by protocol extensions to get
-     * access to "their" service for protocol specific settings.
-     *
-     * @param name	the requested service's name
-     * @return 		the active Axis2 service if it exists in this Holodeck B2B instance,<br><code>null</code> otherwise
-     * @since 8.2.0
-     */
+	/**
+	 * See {@link HolodeckB2BCoreInterface#getService(String)}
+	 */
     AxisService getService(final String name);
 
-    /**
-     * Gets the Axis2 Transport Sender with the given name (as set in the Holodeck B2B configuration).
-     *
-     * @param name	the requested transport sender's name
-     * @return 		the transport sender if it exists in this Holodeck B2B instance,<br><code>null</code> otherwise
-     * @since 8.2.0
-     */
-    TransportSender getTransportSender(final String name);
+	/**
+	 * See {@link HolodeckB2BCoreInterface#getTransport(String)}
+	 */
+    TransportOutDescription getTransport(final String name);
 
-    /**
-     * Gets a {@link IMessageSubmitter} object that can be used by the <i>Producer</i> business application for
-     * submitting User Messages to the Holodeck B2B Core.
-     *
-     * @return  A {@link IMessageSubmitter} object to use for submission of User Messages
-     */
+	/**
+	 * See {@link HolodeckB2BCoreInterface#getMessageSubmitter()}
+	 */
     IMessageSubmitter getMessageSubmitter();
 
-    /**
-     * Gets the set of currently configured P-Modes.
-     * <p>The P-Modes define how Holodeck B2B should process the messages. The set of P-Modes is therefor the most
-     * important configuration item in Holodeck B2B, without P-Modes it will not be possible to send and receive
-     * messages.
-     *
-     * @return  The current set of P-Modes as a {@link IPModeSet}
-     * @see IPMode
-     */
+	/**
+	 * See {@link HolodeckB2BCoreInterface#getPModeSet()}
+	 */
     IPModeSet getPModeSet();
 
-    /**
-     * Gets the core component that is responsible for processing <i>"events"</i> that are raised while processing a
-     * message unit. Such <i>"message processing events"</i> may need to be send to the business (or other external)
-     * application to keep them updated. The {@link IMessageProcessingEventProcessor} will manage the notifications to
-     * the external applications based on the configuration provided in the P-Mode.
-     *
-     * @return  The {@link IMessageProcessingEventProcessor} managing the event processing
-     * @since 2.1.0
-     */
+	/**
+	 * See {@link HolodeckB2BCoreInterface#getEventProcessor()}
+	 */
     IMessageProcessingEventProcessor getEventProcessor();
 
-    /**
-     * Gets the data access object that should be used to query the meta-data on processed message units.
-     * <p>Note that the DAO itself is provided by the persistency provider.
-     *
-     * @return  The {@link IQueryManager} that should use to query the meta-data of message units
-     * @since  3.0.0
-     */
+	/**
+	 * See {@link HolodeckB2BCoreInterface#getQueryManager()}
+	 */
     IQueryManager getQueryManager();
 
-    /**
-     * Gets the {@link ICertificateManager} of the active <i>security provider</i>. Using the certificate manager keys
-     * and certificates needed for the correct processing of messages can be managed.
-     *
-     * @return The active certificate manager
-     * @since 4.0.0
-     */
+	/**
+	 * See {@link HolodeckB2BCoreInterface#getCertificateManager()}
+	 */
     ICertificateManager getCertificateManager();
 
-    /**
-     * Registers a <i>global</i> event handler for handling {@link IMessageProcessingEvent}s that occur during the
-     * processing of messages. If there is already a configuration registered with the same <code>id</code> it will be
-     * replaced by the new configuration.
-     * <p>NOTE: When the P-Mode of a message also defines an event handler for an event for which also a global
-     * configuration exists the one in the P-Mode takes precedence over the global configuration.
-     *
-     * @param eventConfiguration	The event handler's configuration
-     * @return 						<code>true</code> if an existing event configuration was replaced,
-     * 								<code>false</code> if this was a new registration
-     * @throws MessageProccesingEventHandlingException When the given event handler configuration cannot be registered,
-     * 												   for example because the handler class is not available or no id
-     * 												   is specified
-     * @since 4.1.0
-     */
+	/**
+	 * See {@link HolodeckB2BCoreInterface#registerEventHandler(IMessageProcessingEventConfiguration)}
+	 */
     boolean registerEventHandler(IMessageProcessingEventConfiguration eventConfiguration)
     																	throws MessageProccesingEventHandlingException;
 
-    /**
-     * Removes a <i>global</i> event handler configuration.
-     *
-     * @param id	The id of the event handler configuration to remove
-     * @since 4.1.0
-     */
+	/**
+	 * See {@link HolodeckB2BCoreInterface#removeEventHandler(String)}
+	 */
     void removeEventHandler(String id);
 
-    /**
-     * Gets the list of globally configured event handlers.
-     *
-     * @return		The list of event handler configurations
-     * @since 4.1.0
-     */
+	/**
+	 * See {@link HolodeckB2BCoreInterface#getEventHandlerConfiguration()}
+	 */
     List<IMessageProcessingEventConfiguration> getEventHandlerConfiguration();
 
-    /**
-     * Gets information about the version of the Holodeck B2B Core of this instance.
-     *
-     * @return	The version info
-     * @since 5.0.0
-     */
+	/**
+	 * See {@link HolodeckB2BCoreInterface#getVersion()}
+	 */
     IVersionInfo getVersion();
 
-    /**
-     * Creates a new worker pool using the provided name and configuration.
-     *
-     * @param name 				name to identify the new pool
-     * @param configuration		the configuration for the new pool
-     * @return the created worker pool
-     * @throws WorkerPoolException when the worker pool cannot be created because of an issue in the provided
-     * 							   configuration or that the pool name isn't unique.
-     * @since 5.1.0
-     */
+	/**
+	 * See {@link HolodeckB2BCoreInterface#createWorkerPool(String, IWorkerPoolConfiguration)}
+	 */
     IWorkerPool createWorkerPool(final String name, final IWorkerPoolConfiguration configuration)
 																							throws WorkerPoolException;
-
-    /**
-     * Gets the worker pool with the given name.
-     *
-     * @param name	of the worker pool to retrieve
-     * @return		the worker pool with the given name, or <code>null</code> when no such pool exists
-     * @since 5.1.0
-     */
+	/**
+	 * See {@link HolodeckB2BCoreInterface#getWorkerPool(String)}
+	 */
     IWorkerPool getWorkerPool(final String name);
 
-    /**
-     * Resumes processing of the <i>suspended</i> User Message.
-     * <p>Note that only outgoing User Messages can be in suspended state and resumed. The resume operation will change
-     * the processing state from <i>SUSPENDED</i> to either <i>READY_TO_PUSH</i> or <i>AWAIT_PULL</i> depending on the
-     * MEP defined in the P-Mode. If the current processing state however has already changed it assumed that the
-     * message has already been resumed and no further action is needed.
-     *
-     * @param userMessage	to be resumed
-     * @throws StorageException		when an error occurs updating the processing state of the message unit
-     * @throws IllegalArgumentException when the given User Message is an incoming User Message
-     * @since 5.3.0
-     */
+	/**
+	 * See {@link HolodeckB2BCoreInterface#resumeProcessing(IUserMessageEntity)}
+	 */
     void resumeProcessing(IUserMessageEntity userMessage) throws StorageException, IllegalArgumentException;
 
-    /**
-     * Gets the active <i>Delivery Manager</i> of this Holodeck B2B instance.
-     *
-     * @return the active {@link IDeliveryManager} implementation
-     * @since 6.0.0
-     */
+	/**
+	 * See {@link HolodeckB2BCoreInterface#getDeliveryManager()}
+	 */
     IDeliveryManager getDeliveryManager();
 
-    /**
-     * Creates a new Axis2 Service Client for the given service and transport sender that can be used to start the
-     * send process. The service and transport are optional. If no service is provided a default "anonymous" service is
-	 * used. For the transport no default is set and it should be set during the send process.
-	 *
-     * @param service		Axis2 service to use for sending
-     * @param transport		Axis2 transport sender to use for sending
-     * @return	a new service client
-     * @throws AxisFault when an error occurs creating the service client
-     * @since 8.2.0
-     */
-    ServiceClient createServiceClient(AxisService service, TransportSender transport) throws AxisFault;
+	/**
+	 * See {@link HolodeckB2BCoreInterface#executeSendProcess(MessageContext, AxisService)}
+	 */
+    MessageContext executeSendProcess(MessageContext msgContext, AxisService service) throws AxisFault;
 }

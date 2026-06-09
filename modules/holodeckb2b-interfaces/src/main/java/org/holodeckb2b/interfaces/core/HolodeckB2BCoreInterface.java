@@ -19,9 +19,9 @@ package org.holodeckb2b.interfaces.core;
 import java.util.List;
 
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.client.ServiceClient;
+import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisService;
-import org.apache.axis2.kernel.TransportSender;
+import org.apache.axis2.description.TransportOutDescription;
 import org.apache.axis2.modules.Module;
 import org.holodeckb2b.interfaces.config.IConfiguration;
 import org.holodeckb2b.interfaces.delivery.IDeliveryManager;
@@ -218,31 +218,16 @@ public class HolodeckB2BCoreInterface {
     }
 
     /**
-     * Gets the Axis2 Transport Sender with the given name (as set in the Holodeck B2B configuration).
+     * Gets the Axis2 Transport Sender configuration with the given name (as set in the Holodeck B2B configuration).
      *
      * @param name	the requested transport sender's name
-     * @return 		the transport sender if it exists in this Holodeck B2B instance,<br><code>null</code> otherwise
+     * @return 		the transport sender configuration if it exists in this Holodeck B2B instance,<br>
+     * 				<code>null</code> otherwise
      * @since 8.2.0
      */
-    public static TransportSender getTransportSender(final String name) {
+    public static TransportOutDescription getTransport(final String name) {
     	assertInitialized();
-    	return coreImplementation.getTransportSender(name);
-    }
-
-    /**
-     * Creates a new Axis2 Service Client for the given service and transport sender that can be used to start the
-     * send process. The service and transport are optional. If no service is provided a default "anonymous" service is
-	 * used. For the transport no default is set and it should be set during the send process.
-	 *
-     * @param service		Axis2 service to use for sending
-     * @param transport		Axis2 transport sender to use for sending
-     * @return	a new service client
-     * @throws AxisFault when an error occurs creating the service client
-     * @since 8.2.0
-     */
-    public static ServiceClient createServiceClient(AxisService service, TransportSender transport) throws AxisFault {
-	    assertInitialized();
-	    return coreImplementation.createServiceClient(service, transport);
+    	return coreImplementation.getTransport(name);
     }
 
     /**
@@ -301,6 +286,56 @@ public class HolodeckB2BCoreInterface {
     	assertInitialized();
     	return coreImplementation.getDeliveryManager();
     }
+
+    /**
+     * Executes the send process for the provided message context. The response message context is returned and should
+     * be used to determine the outcome of the send process on the application level.
+     * <p>
+     * NOTE: When the response also contains data the caller should ensure that an <code>MessageBuilder</code> is
+     * configured that can handle the data. By default the Holodeck B2B Core can already handle XML responses. If
+     * another type of data neeeds to be handler an applicable builder should either be configured in the Holodeck B2B
+     * configuration or a Service should be provided which specifies a specific builder (using the {@link
+     * #executeSendProcess(MessageContext, AxisService)} method).
+     *
+     * @param msgContext	Axis2 message context containing the message to send
+     * @return	the Axis2 message context containing the meta-data of the response, may be <code>null</code> if there
+     * 			was no response	message
+     * @throws AxisFault when an error occurs sending the message. NOTE: In general this exception is only thrown when
+     * 			an errors occurs during the processing of the message or on the transport level. It depends on the
+     * 			configured transport sender whether transport protocol errors, e.g. HTTP non 2xx status codes, are
+     * 			reported as AxisFaults or in the returned message context.
+     * @since 8.2.0
+     */
+    public static MessageContext executeSendProcess(MessageContext msgContext) throws AxisFault {
+    	return executeSendProcess(msgContext, null);
+    }
+
+    /**
+     * Executes the send process for the provided message context applying the configuration of the given service.
+     * The service argument is optional and when not provided a default "anonymous" service without any configuration is
+     * used. The response message context is returned and should be used to determine the outcome of the send process
+     * on the application level.
+     * <p>
+     * NOTE: When the response also contains data the caller should ensure that an <code>MessageBuilder</code> is
+     * configured that can handle the data. By default the Holodeck B2B Core can already handle XML responses. If
+     * another type of data needs to be handler an applicable builder should either be configured in the Holodeck B2B
+     * configuration or a Service should be provided which specifies a specific builder.
+	 *
+	 * @param msgContext	Axis2 message context containing the message to send
+     * @param service		Axis2 service to use for configuration of the send process
+     * @return	the Axis2 message context containing the meta-data of the response
+     * @throws AxisFault when an error occurs sending the message. NOTE: In general this exception is only thrown when
+     * 			an errors occurs during the processing of the message or on the transport level. It depends on the
+     * 			configured transport sender whether transport protocol errors, e.g. HTTP non 2xx status codes, are
+     * 			reported as AxisFaults or in the returned message context.
+     * @since 8.2.0
+     */
+    public static MessageContext executeSendProcess(MessageContext msgContext, AxisService service) throws AxisFault {
+	    assertInitialized();
+	    return coreImplementation.executeSendProcess(msgContext, service);
+    }
+
+
 
     /**
      * Sets the Holodeck B2B Core implementation that is in use.

@@ -16,25 +16,36 @@
  */
 package org.holodeckb2b.core;
 
+import static org.apache.axis2.client.ServiceClient.ANON_OUT_IN_OP;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.client.ServiceClient;
+import org.apache.axis2.client.OperationClient;
+import org.apache.axis2.client.Options;
 import org.apache.axis2.context.ConfigurationContext;
+import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.context.ServiceContext;
+import org.apache.axis2.context.ServiceGroupContext;
 import org.apache.axis2.description.AxisModule;
 import org.apache.axis2.description.AxisService;
+import org.apache.axis2.description.AxisServiceGroup;
+import org.apache.axis2.description.OutInAxisOperation;
 import org.apache.axis2.description.TransportOutDescription;
 import org.apache.axis2.engine.AxisError;
-import org.apache.axis2.kernel.TransportSender;
+import org.apache.axis2.kernel.http.HTTPConstants;
 import org.apache.axis2.modules.Module;
+import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.VersionInfo;
 import org.holodeckb2b.common.events.SyncEventProcessor;
 import org.holodeckb2b.common.workerpool.XMLWorkerPoolConfiguration;
 import org.holodeckb2b.commons.util.Utils;
+import org.holodeckb2b.core.axis2.Axis2Utils;
+import org.holodeckb2b.core.axis2.OutOptInAxisOperation;
 import org.holodeckb2b.core.config.InternalConfiguration;
 import org.holodeckb2b.core.pmode.PModeManager;
 import org.holodeckb2b.core.pmode.PModeUtils;
@@ -44,6 +55,7 @@ import org.holodeckb2b.core.submission.MessageSubmitter;
 import org.holodeckb2b.core.validation.DefaultValidationExecutor;
 import org.holodeckb2b.core.validation.IValidationExecutor;
 import org.holodeckb2b.core.workerpool.WorkerPool;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.core.IHolodeckB2BCore;
 import org.holodeckb2b.interfaces.core.IQueryManager;
 import org.holodeckb2b.interfaces.delivery.IDeliveryManager;
@@ -68,10 +80,10 @@ import org.holodeckb2b.interfaces.workerpool.IWorkerPoolConfiguration;
 import org.holodeckb2b.interfaces.workerpool.WorkerPoolException;
 
 /**
- * The Holodeck B2B Core which provides access to and ensures that core components like the P-Mode and persistency
- * provider.
+ * The Holodeck B2B Core implementation.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
+ * @see HolodeckB2BCoreInterface
  */
 public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
     private static final class SubmitterSingletonHolder {
@@ -82,14 +94,6 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
      * Logger
      */
     private static final Logger log = LogManager.getLogger(HolodeckB2BCoreImpl.class);
-
-    /**
-     * The default "anonymous" Axis2 Service that will be used to create service clients when no specific service is
-     * specified by the caller.
-     *
-     * @since 8.2.0
-     */
-    private static final AxisService DEFAULT_SERVICE = new AxisService("HB2B_CORE_ANON_SVC");
 
     /**
      * The configuration of this Holodeck B2B instance
@@ -498,9 +502,8 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
      * @since 8.2.0
      */
     @Override
-	public TransportSender getTransportSender(final String name) {
-		TransportOutDescription transportOut = instanceConfiguration.getTransportOut(name);
-		return transportOut != null ? transportOut.getSender() : null;
+	public TransportOutDescription getTransport(final String name) {
+		return instanceConfiguration.getTransportOut(name);
     }
 
     /**
@@ -589,14 +592,59 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
     	return deliveryManager;
     }
 
-
     /**
      * {@inheritDoc}
      * @since 8.2.0
      */
     @Override
-	public ServiceClient createServiceClient(AxisService service, TransportSender transport) throws AxisFault {
-		return new ServiceClient(new ConfigurationContext(instanceConfiguration),
-								 service != null ? service : DEFAULT_SERVICE);
+    public MessageContext executeSendProcess(MessageContext msgContext, AxisService service) throws AxisFault {
+		final Options options = new Options();
+        options.setExceptionToBeThrownOnSOAPFault(false);
+        options.setProperty(HTTPConstants.USER_AGENT, Axis2Utils.HTTP_PRODID_HEADER);
+        options.setTransportOut(msgContext.getTransportOut());
+        OutInAxisOperation sendOp = new OutOptInAxisOperation(ANON_OUT_IN_OP);
+        sendOp.setParent(service);
+        instanceConfiguration.getPhasesInfo().setOperationPhases(sendOp);
+
+        ConfigurationContext configContext = new ConfigurationContext(instanceConfiguration);
+        AxisService svc = service != null ? service : createAnonymousService();
+    	AxisServiceGroup axisServiceGroup = service.getAxisServiceGroup();
+        ServiceGroupContext sgc = configContext.createServiceGroupContext(axisServiceGroup);
+	    ServiceContext svcContext = sgc.getServiceContext(service);
+
+	    for(AxisModule module : svc.getEngagedModules())
+	    	sendOp.engageModule(module);
+
+        OperationClient oc = sendOp.createClient(svcContext, options);
+        msgContext.setFLOW(MessageContext.OUT_FLOW);
+        oc.addMessageContext(msgContext);
+
+    	try {
+	        oc.execute(true);
+    	} catch (AxisFault axisFault) {
+    		throw axisFault;
+    	} catch (Throwable t) {
+			throw new AxisFault("Unexpected error occurred while processing message", t);
+		} finally {
+			oc.complete(msgContext);
+		}
+
+    	return oc.getMessageContext(WSDLConstants.MESSAGE_LABEL_IN_VALUE);
     }
+
+    /**
+     * Creates an anonymous service for sending.
+	 *
+     * @return the anonymous service
+     * @throws AxisFault if something goes wrong
+     */
+	private AxisService createAnonymousService() throws AxisFault {
+		AxisService axisService = new AxisService("hb2b-core-anonymous");
+		AxisServiceGroup axisServiceGroup = new AxisServiceGroup(instanceConfiguration);
+		axisServiceGroup.setServiceGroupName("hb2b-core-anonymous-sg");
+		axisServiceGroup.addService(axisService);
+		return axisService;
+	}
+
+
 }
