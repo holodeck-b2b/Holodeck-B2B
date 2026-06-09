@@ -114,7 +114,7 @@ public interface IMessageProcessingContext {
 	 * Sets the <i>User Message</i> that is processed in the current flow of this message processing context. Based on
 	 * the flow the message unit is set as either received (in flow) or sending (out_flow).
 	 *
-	 * @param userMessage	The received User Message
+	 * @param userMessage	The User Message being processed in the current context
 	 */
 	void setUserMessage(IUserMessageEntity userMessage);
 

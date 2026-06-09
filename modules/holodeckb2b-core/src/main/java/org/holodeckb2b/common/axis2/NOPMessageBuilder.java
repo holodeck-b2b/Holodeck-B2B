@@ -27,26 +27,29 @@ import org.apache.axis2.kernel.TransportUtils;
 /**
  * Is a {@link Builder} implementation that does not process the received message content but just adds a reference to
  * the request input stream to the Axis2 <i>Message Context</i>. This means that either handlers or the final message
- * receiver is responsible for processing of the message content.
- * 
+ * receiver is responsible for processing of the message content. The request input stream can be retrieved from the
+ * message context by calling {@link #getRequestInputStream(MessageContext)}.
+ *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 5.0.0
  */
+@Deprecated(since = "8.2.0", forRemoval = true)
 public class NOPMessageBuilder implements Builder {
 
 	/**
-	 * Name of the Axis2 Message Context property in which the request input stream is stored 
+	 * Name of the Axis2 Message Context property in which the request input stream is stored
 	 */
+	@Deprecated
 	public static final String REQUEST_INPUTSTREAM = "hb2b-rest:is";
-			
+
+	@Deprecated
 	@Override
 	public OMElement processDocument(InputStream inputStream, String contentType, MessageContext messageContext)
-			throws AxisFault {		
-		
+			throws AxisFault {
+
 		messageContext.setDoingREST(true);
 		messageContext.setProperty(REQUEST_INPUTSTREAM, inputStream);
-				
-		return TransportUtils.createSOAPEnvelope(null);
 
+		return TransportUtils.createSOAPEnvelope(null);
 	}
 }

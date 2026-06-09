@@ -31,7 +31,7 @@ import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.commons.util.Utils;
 
 /**
- * A facade to the Axis2 configuration context that uses a implements a different shutdown sequence where first all
+ * A facade to the Axis2 configuration context that implements a different shutdown sequence where first all
  * services are stopped and then the modules in reverse order of being started.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)

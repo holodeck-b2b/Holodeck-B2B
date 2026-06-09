@@ -17,7 +17,6 @@
 package org.holodeckb2b.core.axis2;
 
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.xml.namespace.QName;
@@ -42,7 +41,6 @@ import org.apache.axis2.kernel.http.HTTPConstants;
 import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 
 
@@ -180,33 +178,18 @@ public class OutOptInAxisOperation extends OutInAxisOperation {
             addMessageContext(responseMessageContext);
             responseMessageContext.setServiceContext(msgContext.getServiceContext());
             responseMessageContext.setAxisMessage(axisOp.getMessage(WSDLConstants.MESSAGE_LABEL_IN_VALUE));
+            responseMessageContext.setTransportIn(msgContext.getTransportIn());
+//            responseMessageContext.setTransportOut(msgContext.getTransportOut());
 
             //sending the message
             AxisEngine.send(msgContext);
 
             responseMessageContext.setDoingREST(msgContext.isDoingREST());
 
-            // Copy RESPONSE properties which the transport set onto the request message context when it processed
-            // the incoming response received in reply to an outgoing request.
+            // Copy the Holodeck B2B Message Processing Context and to the response message context
             IMessageProcessingContext.getFromMessageContext(msgContext).addToMessageContext(responseMessageContext);
-            // We convert the http headers to lowercase for unambigious processing
-            @SuppressWarnings("unchecked")
-			final Map<String, String> httpHeaders = (Map<String, String>)
-            												msgContext.getProperty(MessageContext.TRANSPORT_HEADERS);
-            if (!Utils.isNullOrEmpty(httpHeaders)) {
-            		final Map<String, String> lcHeaders = new HashMap<>(httpHeaders.size());
-            		httpHeaders.entrySet().forEach(e -> lcHeaders.put(e.getKey().toLowerCase(), e.getValue()));
-            		responseMessageContext.setProperty(MessageContext.TRANSPORT_HEADERS, lcHeaders);
-            } else
-            	responseMessageContext.setProperty(MessageContext.TRANSPORT_HEADERS, httpHeaders);
-
-            responseMessageContext.setProperty(HTTPConstants.MC_HTTP_STATUS_CODE,
-            									msgContext.getProperty(HTTPConstants.MC_HTTP_STATUS_CODE));
-
-            responseMessageContext.setProperty(MessageContext.TRANSPORT_IN, msgContext
-                    .getProperty(MessageContext.TRANSPORT_IN));
-            responseMessageContext.setTransportIn(msgContext.getTransportIn());
-            responseMessageContext.setTransportOut(msgContext.getTransportOut());
+//            responseMessageContext.setProperty(MessageContext.TRANSPORT_IN, msgContext
+//                    .getProperty(MessageContext.TRANSPORT_IN));
 
             return responseMessageContext;
         }
