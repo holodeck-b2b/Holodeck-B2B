@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 The Holodeck B2B Team, Sander Fieten
+/*
+ * Copyright (C) 2026 The Holodeck B2B Team
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.core.axis2;
+package org.holodeckb2b.core.transport.http;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,21 +25,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.axiom.mime.Header;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.kernel.http.HTTPConstants;
-import org.apache.axis2.transport.http.AxisRequestEntity;
 import org.apache.axis2.transport.http.HTTPAuthenticator;
 import org.apache.axis2.transport.http.HTTPTransportConstants;
-import org.apache.axis2.transport.http.Request;
-import org.apache.axis2.transport.http.impl.httpclient4.AxisRequestEntityImpl;
 import org.apache.axis2.transport.http.impl.httpclient4.HTTPProxyConfigurator;
+import org.apache.http.Header;
 import org.apache.http.HeaderElement;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
-import org.apache.http.HttpVersion;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.NTCredentials;
@@ -56,21 +52,25 @@ import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.commons.util.Utils;
 
 /**
- * Is a customised verion of <code>org.apache.axis2.transport.http.impl.httpclient4.RequestImpl</code> that allows to
- * set the {@link HttpClientContext} of the request. Because the Axis2 class is <code>final</code> we can't subclass it
- * and have to make a modified copy.
+ * Represents a HTTP request and provides information about the response to the request.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since 8.0.0
+ * @since 8.2.0
  */
-class RequestImpl implements Request {
-	private static final Logger log = LogManager.getLogger(RequestImpl.class);
+/*
+ * This class is a customised version of <code>org.apache.axis2.transport.http.impl.httpclient4.RequestImpl</code> that
+ * allows to set the {@link HttpClientContext} of the request which is needed for correct functioning of the connection
+ * manager. Because the Axis2 class is <code>final</code> we can't subclass it and have to make a modified copy.
+ */
+class HTTPRequest {
+	private static final Logger log = LogManager.getLogger();
 
     private static final String[] COOKIE_HEADER_NAMES = { HTTPConstants.HEADER_SET_COOKIE, HTTPConstants.HEADER_SET_COOKIE2 };
 
@@ -83,8 +83,8 @@ class RequestImpl implements Request {
     private final HttpClientContext clientContext;
     private HttpResponse response;
 
-    RequestImpl(HttpClient httpClient, MessageContext msgContext, final String methodName, URL url,
-            	AxisRequestEntity requestEntity, HttpClientContext clientContext) throws AxisFault {
+    HTTPRequest(HttpClient httpClient, MessageContext msgContext, final String methodName, URL url,
+            	RequestEntity requestEntity, HttpClientContext clientContext) throws AxisFault {
         this.httpClient = httpClient;
         this.msgContext = msgContext;
         this.clientContext = clientContext;
@@ -96,6 +96,9 @@ class RequestImpl implements Request {
                     return methodName;
                 }
             };
+            if ("POST".equals(methodName) || "PUT".equals(methodName))
+            	// HTTP 1.1 recommends setting the Content-Length header if no entity is included with POST or PUT
+				method.addHeader(HTTPConstants.HEADER_CONTENT_LENGTH, "0");
         } else {
             HttpEntityEnclosingRequestBase entityEnclosingRequest = new HttpEntityEnclosingRequestBase() {
                 @Override
@@ -103,8 +106,11 @@ class RequestImpl implements Request {
                     return methodName;
                 }
             };
-            entityEnclosingRequest.setEntity(new AxisRequestEntityImpl(requestEntity));
+            entityEnclosingRequest.setEntity(requestEntity);
             method = entityEnclosingRequest;
+            method.addHeader(requestEntity.getContentType());
+            if (requestEntity.isCompressed())
+            	method.addHeader(HTTPConstants.HEADER_CONTENT_ENCODING, HTTPConstants.COMPRESSION_GZIP);
         }
         try {
             method.setURI(url.toURI());
@@ -123,73 +129,111 @@ class RequestImpl implements Request {
         httpHost = new HttpHost(url.getHost(), port, url.getProtocol());
     }
 
-    @Override
-    public void enableHTTP10() {
-        method.setProtocolVersion(HttpVersion.HTTP_1_0);
-    }
-
-    @Override
+    /**
+     * Sets the HTTP header with the given name to the given value. If a header with this name was already set, its
+     * value is overwritten.
+     * <p>
+     * Note that this method can only be used to add headers that are not created by this sender or the HttpClient
+     * components. If the name of such header is specified, the method does nothing.
+	 *
+     * @param name		name of the HTTP header to set
+     * @param value		value of the HTTP header
+     */
     public void setHeader(String name, String value) {
-        method.setHeader(name, value);
+    	if (allowedHeader(name))
+    		method.setHeader(name, value);
     }
 
-    @Override
+    /**
+     * Adds the HTTP header with the given name to the given value. If a header with this name was already set, the
+     * specified value is appended to the existing value.
+     * <p>
+     * Note that this method can only be used to add headers that are not created by this sender or the HttpClient
+     * components. If the name of such header is specified, the method does nothing.
+	 *
+     * @param name		name of the HTTP header to set
+     * @param value		value of the HTTP header     */
     public void addHeader(String name, String value) {
-        method.addHeader(name, value);
+    	if (allowedHeader(name))
+    		method.addHeader(name, value);
     }
 
-    private static Header[] convertHeaders(org.apache.http.Header[] headers) {
-        Header[] result = new Header[headers.length];
-        for (int i=0; i<headers.length; i++) {
-            result[i] = new Header(headers[i].getName(), headers[i].getValue());
-        }
-        return result;
-    }
-
-    @Override
-    public Header[] getRequestHeaders() {
+    /**
+     * Gets all headers included in this request. As HTTP header names are case-insentive, the header names are
+     * converted to lower-case.
+     *
+     * @return array with all headers included in this request
+     */
+    public Map<String, String> getRequestHeaders() {
         return convertHeaders(method.getAllHeaders());
     }
 
-    @Override
+    /**
+     * Sets the connection timeout for this request
+     *
+     * @param timeout the timeout in milliseconds
+     */
     public void setConnectionTimeout(int timeout) {
         requestConfig.setConnectTimeout(timeout);
     }
 
-    @Override
+    /**
+     * Sets the read/socket timeout for this request
+     *
+     * @param timeout the timeout in milliseconds
+     */
     public void setSocketTimeout(int timeout) {
         requestConfig.setSocketTimeout(timeout);
     }
 
-    @Override
+    /**
+     * @return the HTTP status code of the response
+     */
     public int getStatusCode() {
         return response.getStatusLine().getStatusCode();
     }
 
-    @Override
+    /**
+     * @return	the HTTP status text of the response
+     */
     public String getStatusText() {
         return response.getStatusLine().getReasonPhrase();
     }
 
-    @Override
+    /**
+     * Gets the value of the HTTP header with the given name from the response. As HTTP header names are case-insentive,
+     * this method also performs a case-insensitive lookup.
+     *
+     * @param name the name of the header to retrieve
+     * @return the value of the header if it exists in the response, <code>null</code> otherwise
+     */
     public String getResponseHeader(String name) {
         org.apache.http.Header header = response.getFirstHeader(name);
         return header == null ? null : header.getValue();
     }
 
-    @Override
-    public Header[] getResponseHeaders() {
+    /**
+     * Gets all headers included in this request. As HTTP header names are case-insentive, the header names are
+     * converted to lower-case.
+     *
+     * @return array with all headers included in this request
+     */
+    public Map<String, String> getResponseHeaders() {
         return convertHeaders(response.getAllHeaders());
     }
 
-    @Override
+    /**
+     * Gets all cookies included in the response.
+     *
+     * @return a map with all cookies included in the response
+     */
     public Map<String,String> getCookies() {
         Map<String,String> cookies = null;
         for (String name : COOKIE_HEADER_NAMES) {
             for (org.apache.http.Header header : response.getHeaders(name)) {
                 for (HeaderElement element : header.getElements()) {
                     if (cookies == null) {
-                        cookies = new HashMap<String,String>();
+                        cookies = new HashMap<>();
                     }
                     cookies.put(element.getName(), element.getValue());
                 }
@@ -198,33 +242,47 @@ class RequestImpl implements Request {
         return cookies;
     }
 
-    @Override
+    /**
+     * Gets an input stream to read the entity body of the HTTP response.
+     *
+     * @return	if the response contains an entity body, an input stream to access it, <code>null</code> otherwise
+     * @throws IOException if a connection error occurs
+     */
     public InputStream getResponseContent() throws IOException {
         HttpEntity entity = response.getEntity();
         return entity == null ? null : entity.getContent();
     }
 
-    @Override
+    /**
+     * Executes the HTTP request.
+     *
+     * @throws IOException	when a connection error occurs.
+     */
     public void execute() throws IOException {
-        populateHostConfiguration();
+        if (HTTPProxyConfigurator.isProxyEnabled(msgContext, url)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Configuring HTTP proxy.");
+            }
+            HTTPProxyConfigurator.configure(msgContext, requestConfig, clientContext);
+        }
 
         // add compression headers if needed
-        if (msgContext.isPropertyTrue(HTTPConstants.MC_ACCEPT_GZIP)) {
-            method.addHeader(HTTPConstants.HEADER_ACCEPT_ENCODING,
-                             HTTPConstants.COMPRESSION_GZIP);
-        }
+        if (msgContext.isPropertyTrue(HTTPConstants.MC_ACCEPT_GZIP))
+			method.addHeader(HTTPConstants.HEADER_ACCEPT_ENCODING, HTTPConstants.COMPRESSION_GZIP);
 
         String cookiePolicy = (String) msgContext.getProperty(HTTPConstants.COOKIE_POLICY);
         if (cookiePolicy != null) {
-            requestConfig.setCookieSpec(cookiePolicy);
-        }
+			requestConfig.setCookieSpec(cookiePolicy);
+		}
 
         method.setConfig(requestConfig.build());
 
         response = httpClient.execute(httpHost, method, clientContext);
     }
 
-    @Override
+    /**
+     * Releases the connection used by this request.
+     */
     public void releaseConnection() {
         HttpEntity entity = response != null ? response.getEntity() : null;
         if (entity != null) {
@@ -245,29 +303,10 @@ class RequestImpl implements Request {
     }
 
     /**
-     * getting host configuration to support standard http/s, proxy and NTLM
-     * support
+     * Enables authentication for this request. Authentication could be either NTLM, Digest or Basic Authentication.
      *
-     * @return a HostConfiguration set up with proxy information
-     * @throws org.apache.axis2.AxisFault if problems occur
+     * @param authenticator	the authentication meta-data to use
      */
-    private void populateHostConfiguration() throws AxisFault {
-        // proxy configuration
-
-        if (HTTPProxyConfigurator.isProxyEnabled(msgContext, url)) {
-            if (log.isDebugEnabled()) {
-                log.debug("Configuring HTTP proxy.");
-            }
-            HTTPProxyConfigurator.configure(msgContext, requestConfig, clientContext);
-        }
-    }
-
-    /*
-     * This will handle server Authentication, It could be either NTLM, Digest
-     * or Basic Authentication. Apart from that user can change the priory or
-     * add a custom authentication scheme.
-     */
-    @Override
     public void enableAuthentication(HTTPAuthenticator authenticator) {
         requestConfig.setAuthenticationEnabled(true);
 
@@ -330,4 +369,35 @@ class RequestImpl implements Request {
             requestConfig.setTargetPreferredAuthSchemes(authPrefs);
         }
     }
+
+
+    /**
+     * Checks if a user defined header with the given name is allowed.
+     *
+     * @param name name of the header to be added to the request
+     * @return <code>true</code> if a header with this name can be added,
+     * 		   <code>false</code> if this header is created by this code or the HttpClient components
+     */
+    private boolean allowedHeader(String name) {
+    	return !HTTP.CONN_DIRECTIVE.equalsIgnoreCase(name)
+            && !HTTP.TRANSFER_ENCODING.equalsIgnoreCase(name)
+            && !HTTP.CONTENT_ENCODING.equalsIgnoreCase(name)
+            && !HTTP.DATE_HEADER.equalsIgnoreCase(name)
+            && !HTTP.CONTENT_TYPE.equalsIgnoreCase(name)
+            && !HTTP.CONTENT_LEN.equalsIgnoreCase(name);
+    }
+
+    /**
+     * Helper method to convert an array of Header objects to a map.
+     *
+     * @param headers	the array of headers represented by {@link Header} objects
+     * @return a map of header names to header values. The header names are converted to lower-case.
+     */
+    private Map<String, String> convertHeaders(Header[] headers) {
+		Map<String, String> result = new HashMap<>();
+		for (Header header : headers) {
+			result.put(header.getName().toLowerCase(), header.getValue());
+		}
+		return result;
+	}
 }

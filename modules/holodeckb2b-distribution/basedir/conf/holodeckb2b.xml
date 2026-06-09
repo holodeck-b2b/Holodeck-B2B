@@ -57,8 +57,7 @@
     <!-- ================================================= -->
     <!-- Transport Ins -->
     <!-- ================================================= -->
-    <transportReceiver name="http"
-        class="org.holodeckb2b.core.axis2.HTTPListener">
+    <transportReceiver name="http" class="org.holodeckb2b.core.transport.http.HTTPListener">
         <parameter name="port">8080</parameter>
         <!-- Here is the complete list of supported parameters (see example settings further below):
             port: the port to listen on (default 6060)
@@ -83,8 +82,7 @@
     <!-- ================================================= -->
     <!-- Transport Outs -->
     <!-- ================================================= -->
-    <transportSender name="http"
-        class="org.holodeckb2b.core.axis2.HTTPTransportSender">
+    <transportSender name="http" class="org.holodeckb2b.core.transport.http.HTTPTransportSender">
         <parameter name="PROTOCOL">HTTP/1.1</parameter>
         <parameter name="Transfer-Encoding">chunked</parameter>
 

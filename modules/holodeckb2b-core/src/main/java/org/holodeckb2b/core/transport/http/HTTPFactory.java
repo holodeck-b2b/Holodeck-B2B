@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.core.axis2;
+package org.holodeckb2b.core.transport.http;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
@@ -38,6 +38,7 @@ import org.apache.http.protocol.ResponseConnControl;
 import org.apache.http.protocol.ResponseContent;
 import org.apache.http.protocol.ResponseDate;
 import org.apache.http.protocol.ResponseServer;
+import org.holodeckb2b.core.axis2.Axis2Utils;
 
 /**
  * Is a customised {@link org.apache.axis2.transport.http.server.HttpFactory} that uses the actual {@link

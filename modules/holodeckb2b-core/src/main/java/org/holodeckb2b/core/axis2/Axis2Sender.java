@@ -16,28 +16,17 @@
  */
 package org.holodeckb2b.core.axis2;
 
-import static org.apache.axis2.client.ServiceClient.ANON_OUT_IN_OP;
-
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.client.OperationClient;
-import org.apache.axis2.client.Options;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.MessageContext;
-import org.apache.axis2.context.ServiceContext;
-import org.apache.axis2.context.ServiceGroupContext;
-import org.apache.axis2.description.AxisModule;
 import org.apache.axis2.description.AxisService;
-import org.apache.axis2.description.AxisServiceGroup;
-import org.apache.axis2.description.OutInAxisOperation;
 import org.apache.axis2.engine.AxisConfiguration;
-import org.apache.axis2.kernel.http.HTTPConstants;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.events.impl.GenericSendMessageFailure;
 import org.holodeckb2b.common.util.MessageUnitUtils;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
-import org.holodeckb2b.core.MessageProcessingContext;
 import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.messagemodel.IErrorMessage;
@@ -115,54 +104,26 @@ public class Axis2Sender {
 
         final MessageContext msgCtx = new MessageContext();
         msgCtx.setFLOW(MessageContext.OUT_FLOW);
-        OperationClient oc = null;
+    	msgCtx.setTransportOut(axisConfig.getTransportOut("http"));
 
-        try {
-	        AxisServiceGroup axisServiceGroup = service.getAxisServiceGroup();
-	        ServiceGroupContext sgc = configContext.createServiceGroupContext(axisServiceGroup);
-	        ServiceContext svcCtx = sgc.getServiceContext(service);
-
-	        final Options options = new Options();
-	        options.setTransportOut(axisConfig.getTransportOut("http"));
-	        options.setExceptionToBeThrownOnSOAPFault(false);
-	        options.setProperty(HTTPConstants.USER_AGENT, Axis2Utils.HTTP_PRODID_HEADER);
-	        OutInAxisOperation sendOp = new OutOptInAxisOperation(ANON_OUT_IN_OP);
-	        sendOp.setParent(service);
-	        axisConfig.getPhasesInfo().setOperationPhases(sendOp);
-	        // Engage all modules required by the service
-	        for(String moduleName : service.getModules()) {
-	            AxisModule module = axisConfig.getModule(moduleName);
-	            if (module != null)
-	                sendOp.engageModule(module);
-	        }
-	        oc = sendOp.createClient(svcCtx, options);
-	        oc.addMessageContext(msgCtx);
-
-	        log.trace("Create an empty IMessageProcessingContext for message with current configuration");
-            final IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(msgCtx);
-            if (messageUnit instanceof IUserMessage)
-                procCtx.setUserMessage((IUserMessageEntity) messageUnit);
-            else if (messageUnit instanceof IPullRequest)
-            	procCtx.setPullRequest((IPullRequestEntity) messageUnit);
-            else if (messageUnit instanceof IErrorMessage)
-                procCtx.addSendingError((IErrorMessageEntity) messageUnit);
-            else if (messageUnit instanceof IReceipt)
-                procCtx.addSendingReceipt((IReceiptEntity) messageUnit);
-        } catch (AxisFault cfgError) {
-        	log.error("An exception occurred setting up the send operation for {} (msgId={}).Exception stack below:\n",
-        			   MessageUnitUtils.getMessageUnitName(messageUnit), messageUnit.getMessageId(),
-        			   Utils.getExceptionTrace(cfgError, true));
-        	registerSendFailure(messageUnit, "Axis2 initialisation failure", cfgError);
-        	return;
-        }
+    	log.trace("Create new IMessageProcessingContext");
+        final IMessageProcessingContext procCtx = IMessageProcessingContext.getFromMessageContext(msgCtx);
+        if (messageUnit instanceof IUserMessage)
+            procCtx.setUserMessage((IUserMessageEntity) messageUnit);
+        else if (messageUnit instanceof IPullRequest)
+        	procCtx.setPullRequest((IPullRequestEntity) messageUnit);
+        else if (messageUnit instanceof IErrorMessage)
+            procCtx.addSendingError((IErrorMessageEntity) messageUnit);
+        else if (messageUnit instanceof IReceipt)
+            procCtx.addSendingReceipt((IReceiptEntity) messageUnit);
 
         try {
         	log.debug("Start send process for {} [msgId={}]", MessageUnitUtils.getMessageUnitName(messageUnit),
         				messageUnit.getMessageId());
-            oc.execute(true);
+            HolodeckB2BCoreInterface.executeSendProcess(msgCtx, service);
             log.debug("Finished send process for {} [msgId={}]", MessageUnitUtils.getMessageUnitName(messageUnit),
             		messageUnit.getMessageId());
-        } catch (final Throwable t) {
+        } catch (final AxisFault fault) {
             /* An error occurred while sending the message, it should however be already processed by one of the
                handlers. In that case the message context will not contain the failure reason. To prevent redundant
                logging we check if there is a failure reason before we log the error here.
@@ -170,7 +131,7 @@ public class Axis2Sender {
         	if (msgCtx.getFailureReason() != null) {
         		log.error("An unexpected error occurred while sending {} (msgId={}). Exception trace:\n{}",
         				  MessageUnitUtils.getMessageUnitName(messageUnit), messageUnit.getMessageId(),
-        				  Utils.getExceptionTrace(t, true));
+        				  Utils.getExceptionTrace(fault, true));
         		registerSendFailure(messageUnit, "Unexpected error sending message", msgCtx.getFailureReason());
         	}
         }

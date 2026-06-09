@@ -16,116 +16,15 @@
  */
 package org.holodeckb2b.core.axis2;
 
-import org.apache.axis2.AxisFault;
-import org.apache.axis2.addressing.EndpointReference;
-import org.apache.axis2.builder.Builder;
-import org.apache.axis2.context.ConfigurationContext;
-import org.apache.axis2.context.MessageContext;
-import org.apache.axis2.context.SessionContext;
-import org.apache.axis2.description.TransportInDescription;
-import org.apache.axis2.kernel.TransportListener;
-import org.apache.axis2.transport.http.HTTPTransportUtils;
-import org.apache.axis2.transport.http.server.SimpleHttpServer;
-import org.apache.logging.log4j.LogManager;
-import org.holodeckb2b.commons.util.Utils;
-
 /**
- * Is an Axis2 {@link TransportListener} implementation that will create a stand alone HTTP listener that will use the
- * {@link Builder} implementation specified by the service configured at the requested URL. The Builder to use can be
- * specified in the <i>Sevice</i> parameter "hb2b:builder". If no builder is specified the default Axis2 Builder
- * applicable to the Content-Type of the request is used.
- * <p>To implement this functionality this listener uses the HTTP sever built into Axis2 but initialises its with a
- * custom {@link HTTPFactory} to create workers that provide the required functionality.
- * <p>As this transport listener replaces the default Axis2 listener it uses the same parameters, the main one being
- * the port parameter where the message should be received. If that parameter is not provided the default port 8080
- * is used.
+ * Is a proxy to the {@link org.holodeckb2b.core.transport.http.HTTPListener} for backward compatibility with
+ * previous version 8 of Holodeck B2B.
  *
  * @author Sander Fieten (sander at chasquis-consulting.com)
  * @since 5.0.0
+ * @deprecated since 8.2.0. Use {@link org.holodeckb2b.core.transport.http.HTTPListener} instead
  */
-public class HTTPListener implements TransportListener {
-	/**
-	 * The Axis2 http server
-	 */
-	private SimpleHttpServer embedded = null;
-	/**
-	 * The Axis2 configuration of this instance
-	 */
-    private ConfigurationContext configurationContext;
-    /**
-     * The transport configuration for this listener
-     */
-    private TransportInDescription	transportConfig;
-    /**
-     * The factory for HTTP workers
-     */
-    private HTTPFactory httpFactory;
-    /**
-     * Cause of the startup failure
-     */
-    private Throwable 	startupFailure;
+@Deprecated
+public class HTTPListener extends org.holodeckb2b.core.transport.http.HTTPListener {
 
-	@Override
-	public void init(ConfigurationContext axisConf, TransportInDescription transprtIn) throws AxisFault {
-        this.configurationContext = axisConf;
-        this.transportConfig = transprtIn;
-        this.httpFactory = new HTTPFactory(configurationContext, transprtIn, this);
-	}
-
-	@Override
-	public void start() throws AxisFault {
-        try {
-            embedded = new SimpleHttpServer(httpFactory, httpFactory.getPort());
-            embedded.init();
-            startupFailure = null;
-            embedded.start();
-            if (startupFailure != null) {
-            	embedded.destroy();
-            	throw startupFailure;
-            }
-        } catch (Throwable e) {
-        	LogManager.getLogger().error("Failed to start HTTP transport ({}) : {}", transportConfig.getName(),
-        			Utils.getExceptionTrace(startupFailure));
-            throw AxisFault.makeFault(e);
-        }
-    }
-
-	/**
-	 * Indicates that the startup of the HTTP listener failed.
-	 *
-	 * @param t	the cause of the failure
-	 */
-	void notifyStartupFailure(Throwable t) {
-		this.startupFailure = t;
-	}
-
-	@Override
-	public void stop() throws AxisFault {
-        if (embedded != null) {
-            try {
-                embedded.destroy();
-            } catch (Exception e) {
-            }
-        }
-	}
-
-	@Override
-	public EndpointReference[] getEPRsForService(String serviceName, String ip) throws AxisFault {
-        if (embedded == null) {
-            throw new AxisFault("Unable to generate EPR for the transport : http");
-        }
-        return HTTPTransportUtils.getEPRsForService(configurationContext, transportConfig,
-        											serviceName, ip, embedded.getPort());
-	}
-
-	@Override
-	public SessionContext getSessionContext(MessageContext messageContext) {
-		// Session support isn't needed for Holodeck B2B
-		return null;
-	}
-
-	@Override
-	public void destroy() {
-		this.configurationContext = null;
-	}
 }

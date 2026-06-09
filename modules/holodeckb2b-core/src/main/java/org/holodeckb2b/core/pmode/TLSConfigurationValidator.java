@@ -24,7 +24,7 @@ import org.apache.axis2.description.TransportOutDescription;
 import org.apache.logging.log4j.LogManager;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.HolodeckB2BCore;
-import org.holodeckb2b.core.axis2.HTTPTransportSender;
+import org.holodeckb2b.core.transport.http.HTTPTransportSender;
 import org.holodeckb2b.interfaces.pmode.ILeg;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.pmode.IProtocol;

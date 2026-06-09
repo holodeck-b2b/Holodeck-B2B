@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.core.axis2;
+package org.holodeckb2b.core.transport.http;
 
 import org.apache.axis2.description.TransportInDescription;
 import org.apache.axis2.transport.http.server.Worker;

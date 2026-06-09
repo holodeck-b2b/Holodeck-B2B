@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.holodeckb2b.core.axis2;
+package org.holodeckb2b.core.transport.http;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,7 +31,7 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.TransportInDescription;
-import org.apache.axis2.dispatchers.RequestURIBasedDispatcher;
+import org.apache.axis2.dispatchers.RequestURIBasedServiceDispatcher;
 import org.apache.axis2.engine.AxisEngine;
 import org.apache.axis2.engine.Handler.InvocationResponse;
 import org.apache.axis2.kernel.RequestResponseTransport;
@@ -53,7 +53,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.holodeckb2b.common.axis2.RequestParameters;
 import org.holodeckb2b.commons.util.Utils;
-import org.holodeckb2b.core.MessageProcessingContext;
+import org.holodeckb2b.core.axis2.Axis2Utils;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;
 import org.holodeckb2b.interfaces.core.IURLRequestParameters;
 
@@ -154,22 +154,23 @@ public class HTTPWorker implements Worker {
         }
 
         log.trace("Find Service for request URL: " + url);
+        AxisService axisService = null;
 		try {
-			RequestURIBasedDispatcher requestDispatcher = new RequestURIBasedDispatcher();
-			requestDispatcher.invoke(msgContext);
-		} catch (AxisFault notFound) {}
-
-		final AxisService axisService = msgContext.getAxisService();
+			axisService = new RequestURIBasedServiceDispatcher().findService(msgContext);
+		} catch (AxisFault svcDetectFailure) {
+			log.error("An error occurred determining the service for the request : {}", svcDetectFailure.getMessage());
+		}
 		if (axisService == null) {
-			log.warn("No service configured for Request : {}", url);
+			log.warn("No service configured for request : {}", url);
 			response.setStatus(HttpStatus.SC_NOT_FOUND);
 			return;
 		}
+		msgContext.setAxisService(axisService);
 
 		try {
 			prepareMessageContext(msgContext, url, contentType, request, response);
-			if (method.equals(HTTPConstants.HEADER_GET)) {
-				log.debug("GET request for service {}", axisService.getName());
+			if (method.equals(HTTPConstants.HEADER_GET) || method.equals(HTTPConstants.HEADER_DELETE)) {
+				log.debug("{} request for service {}", method, axisService.getName());
 	            int index = !Utils.isNullOrEmpty(contentType) ? contentType.indexOf(';') : 0;
 	            if (index > 0)
 	                contentType = contentType.substring(0, index);
@@ -178,9 +179,8 @@ public class HTTPWorker implements Worker {
 	                    msgContext,
 	                    response.getOutputStream(),
 	                    contentType);
-			} else if (method.equals(HTTPConstants.HEADER_POST)) {
-				log.debug("POST request for service {}", axisService.getName());
-
+			} else if (method.equals(HTTPConstants.HEADER_POST) || method.equals(HTTPConstants.HEADER_PUT)) {
+				log.debug("{} request for service {}", method, axisService.getName());
 				final Builder msgBuilder = Axis2Utils.getBuilderFromService(axisService);
 				if (msgBuilder != null) {
 					log.debug("Using " + msgBuilder.getClass().getSimpleName()
@@ -199,34 +199,41 @@ public class HTTPWorker implements Worker {
 					msgContext.setEnvelope(TransportUtils.createSOAPEnvelope(msgBuilder.processDocument(is,
 																							contentType, msgContext)));
 					pi = AxisEngine.receive(msgContext);
-				} else {
-					log.trace("No specific Builder specified, use default Axis2 process");
-	        		// deal with POST request
-		            if (HTTPTransportUtils.isRESTRequest(contentType)) {
-		            	log.debug("Using REST message builder");
-		                pi = RESTUtil.processXMLRequest(
-		                        msgContext,
-		                        request.getInputStream(),
-		                        response.getOutputStream(),
-		                        contentType);
-		            } else {
-		            	log.debug("Using SOAP message builder");
-		            	final String ip = (String)msgContext.getProperty(MessageContext.TRANSPORT_ADDR);
-		                final String requestURL = (!Utils.isNullOrEmpty(ip) ? ip : "") + url;
-		                pi = HTTPTransportUtils.processHTTPPostRequest(
-		                        msgContext,
-		                        request.getInputStream(),
-		                        response.getOutputStream(),
-		                        contentType,
-		                        soapAction,
-		                        requestURL);
-		            }
-				}
+				} else if (HTTPTransportUtils.isRESTRequest(contentType)) {
+	            	log.debug("Using REST message builder");
+	                pi = RESTUtil.processXMLRequest(
+	                        msgContext,
+	                        request.getInputStream(),
+	                        response.getOutputStream(),
+	                        contentType);
+	            } else if (method.equals(HTTPConstants.HEADER_POST)) {
+	            	log.debug("Using SOAP message builder");
+	            	final String ip = (String)msgContext.getProperty(MessageContext.TRANSPORT_ADDR);
+	                final String requestURL = (!Utils.isNullOrEmpty(ip) ? ip : "") + url;
+	                pi = HTTPTransportUtils.processHTTPPostRequest(
+	                        msgContext,
+	                        request.getInputStream(),
+	                        response.getOutputStream(),
+	                        contentType,
+	                        soapAction,
+	                        requestURL);
+	            } else {
+	            	log.error("Received unexpected PUT method for SOAP based service {}", axisService.getName());
+	            	throw new MethodNotSupportedException(method + " method not supported");
+	            }
 			} else {
 	            throw new MethodNotSupportedException(method + " method not supported");
 	        }
         } catch (AxisFault f) {
         	log.error("Error while processing request, URL={};Error message= {}", url, f.getMessage());
+        	// Check if a custom response status code has been set
+        	Integer responseStatusCode = getResponseStatusCode(msgContext);
+        	if (responseStatusCode != null) {
+        		msgContext.setProperty(Constants.HTTP_RESPONSE_STATE, responseStatusCode.toString());
+        		String statusMsg = (String) msgContext.getProperty(HTTPConstants.MC_HTTP_STATUS_MESSAGE);
+        		if (!Utils.isNullOrEmpty(statusMsg))
+					response.sendError(responseStatusCode, statusMsg);
+        	}
         	throw f;
 		}
 
@@ -263,18 +270,41 @@ public class HTTPWorker implements Worker {
         		((Map<String, String>) responseHdrs).forEach((n, v) -> response.addHeader(n, v));
 
             // Mark the status as accepted, unless already set by service
-        	Object status = msgContext.getProperty(HTTPConstants.MC_HTTP_STATUS_CODE);
-        	if (status != null && status instanceof Integer) {
-        		response.setStatus(((Integer) status).intValue());
-        	} else {
-        		status = msgContext.getProperty(HTTPConstants.RESPONSE_CODE);
-            	if (status != null && status instanceof Integer)
-            		response.setStatus(((Integer) status).intValue());
-            	else
-            		response.setStatus(HttpStatus.SC_ACCEPTED);
-        	}
+        	Integer responseStatusCode = getResponseStatusCode(msgContext);
+        	if (responseStatusCode != null) {
+        		String statusMsg = (String) msgContext.getProperty(HTTPConstants.MC_HTTP_STATUS_MESSAGE);
+        		if (!Utils.isNullOrEmpty(statusMsg))
+					response.sendError(responseStatusCode, statusMsg);
+        		else
+        			response.setStatus(responseStatusCode);
+        	} else
+        		response.setStatus(HttpStatus.SC_ACCEPTED);
         }
     }
+
+	/**
+	 * Checks if a custom response status code has been set in the Axis2 Message Context and returns it as an Integer.
+	 *
+	 * @param msgContext	the current Axis2 Message Context
+	 * @return	Integer representing the response status code if set, <code>null</code> if not set
+	 */
+	private Integer getResponseStatusCode(final MessageContext msgContext) {
+		Object status = msgContext.getProperty(Constants.HTTP_RESPONSE_STATE);
+		if (status == null)
+			status = msgContext.getProperty(HTTPConstants.MC_HTTP_STATUS_CODE);
+
+		if (status == null)
+			status = msgContext.getProperty(HTTPConstants.RESPONSE_CODE);
+
+		if (status != null) {
+			try {
+				return Integer.valueOf(status.toString());
+			} catch (NumberFormatException e) {
+				return null;
+			}
+		} else
+    		return null;
+	}
 
 	/**
 	 * Prepares the Axis2 Message Context by setting some generic properties that apply to all messages.
