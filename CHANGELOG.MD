@@ -20,7 +20,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Functional tests for security and trust components (thanks to @ckaaber)
 
 ### Changed
-* Configuration of revocation checks which can be specified to be _mandatory_, _optional_ or _never_. 
+* Configuration of revocation checks which can be specified to be _mandatory_, _optional_ or _never_. Default is now
+  set to _optional_
 * `org.holodeckb2b.interfaces.pmode.IEncryptionConfiguration` has been refactored to allow specification of multiple keypairs
   that can be used for decryption of messages. The old `getKeystoreAlias()` and `getCertificatePassword()` methods have been
   replaced by `getDecryptionKeypairs()` and `getEncryptionCertificate()`.

@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
-    targetNamespace="http://holodeck-b2b.org/schemas/2019/09/config/certmanager" version="8.2.0"
+    targetNamespace="http://holodeck-b2b.org/schemas/2019/09/config/certmanager" version="9.0.0"
     xmlns="http://holodeck-b2b.org/schemas/2019/09/config/certmanager">
     <xs:annotation>
         <xs:documentation>This XML schema defines the structure of the configuration file of the default <i>Certificate Manager</i> of Holodeck B2B.
@@ -25,26 +25,31 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         checks and "direct trust" in trading partner certificates.</xs:documentation>
         <xs:documentation>In version 7.0.0 the type attribute was added to the Password element to enable retrieving the password from a Java system 
         property or system environment variable.</xs:documentation>
-        <xs:documentation>In version 8.0.0 the <code/></xs:documentation>
+        <xs:documentation>In version 8.0.0 the Certificate Manager also performs the validation of TLS certificates. To facilitate this, a configuration
+        option has been added to specify whether the CA certificates included in the JRE's default trust store should be used when validating certificates.
+        </xs:documentation>
+        <xs:documentation>In version 9.0.0 the revocation check configuration is extended so it can be set to mandatory, optional and never. The default
+        also has been changed to optional.</xs:documentation>
     </xs:annotation>
     <xs:element name="CertManagerConfiguration" type="CertManagerConfigurationType"/>
     <xs:complexType name="CertManagerConfigurationType">
         <xs:sequence>
             <xs:element name="PerformRevocationCheck" type="revocation-options" minOccurs="0"
-                default="never">
+                default="optional">
                 <xs:annotation>
                     <xs:documentation>This OPTIONAL element indicates whether the Certificate Manager should perform a revocation check when
         			 validating trust in a certificate path. Possible settings are:<ul>
         			 <li>"mandatory" : revocation checks MUST be executed. If the revocation check cannot be performed because the certificate to 
         			         check does not contain the required extensions or the revocation data cannot be retrieved this will lead to 
         			         rejection of the certificate path being checked.</li>
-        			 <li>"optional" : revocation checks SHOULD be executed, buf if they cannot be executed the certificate path is "trusted with 
+        			 <li>"optional" : revocation checks SHOULD be executed, but if they cannot be executed the certificate path is "trusted with 
         			         warnings"</li>
-        			 <li>"never" : revecocation checks ARE NOT executed, only the correctness and validaty (in terms of time) of the certificate 
+        			 <li>"never" : revocation checks ARE NOT executed, only the correctness and validity (in terms of time) of the certificate 
         			         path is checked.</li></ul>
         			 </xs:documentation>
-                    <xs:documentation>The default is value is <i>never</i> so the behaviour is the same as in earlier versions</xs:documentation>
-                    <xs:documentation>The enumeration is new in version 8.2.0 and for backward compatibility the values <i>true</i> and <i>false</i> 
+                    <xs:documentation>The default is value is <i>optional</i> so certificates are checked for revocation if possible, but
+                     validation will not fail if revocation checks are not possible.</xs:documentation>
+                    <xs:documentation>The enumeration is new in version 9.0.0 and for backward compatibility the values <i>true</i> and <i>false</i> 
                         are still accepted and mapped to <i>optional</i> resp <i>never</i>. These values however are <b>deprecated</b> and SHOULD NOT
                         be used any more.</xs:documentation>
                 </xs:annotation>

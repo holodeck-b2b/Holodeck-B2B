@@ -82,7 +82,6 @@ import org.holodeckb2b.security.trust.config.DefaultTrustOptions;
 import org.holodeckb2b.security.trust.config.PasswordType;
 import org.holodeckb2b.security.trust.config.RevocationOptions;
 
-
 /**
  * Is the default implementation of the {@link ICertificateManager} which manages the storage of private keys and
  * certificates needed for the processing of both the transport and message level security. It <b>does not</b> support
@@ -116,14 +115,17 @@ import org.holodeckb2b.security.trust.config.RevocationOptions;
  * like trust anchors.
  * <p>
  * Another feature of this Certificate Manager is the option to perform a revocation check using OCSP on
- * certificates. This check is disabled by default for back-ward compatibility and can be enabled in the configuration.
- * Note however that when enabled and used in an environment where certificates don't provide OSCP information this will
- * result in a lot of {@link ISignatureVerifiedWithWarning} events as the revocation check could not be executed.
+ * certificates. This check is enabled by default, but optional for back-ward compatibility. It can be made mandatory
+ * in the configuration. The revocation check should only be enabled when the certificates used do provide information
+ * where to check for revocation. Otherwise enabling revocation checks will result in a lot of
+ * {@link ISignatureVerifiedWithWarning} events or even message processing failures (when set mandatory) as the
+ * revocation check cannot be executed.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 5.0.0	This class replaces the certificate manager implementation part of the <i>default Security
  * 			Provider</i> in version 4.x (<code>org.holodeckb2b.security.CertificateManager</code>)
  * @since 8.0.0 Added support for handling key pairs and certificates used in transport level security
+ * @since 9.0.0 Extended revocation check configuration to never, optional and mandatory
  */
 public class DefaultCertManager implements ICertificateManager {
     private final Logger log = LogManager.getLogger(DefaultCertManager.class);
@@ -203,7 +205,7 @@ public class DefaultCertManager implements ICertificateManager {
             					jaxbUnmarshaller.unmarshal(new StreamSource(fis), CertManagerConfigurationType.class);
             CertManagerConfigurationType certMgrConfig = rootConfigElement.getValue();
             // Check revocation check and direct trust parameters
-            performRevocationCheck = certMgrConfig.getPerformRevocationCheck() == null ? RevocationOptions.NEVER :
+            performRevocationCheck = certMgrConfig.getPerformRevocationCheck() == null ? RevocationOptions.OPTIONAL :
             															certMgrConfig.getPerformRevocationCheck();
             if (performRevocationCheck == RevocationOptions.TRUE || performRevocationCheck == RevocationOptions.FALSE) {
             	log.warn("{} is deprecated for the PerformRevocationCheck parameter. Please use {} instead.",
