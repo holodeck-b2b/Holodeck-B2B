@@ -23,6 +23,7 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.builder.Builder;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.kernel.TransportUtils;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Is a {@link Builder} implementation that does not process the received message content but just adds a reference to
@@ -32,8 +33,10 @@ import org.apache.axis2.kernel.TransportUtils;
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 5.0.0
+ * @deprecated Use the <code>BinaryMessageBuilder</code> from the <a href="https://github.com/holodeck-b2b/axis2-binary">
+ * 			   Axis2 Binary Message Utils</a> instead
  */
-@Deprecated(since = "8.2.0", forRemoval = true)
+@Deprecated(since = "9.0.0", forRemoval = true)
 public class NOPMessageBuilder implements Builder {
 
 	/**
@@ -46,6 +49,8 @@ public class NOPMessageBuilder implements Builder {
 	@Override
 	public OMElement processDocument(InputStream inputStream, String contentType, MessageContext messageContext)
 			throws AxisFault {
+
+		LogManager.getLogger().warn("The NOPMessageBuilder is deprecated. Use the BinaryMessageBuilder instead.");
 
 		messageContext.setDoingREST(true);
 		messageContext.setProperty(REQUEST_INPUTSTREAM, inputStream);

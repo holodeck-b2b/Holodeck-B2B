@@ -135,7 +135,7 @@ public class HTTPTransportSender extends AbstractHandler implements TransportSen
 	/**
 	 * Defines the name of the message context property that includes the request specific HTTP configuration.
 	 *
-	 * @since 8.2.0
+	 * @since 9.0.0
 	 */
 	public static final String MC_HTTP_CONFIG = "hb2b-http-sender::ConnConfig";
 
@@ -144,7 +144,7 @@ public class HTTPTransportSender extends AbstractHandler implements TransportSen
 	 * property is set to <i>true</i> no entity body will be included with a request. This can be used to send POST or
 	 * PUT requests without content.
 	 *
-	 * @since 8.2.0
+	 * @since 9.0.0
 	 */
 	public static final String MC_HTTP_EMPTY_BODY = "hb2b-http-sender::EmptyBody";
 

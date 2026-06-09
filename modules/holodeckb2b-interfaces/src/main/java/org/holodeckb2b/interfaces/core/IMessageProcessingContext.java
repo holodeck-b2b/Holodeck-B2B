@@ -85,7 +85,7 @@ public interface IMessageProcessingContext {
 	 * binding a new message processing context to the current Axis2 message context.
 	 *
 	 * @return	The current Axis2 {@link MessageContext}
-	 * @since 8.2.0
+	 * @since 9.0.0
 	 */
 	void setParentContext(MessageContext axisMsgCtx);
 

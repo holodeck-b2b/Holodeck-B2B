@@ -137,7 +137,7 @@ public final class SecurityConstants {
      * "https://www.ietf.org/archive/id/draft-eastlake-rfc9231bis-xmlsec-uris-05.html#section-2.7">section 2.7 of
      * RFC9231bis</a>.
      *
-     * @since 8.2.0
+     * @since 9.0.0
      */
     public static final String X25519_KEY_AGREEMENT_URI = "http://www.w3.org/2021/04/xmldsig-more#x25519";
 }

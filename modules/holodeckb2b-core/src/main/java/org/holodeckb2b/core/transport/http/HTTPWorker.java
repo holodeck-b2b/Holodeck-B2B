@@ -51,7 +51,6 @@ import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EncodingUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.holodeckb2b.common.axis2.RequestParameters;
 import org.holodeckb2b.commons.util.Utils;
 import org.holodeckb2b.core.axis2.Axis2Utils;
 import org.holodeckb2b.interfaces.core.IMessageProcessingContext;

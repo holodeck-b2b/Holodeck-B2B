@@ -37,7 +37,7 @@ import org.apache.http.entity.AbstractHttpEntity;
  * compressed content first in memory.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since 8.2.0
+ * @since 9.0.0
  */
 class RequestEntity extends AbstractHttpEntity {
 

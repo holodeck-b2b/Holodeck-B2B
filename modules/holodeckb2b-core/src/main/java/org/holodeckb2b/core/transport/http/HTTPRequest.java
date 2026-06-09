@@ -62,7 +62,7 @@ import org.holodeckb2b.commons.util.Utils;
  * Represents a HTTP request and provides information about the response to the request.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since 8.2.0
+ * @since 9.0.0
  */
 /*
  * This class is a customised version of <code>org.apache.axis2.transport.http.impl.httpclient4.RequestImpl</code> that

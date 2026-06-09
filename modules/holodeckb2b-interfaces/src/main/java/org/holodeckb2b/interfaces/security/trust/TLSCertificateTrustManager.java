@@ -39,7 +39,7 @@ import org.holodeckb2b.interfaces.security.trust.IValidationResult.Trust;
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 8.0.0 added in package org.holodeckb2b.core.axis2
  * @since 8.1.0 moved to in org.holodeckb2b.common.security.trust
- * @since 8.2.0 moved to in org.holodeckb2b.interfaces.security.trust
+ * @since 9.0.0 moved to in org.holodeckb2b.interfaces.security.trust
  * @see ICertificateManager
  */
 public final class TLSCertificateTrustManager implements X509TrustManager {

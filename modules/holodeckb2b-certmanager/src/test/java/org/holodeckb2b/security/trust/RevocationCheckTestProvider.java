@@ -37,7 +37,7 @@ import org.bouncycastle.jce.provider.PKIXCertPathBuilderSpi_8;
  * A mock Java Security Provider for testing the handling of the revocation checks by the default certificate manager.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since 8.2.0
+ * @since 9.0.0
  */
 public class RevocationCheckTestProvider extends Provider {
 	enum Resp { ok, revoke, fail };

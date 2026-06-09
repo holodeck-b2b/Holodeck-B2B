@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.axis2.context.MessageContext;
-import org.holodeckb2b.common.axis2.RequestParameters;
+import org.holodeckb2b.core.transport.http.RequestParameters;
 import org.holodeckb2b.interfaces.core.IURLRequestParameters;
 
 /**

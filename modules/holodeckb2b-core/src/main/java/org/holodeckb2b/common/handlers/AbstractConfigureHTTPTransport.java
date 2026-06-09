@@ -104,7 +104,7 @@ public abstract class AbstractConfigureHTTPTransport extends AbstractBaseHandler
 	 * @param procCtx		The message processing context
 	 * @return				A {@link IProtocol} instance with the protocol configuration,<br/>
 	 * 						or <code>null</code> if the configuration cannot be determined
-	 * @since 8.2.0
+	 * @since 9.0.0
 	 */
 	protected abstract IProtocol getProtocolConfig(IMessageUnitEntity msgToSend, IMessageProcessingContext procCtx);
 

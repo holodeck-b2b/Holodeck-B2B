@@ -85,7 +85,7 @@ public class EncryptionConfig implements IEncryptionConfiguration, Serializable 
      * Sets the reference to the certificate managed by the <i>Certificate Manager</i> to be used for encryption.
      *
      * @param alias	the alias of the certificate
-     * @since 8.2.0
+     * @since 9.0.0
      */
     public void setEncryptionCertificate(final String alias) {
         keyStoreRefs = List.of(new KeystoreAlias(alias, null));
@@ -100,7 +100,7 @@ public class EncryptionConfig implements IEncryptionConfiguration, Serializable 
      * Sets the reference(s) to the keypair(s) managed by the <i>Certificate Manager</i> to be used for decryption.
      *
      * @param keypairs	map of keypair references consisting of the alias and password to access the keypair
-     * @since 8.2.0
+     * @since 9.0.0
      */
 	public void setDecryptionKeypairs(final Map<String, String> keypairs) {
 		if (keypairs == null)
@@ -115,7 +115,7 @@ public class EncryptionConfig implements IEncryptionConfiguration, Serializable 
 	 *
 	 * @param alias		the alias the keypair is registered with in the <i>Certificate Manager</i>
 	 * @param password	the password to access the {@link KeyPair}
-	 * @since 8.2.0
+	 * @since 9.0.0
 	 */
 	public void addDecryptionKeypair(final String alias, final String password) {
 		if (Utils.isNullOrEmpty(alias))

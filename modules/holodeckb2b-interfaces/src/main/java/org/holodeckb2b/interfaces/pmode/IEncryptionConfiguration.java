@@ -40,7 +40,7 @@ public interface IEncryptionConfiguration {
      * @deprecated {@link #getDecryptionKeypairs()} and {@link #getEncryptionCertificate()} should be implemented and
      *  			used to provide/get the keypair(s)/certificate for decryption/encryption of messages.
      */
-	@Deprecated(since = "8.2.0", forRemoval = true)
+	@Deprecated(since = "9.0.0", forRemoval = true)
     default String getKeystoreAlias() {
 		throw new UnsupportedOperationException();
 	}
@@ -52,7 +52,7 @@ public interface IEncryptionConfiguration {
      * @return  The password to get access to the private key
      * @deprecated {@link #getDecryptionKeypairs()} should be implemented and used instead
      */
-    @Deprecated(since = "8.2.0", forRemoval = true)
+    @Deprecated(since = "9.0.0", forRemoval = true)
     default String getCertificatePassword() {
     	throw new UnsupportedOperationException();
     }
@@ -62,7 +62,7 @@ public interface IEncryptionConfiguration {
      * decryption of the messages are registered with the installed <i>Certificate Manager</i>.
      *
      * @return  A map of alias and password combinations that identify the key pairs to use for decryption.
-     * @since 8.2.0	for backwards compatibility a default implementation is provided that will return the
+     * @since 9.0.0	for backwards compatibility a default implementation is provided that will return the
 	 * 				single alias/password combination provided by the old methods.
      */
     default Map<String, String> getDecryptionKeypairs() {
@@ -74,7 +74,7 @@ public interface IEncryptionConfiguration {
      * Gets the alias of the <i>partner certificate</i> that should be used for the encryption of the message.
      *
      * @return  The alias that identifies the certificate to use for the encryption
-     * @since 8.2.0 for backwards compatibility a default implementation is provided that will return the alias provided
+     * @since 9.0.0 for backwards compatibility a default implementation is provided that will return the alias provided
      * 				by the old method.
      */
     default String getEncryptionCertificate() {

@@ -485,7 +485,7 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
 
     /**
      * {@inheritDoc}
-     * @since 8.2.0
+     * @since 9.0.0
      */
     @Override
 	public AxisService getService(final String name) {
@@ -499,7 +499,7 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
 
     /**
      * {@inheritDoc}
-     * @since 8.2.0
+     * @since 9.0.0
      */
     @Override
 	public TransportOutDescription getTransport(final String name) {
@@ -594,7 +594,7 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
 
     /**
      * {@inheritDoc}
-     * @since 8.2.0
+     * @since 9.0.0
      */
     @Override
     public MessageContext executeSendProcess(MessageContext msgContext, AxisService service) throws AxisFault {

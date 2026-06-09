@@ -46,7 +46,7 @@ class KeystoreAlias implements Serializable {
      *
      * @param name		name to set in the new instance
      * @param password  password to set in the new instance
-     * @since 8.2.0
+     * @since 9.0.0
      */
 	public KeystoreAlias(String name, String password) {
 		this.name = name;

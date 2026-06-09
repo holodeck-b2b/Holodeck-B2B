@@ -31,7 +31,7 @@ import org.apache.axis2.dispatchers.AbstractOperationDispatcher;
  * complete path part of the URL to find the operation instead of only the first name after the service name.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since 8.2.0
+ * @since 9.0.0
  */
 public class RequestURIOperationDispatcher extends AbstractOperationDispatcher {
 

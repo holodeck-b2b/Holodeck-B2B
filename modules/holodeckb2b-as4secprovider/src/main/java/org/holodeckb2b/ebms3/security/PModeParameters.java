@@ -64,7 +64,7 @@ public final class PModeParameters {
 	 * The Key Derivation parameter to specify the value of the <i>Info</i> element to include in the
 	 * <code>HKDFParams</code>.
 	 *
-	 * @since 8.2.0
+	 * @since 9.0.0
 	 */
 	public static final String	HKDF_CTX_INFO = "ContextInfo";
 }

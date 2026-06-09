@@ -210,7 +210,7 @@ public class HolodeckB2BCoreInterface {
      *
      * @param name	the requested service's name
      * @return 		the active Axis2 service if it exists in this Holodeck B2B instance,<br><code>null</code> otherwise
-     * @since 8.2.0
+     * @since 9.0.0
      */
     public static AxisService getService(final String name) {
     	assertInitialized();
@@ -223,7 +223,7 @@ public class HolodeckB2BCoreInterface {
      * @param name	the requested transport sender's name
      * @return 		the transport sender configuration if it exists in this Holodeck B2B instance,<br>
      * 				<code>null</code> otherwise
-     * @since 8.2.0
+     * @since 9.0.0
      */
     public static TransportOutDescription getTransport(final String name) {
     	assertInitialized();
@@ -304,7 +304,7 @@ public class HolodeckB2BCoreInterface {
      * 			an errors occurs during the processing of the message or on the transport level. It depends on the
      * 			configured transport sender whether transport protocol errors, e.g. HTTP non 2xx status codes, are
      * 			reported as AxisFaults or in the returned message context.
-     * @since 8.2.0
+     * @since 9.0.0
      */
     public static MessageContext executeSendProcess(MessageContext msgContext) throws AxisFault {
     	return executeSendProcess(msgContext, null);
@@ -328,7 +328,7 @@ public class HolodeckB2BCoreInterface {
      * 			an errors occurs during the processing of the message or on the transport level. It depends on the
      * 			configured transport sender whether transport protocol errors, e.g. HTTP non 2xx status codes, are
      * 			reported as AxisFaults or in the returned message context.
-     * @since 8.2.0
+     * @since 9.0.0
      */
     public static MessageContext executeSendProcess(MessageContext msgContext, AxisService service) throws AxisFault {
 	    assertInitialized();

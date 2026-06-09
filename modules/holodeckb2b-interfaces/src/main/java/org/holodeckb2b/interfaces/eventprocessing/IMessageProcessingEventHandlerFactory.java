@@ -51,7 +51,7 @@ public interface IMessageProcessingEventHandlerFactory {
      * Is called by the Holodeck B2B Core when the factory is no longer needed. This method should be used by
      * implementations to release any resources it holds.
      *
-     * @since 8.2.0
+     * @since 9.0.0
      */
     default void shutdown() {};
 }

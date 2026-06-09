@@ -52,7 +52,7 @@ import org.bouncycastle.jsse.provider.BouncyCastleJsseProvider;
  * expected data on calls.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since 8.2.0
+ * @since 9.0.0
  */
 public class MockJSSEProvider extends Provider {
 	private final Service 	SSLCTX_SVC;

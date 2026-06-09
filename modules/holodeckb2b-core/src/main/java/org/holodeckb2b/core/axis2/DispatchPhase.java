@@ -54,7 +54,7 @@ import org.holodeckb2b.commons.util.Utils;
  * "message type" and request methods.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
- * @since 8.2.0
+ * @since 9.0.0
  */
 public class DispatchPhase extends Phase {
 	private static final Logger log = LogManager.getLogger();

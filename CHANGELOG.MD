@@ -2,15 +2,14 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## 8.2.0
+## 9.0.0
 #####
 ### Added
 * Support for automatic downloading of CRLs from the CRL distribution point indicated in the certificate
 * Support for the _X25519 key agreement algorithm_ as specified in [RFC 7748](https://tools.ietf.org/html/rfc7748)
 * Support for the _HMAC-based Extract-and-Expand Key Derivation Function_ (HKDF) as specified in [RFC 5869](https://tools.ietf.org/html/rfc5869)
 * Support for _PUT_ and _DELETE_ http methods for REST based services. Operations can be selected based on request method
-* Services and operations can be bound to specific transports (service level only) and transport methods
-* `org.holodeckb2b.common.axis2.BinaryFormatter` message formatter to send binary data as the message content
+* Services can be bound to specific transports and/or transport methods
 * `getService(String)` to public Holodeck B2B Core interface to get meta-data of a configured service
 * `getTransport(String)` to public Holodeck B2B Core interface to get meta-data of a configured transport
 * `executeSendProcess(MessageContext)` and `executeSendProcess(MessageContext, AxisService)` methods to public Holodeck B2B 
@@ -28,6 +27,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Server startup is now aborted when one of the configured transports for receiving messages cannot be started
 * Improved logging of errors that prevented Holodeck B2B to start 
 * Generalised the HTTP transport sender so it can be used to send other information than Message Units
+* HTTP transport classes moved to the `org.holodeckb2b.core.transport.http` package
 * Moved `getFromMessageContext()` from `org.holodeckb2b.core.MessageProcessingContext` to 
   `org.holodeckb2b.interfaces.core.IMessageProcessingContext`
 * Moved `TLSCertificateTrustManager` from `org.holodeckb2b.core.axis2` to `org.holodeckb2b.interfaces.security.trust` package
@@ -38,7 +38,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Revocation check fails on superseded certificates [#161](https://github.com/holodeck-b2b/Holodeck-B2B/issues/161) (thanks to @BernhardK91 for contributing to this fix)
 
 ### Deprecated
+* `org.holodeckb2b.common.axis2.NOPMessageBuilder`. Use the `BinaryMessageBuilder` from the [Axis2 Binary Message Utils](https://github.com/holodeck-b2b/axis2-binary) instead
 * Methods `getKeystoreAlias()` and `getCertificatePassword()` in `org.holodeckb2b.interfaces.pmode.IEncryptionConfiguration`
+
 
 ## 8.1.0
 ##### 2025-12-29
