@@ -53,6 +53,7 @@
 		<dependency>
 			<groupId>org.apache.axis2</groupId>
 			<artifactId>axis2-transport-http</artifactId>
+			<version>${axis2-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.cache</groupId>
@@ -89,6 +90,12 @@
 	        <groupId>org.junit.vintage</groupId>
 	        <artifactId>junit-vintage-engine</artifactId>
 	        <scope>test</scope>
+	    </dependency>
+	    <dependency>
+	    	<groupId>org.holodeckb2b.axis2</groupId>
+	    	<artifactId>axis2-binary</artifactId>
+			<version>1.0.0</version>
+			<scope>test</scope>
 	    </dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>

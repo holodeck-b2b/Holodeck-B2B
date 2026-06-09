@@ -96,7 +96,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-		<hb2b-utils-version>2.1.0</hb2b-utils-version>
+		<hb2b-utils-version>3.0.0</hb2b-utils-version>
 		<axis2-version>1.8.2</axis2-version>
 		<axiom-version>1.4.0</axiom-version>
 		<bc-version>1.83</bc-version>
@@ -190,16 +190,6 @@
 				</exclusions>
 			</dependency>
 			<dependency>
-				<groupId>org.apache.axis2</groupId>
-				<artifactId>axis2-saaj</artifactId>
-				<version>${axis2-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.axis2</groupId>
-				<artifactId>axis2-transport-http</artifactId>
-				<version>${axis2-version}</version>
-			</dependency>
-			<dependency>
 				<groupId>org.apache.ws.commons.axiom</groupId>
 				<artifactId>axiom-api</artifactId>
 				<version>${axiom-version}</version>
@@ -290,7 +280,7 @@
 			<dependency>
 				<groupId>com.sun.activation</groupId>
 				<artifactId>jakarta.activation</artifactId>
-				<version>1.2.1</version>
+				<version>1.2.2</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>

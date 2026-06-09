@@ -10,6 +10,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Support for the _HMAC-based Extract-and-Expand Key Derivation Function_ (HKDF) as specified in [RFC 5869](https://tools.ietf.org/html/rfc5869)
 * Support for _PUT_ and _DELETE_ http methods for REST based services. Operations can be selected based on request method
 * Services and operations can be bound to specific transports (service level only) and transport methods
+* `org.holodeckb2b.common.axis2.BinaryFormatter` message formatter to send binary data as the message content
 * `getService(String)` to public Holodeck B2B Core interface to get meta-data of a configured service
 * `getTransport(String)` to public Holodeck B2B Core interface to get meta-data of a configured transport
 * `executeSendProcess(MessageContext)` and `executeSendProcess(MessageContext, AxisService)` methods to public Holodeck B2B 
