@@ -119,13 +119,15 @@
     <phaseOrder type="InFlow">
         <phase name="Transport"/>
         <phase name="Addressing"/>
-        <phase name="Dispatch" class="org.apache.axis2.engine.DispatchPhase">
-            <handler name="RequestURIBasedDispatcher"
-                class="org.apache.axis2.dispatchers.RequestURIBasedDispatcher"/>
+        <phase name="Dispatch" class="org.holodeckb2b.core.axis2.DispatchPhase">
+            <handler name="RequestURIServiceDispatcher"
+                class="org.apache.axis2.dispatchers.RequestURIBasedServiceDispatcher"/>
             <handler name="SOAPActionBasedDispatcher"
                 class="org.apache.axis2.dispatchers.SOAPActionBasedDispatcher"/>
             <handler name="RequestURIOperationDispatcher"
-                class="org.apache.axis2.dispatchers.RequestURIOperationDispatcher"/>
+                class="org.holodeckb2b.core.axis2.RequestURIOperationDispatcher"/>
+            <handler name="RequestMethodOperationDispatcher"
+                class="org.holodeckb2b.core.axis2.RequestMethodOperationDispatcher"/>
             <handler name="SOAPMessageBodyBasedDispatcher"
                 class="org.apache.axis2.dispatchers.SOAPMessageBodyBasedDispatcher"/>
             <handler name="HTTPLocationBasedDispatcher"

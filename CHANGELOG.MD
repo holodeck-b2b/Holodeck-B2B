@@ -11,6 +11,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * `getService()` to public Holodeck B2B Core interface 
 * `getTransportSender()` to public Holodeck B2B Core interface 
 * `createServiceClient()` to public Holodeck B2B Core interface
+* Support for _PUT_ and _DELETE_ http methods for REST based services. Operations can be selected based on request method
+* Services and operations can be bound to specific transports (service level only) and transport methods
 * `addToMessageContext()` and `setParentContext()` to `org.holodeckb2b.interfaces.core.IMessageProcessingContext` so the message 
   processing context can be copied to the response message context
 * Functional tests for security and trust components (thanks to @ckaaber)

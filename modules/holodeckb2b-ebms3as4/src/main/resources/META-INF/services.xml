@@ -24,8 +24,8 @@
      <messageReceiver class="org.holodeckb2b.common.handlers.DefaultMessageReceiver"/>
   </operation>
 
+  <parameter name="messageType" locked="xsd:true">soap12</parameter>
   <parameter name="supportSingleOperation" locked="xsd:true">true</parameter>
-  <parameter name="disableREST" locked="xsd:true">true</parameter>
 
   <module ref="holodeckb2b-coreprocessing"/>
   <module ref="holodeckb2b-ebms3as4"/>
