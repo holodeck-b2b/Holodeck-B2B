@@ -16,6 +16,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   Core interface which can be used to trigger the message sending process
 * `addToMessageContext()` and `setParentContext()` to `org.holodeckb2b.interfaces.core.IMessageProcessingContext` so the message 
   processing context can be copied to the response message context
+* `shutdown()` method to `IMessageProcessingEventHandlerFactory` to release any held resources
 * Functional tests for security and trust components (thanks to @ckaaber)
 
 ### Changed

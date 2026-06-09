@@ -46,4 +46,12 @@ public interface IMessageProcessingEventHandlerFactory {
      * @throws MessageProccesingEventHandlingException When the factory is unable to to create event handlers.
      */
     public IMessageProcessingEventHandler createHandler() throws MessageProccesingEventHandlingException;
+
+    /**
+     * Is called by the Holodeck B2B Core when the factory is no longer needed. This method should be used by
+     * implementations to release any resources it holds.
+     *
+     * @since 8.2.0
+     */
+    default void shutdown() {};
 }
