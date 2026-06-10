@@ -25,43 +25,48 @@ import javax.swing.table.TableModel;
 import org.holodeckb2b.common.messagemodel.MessageUnit;
 import org.holodeckb2b.common.util.MessageUnitUtils;
 import org.holodeckb2b.commons.util.Utils;
+import org.holodeckb2b.interfaces.messagemodel.Direction;
+import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
+import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 import org.holodeckb2b.ui.app.gui.views.MessageStatusPanel;
 
 /**
  * Is the data model object for the message status panel. It is a list of <i>Message Units</i> that have the requested
- * <i>MessageId</i> since multiple instances can exists either due to resending or applications not satisfying the 
- * uniqueness constraint. The model is implemented as a {@link TableModel} so it can be directly used in {@link 
- * MessageStatusPanel}. 
- * 
+ * <i>MessageId</i> since multiple instances can exists either due to resending or applications not satisfying the
+ * uniqueness constraint. The model is implemented as a {@link TableModel} so it can be directly used in {@link
+ * MessageStatusPanel}.
+ *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 5.0.0
+ * @since 9.0.0 Details of the processing state are shown
  */
 public class MessageUnitStatesData extends AbstractTableModel {
 
 	/**
-	 * The columns of the message unit list  
+	 * The columns of the message unit list
 	 */
-	private static final String[] MU_LIST_COLUMNS = new String[] {"Message Unit Type", 
-																  "Direction", 
+	private static final String[] MU_LIST_COLUMNS = new String[] {"Message Unit Type",
+																  "Direction",
 																  "Timestamp"
 																  };
 	/**
-	 * The columns of the processing states list  
+	 * The columns of the processing states list
 	 */
-	private static final String[] STATES_LIST_COLUMNS = new String[] {"Processing state", 
-																	  "Start time"
+	private static final String[] STATES_LIST_COLUMNS = new String[] {"Processing state",
+																	  "Start time",
+																	  "Details"
 																	 };
-	
+
 	/**
 	 * The message unit meta-data to show
 	 */
-	private MessageUnit[] msgUnits;	
+	private MessageUnit[] msgUnits;
 
 	public void setMessageUnits(final MessageUnit[] msgUnitData) {
 		this.msgUnits = msgUnitData;
 		fireTableDataChanged();
 	}
-	
+
 	@Override
 	public int getRowCount() {
 		return msgUnits != null ? msgUnits.length : 0;
@@ -76,38 +81,98 @@ public class MessageUnitStatesData extends AbstractTableModel {
 	public String getColumnName(int col) {
         return MU_LIST_COLUMNS[col];
     }
-    
+
 	@Override
 	public Object getValueAt(int rowIndex, int columnIndex) {
 		final MessageUnit m = msgUnits[rowIndex];
 		switch (columnIndex) {
-		case 0 : 
+		case 0 :
 			return MessageUnitUtils.getMessageUnitName(m);
 		case 1 :
 			return m.getDirection().name();
-		case 2 :  
+		case 2 :
 			return Utils.toXMLDateTime(m.getTimestamp());
 		}
 		throw new IllegalArgumentException("Unknown column requested");
-	}    
-	
+	}
+
     /**
      * Gets that list of processing states for the selected message unit or an empty list if the given index does not
      * exists.
-     * 
+     *
      * @param i		The currently selected message unit
      * @return		{@link TableModel} with the processing states for displaying
      */
     public DefaultTableModel getStatesModel(final int i) {
     	if (0 <= i && msgUnits != null && i < msgUnits.length)
     		return new DefaultTableModel(msgUnits[i].getProcessingStates().parallelStream()
-    																  .map(s -> new String[] { s.getState().name(), 	
-    																		  Utils.toXMLDateTime(s.getStartTime())})
-    																  .collect(Collectors.toList()).toArray(new Object[][] {})    																 
+    																  .map(s -> new String[] { s.getState().name(),
+    																		  Utils.toXMLDateTime(s.getStartTime()),
+    																		  s.getDescription()})
+    																  .collect(Collectors.toList()).toArray(new Object[][] {})
     									, STATES_LIST_COLUMNS);
     	else
     		return new DefaultTableModel(new String[][] {}, STATES_LIST_COLUMNS);
     }
-    
+
+    /**
+     * Gets the meta-data of the message unit at the given row in the result set.
+     *
+     * @param i		The row in the result set
+     * @return		The meta-data of the message unit
+     * @since 9.0.0
+     */
+    public MessageUnit getMessageUnit(final int i) {
+		return msgUnits[i];
+	}
+
+    /**
+     * Checks if the message unit at the given row in the result set can be redelivered. This is the case if the message
+     * unit has at some time been in the {@link ProcessingState#READY_FOR_DELIVERY} state.
+     *
+     * @param i		the row in the result set to check
+     * @return	<code>true</code> if the message unit at the given row can be redelivered, <code>false</code> if not
+     * @since 9.0.0
+     */
+    public boolean canRedeliver(final int i) {
+    	return msgUnits != null && 0 <= i && i < msgUnits.length &&
+    			msgUnits[i].getProcessingStates().parallelStream()
+    							.anyMatch(s -> ProcessingState.READY_FOR_DELIVERY == s.getState());
+    }
+
+    /**
+     * Checks if the message unit at the given row in the result set can be resend. This is the case if the message
+     * unit is an outgoing User Message that is in a <i>final</i> processing state.
+     *
+     * @param i		the row in the result set to check
+     * @return	<code>true</code> if the message unit at the given row can be resend, <code>false</code> if not
+     * @since 9.0.0
+     */
+    public boolean canResend(final int i) {
+    	if (msgUnits == null || 0 > i || i >= msgUnits.length)
+			return false;
+    	MessageUnit mu = msgUnits[i];
+    	return (mu instanceof IUserMessage) && mu.getDirection() == Direction.OUT &&
+    				mu.getCurrentProcessingState().getState().isFinal();
+    }
+
+    /**
+     * Checks if the processing of the message unit at the given row in the result set can be resumed. This is the case
+     * if the message unit is an outgoing User Message that is in {@link ProcessingState#SUSPENDED}.
+     *
+     *
+     * @param i		the row in the result set to check
+     * @return	<code>true</code> if the processing of the message unit's at the given row can be resumed,
+     * 			<code>false</code> if not
+     * @since 9.0.0
+     */
+    public boolean canResume(final int i) {
+    	if (msgUnits == null || 0 > i || i >= msgUnits.length)
+			return false;
+    	MessageUnit mu = msgUnits[i];
+    	return (mu instanceof IUserMessage) && (mu.getDirection() == Direction.OUT) &&
+    			mu.getCurrentProcessingState().getState() == ProcessingState.SUSPENDED;
+    }
+
 
 }

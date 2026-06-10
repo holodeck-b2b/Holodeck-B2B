@@ -24,6 +24,7 @@ import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.pmode.IPMode;
 import org.holodeckb2b.interfaces.security.SecurityProcessingException;
 import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
+import org.holodeckb2b.interfaces.storage.IUserMessageEntity;
 import org.holodeckb2b.interfaces.storage.StorageException;
 import org.holodeckb2b.security.trust.DefaultCertManager;
 import org.holodeckb2b.storage.metadata.DefaultMetadataStorageProvider;
@@ -133,5 +134,41 @@ public class CoreInfoImpl implements CoreInfo {
 		} else
 			// For other message units we can simply return a complete copy
 			return MessageUnit.copyOf(entity);
+	}
+
+	@Override
+	public void resumeProcessing(String coreId) throws RemoteException {
+		try {
+			HolodeckB2BCoreInterface.resumeProcessing((IUserMessageEntity)
+											HolodeckB2BCoreInterface.getQueryManager().getMessageUnitWithCoreId(coreId));
+		} catch (Exception resumeFailed) {
+			log.error("Could not resume processing for CoreId {}! Error: {}", coreId,
+						Utils.getExceptionTrace(resumeFailed));
+			throw new RemoteException("Error resuming processing", resumeFailed);
+		}
+	}
+
+	@Override
+	public void resend(String coreId) throws RemoteException {
+		try {
+			HolodeckB2BCoreInterface.resend((IUserMessageEntity)
+											HolodeckB2BCoreInterface.getQueryManager().getMessageUnitWithCoreId(coreId));
+		} catch (Exception resendFailed) {
+			log.error("Could not resend User Message with CoreId {}! Error: {}", coreId,
+						Utils.getExceptionTrace(resendFailed));
+			throw new RemoteException("Error resending User Message", resendFailed);
+		}
+	}
+
+	@Override
+	public void redeliver(String coreId) throws RemoteException {
+		try {
+			HolodeckB2BCoreInterface.getDeliveryManager().deliver(
+											HolodeckB2BCoreInterface.getQueryManager().getMessageUnitWithCoreId(coreId));
+		} catch (Exception redeliverFailed) {
+			log.error("Could not (trigger) deliver of message unit with CoreId {}! Error: {}", coreId,
+						Utils.getExceptionTrace(redeliverFailed));
+			throw new RemoteException("Error redelivering", redeliverFailed);
+		}
 	}
 }

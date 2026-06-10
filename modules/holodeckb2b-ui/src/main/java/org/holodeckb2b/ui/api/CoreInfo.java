@@ -24,13 +24,14 @@ import java.util.Map;
 
 import org.holodeckb2b.common.messagemodel.MessageUnit;
 import org.holodeckb2b.common.pmode.PMode;
+import org.holodeckb2b.interfaces.core.HolodeckB2BCoreInterface;
 import org.holodeckb2b.interfaces.messagemodel.IMessageUnit;
 
 /**
  * Defines the interface of the RMI server that this extension requires for the default User Interface to retrieve
  * information from the gateway.
  * <p>NOTE: The default UI is designed for use with the default Holodeck B2B implementation and therefore does not
- * support custom functionality provided by custome extensions that may have been added to an instance.
+ * support custom functionality provided by custom extensions that may have been added to an instance.
  *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 5.0.0
@@ -96,4 +97,33 @@ public interface CoreInfo extends Remote {
 	 * @throws RemoteException When an error occurs in retrieving the meta-data of the message units
 	 */
 	MessageUnit[] getMessageUnitLog(final Date upto, final int max) throws RemoteException;
+
+	/**
+	 * Resumes the processing of the User Message with the specified CoreId.
+	 *
+	 * @param coreId	The CoreId of the User Message which processing should be resumed
+	 * @throws RemoteException	When an error occurs while resuming processing
+	 * @see HolodeckB2BCoreInterface#resumeProcessing(org.holodeckb2b.interfaces.storage.IUserMessageEntity)
+	 * @since 9.0.0
+	 */
+	void resumeProcessing(final String coreId) throws RemoteException;
+
+	/**
+	 * Resends the User Message unit with the specified CoreId.
+	 *
+	 * @param coreId	The CoreId of the User Message that should be resend
+	 * @throws RemoteException	When an error occurs while triggering the resend of the User Message
+	 * @see HolodeckB2BCoreInterface#resend(org.holodeckb2b.interfaces.storage.IUserMessageEntity)
+	 * @since 9.0.0
+	 */
+	void resend(final String coreId) throws RemoteException;
+
+	/**
+	 * Redelivers the message unit with the specified CoreId.
+	 *
+	 * @param coreId	The CoreId of the message unit that should be redelivered
+	 * @throws RemoteException	When an error occurs while triggering the or redelivering the message unit
+	 * @since 9.0.0
+	 */
+	void redeliver(final String coreId) throws RemoteException;
 }

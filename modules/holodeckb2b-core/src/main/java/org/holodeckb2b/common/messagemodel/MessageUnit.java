@@ -30,6 +30,7 @@ import org.holodeckb2b.interfaces.messagemodel.IReceipt;
 import org.holodeckb2b.interfaces.messagemodel.IUserMessage;
 import org.holodeckb2b.interfaces.processingmodel.IMessageUnitProcessingState;
 import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
+import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
 
 /**
  * Is an in memory only implementation of {@link IMessageUnit} to temporarily store the generic information on message
@@ -41,6 +42,7 @@ import org.holodeckb2b.interfaces.processingmodel.ProcessingState;
 public abstract class MessageUnit implements IMessageUnit, Serializable {
 	private static final long serialVersionUID = -6487452438799675994L;
 
+	private String  coreId;
 	private Direction  direction;
     private String  messageId;
     private Date    timestamp;
@@ -83,6 +85,9 @@ public abstract class MessageUnit implements IMessageUnit, Serializable {
         if (sourceMessageUnit == null)
             return;
 
+        if (sourceMessageUnit instanceof IMessageUnitEntity)
+        	this.coreId = ((IMessageUnitEntity) sourceMessageUnit).getCoreId();
+
         this.direction = sourceMessageUnit.getDirection();
         this.messageId = sourceMessageUnit.getMessageId();
         this.timestamp = sourceMessageUnit.getTimestamp();
@@ -94,6 +99,17 @@ public abstract class MessageUnit implements IMessageUnit, Serializable {
                 setProcessingState(state);
         }
     }
+
+	/**
+	 * Gets the CoreId of this message unit. Note that the CoreId is only available if this instance represents an
+	 * already persisted message unit that has been assigned a CoreId.
+	 *
+	 * @return  The CoreId if available
+	 * @since 9.0.0
+	 */
+	public String getCoreId() {
+		return coreId;
+	}
 
     /**
      * Gets the direction this message unit is flowing, i.e. whether it is sent by Holodeck B2B or received.

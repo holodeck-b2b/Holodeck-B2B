@@ -50,7 +50,7 @@ import org.holodeckb2b.ui.app.gui.models.MessageUnitStatesData;
 
 /**
  * Is the JPanel for querying and displaying the processing states of a message unit.
- * 
+ *
  * @author Sander Fieten (sander at holodeck-b2b.org)
  * @since 5.0.0
  */
@@ -65,6 +65,9 @@ public class MessageStatusPanel extends JPanel implements TableModelListener, Do
 	private JLabel resultLbl;
 
 	private JScrollPane statesList;
+	private JButton redeliverButton;
+	private JButton resendButton;
+	private JButton resumeButton;
 
 	private final static String NO_RESULTS = "No message units found with this MessageId.";
 	private final static String MULTI_RESULTS = "Multiple message units found with this MessageId. Please select one to show states.";
@@ -128,7 +131,7 @@ public class MessageStatusPanel extends JPanel implements TableModelListener, Do
 		separator.setFocusTraversalKeysEnabled(false);
 		GridBagConstraints gbc_separator = new GridBagConstraints();
 		gbc_separator.weighty = 0.1;
-		gbc_separator.gridwidth = 2;
+		gbc_separator.gridwidth = 4;
 		gbc_separator.gridx = 0;
 		gbc_separator.gridy = 0;
 		gbc_separator.anchor = GridBagConstraints.NORTH;
@@ -148,18 +151,19 @@ public class MessageStatusPanel extends JPanel implements TableModelListener, Do
 		msgUnitsTable = new JTable(controller.getMessageUnitStatus());
 		msgUnitsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		msgUnitsTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-		msgUnitsTable.setFillsViewportHeight(true);	
+		msgUnitsTable.setFillsViewportHeight(true);
 		msgUnitList = new JScrollPane(msgUnitsTable);
 		GridBagConstraints gbc_msgUnitList = new GridBagConstraints();
 		gbc_msgUnitList.insets = new Insets(0, 0, 0, 15);
 		gbc_msgUnitList.fill = GridBagConstraints.BOTH;
+		gbc_msgUnitList.gridheight = 2;
 		gbc_msgUnitList.weightx = 1.0;
 		gbc_msgUnitList.weighty = 5.0;
 		gbc_msgUnitList.anchor = GridBagConstraints.NORTHWEST;
 		gbc_msgUnitList.gridx = 0;
 		gbc_msgUnitList.gridy = 2;
 		resultPanel.add(msgUnitList, gbc_msgUnitList);
-		
+
 		statesTable = new JTable(controller.getMessageUnitStatus().getStatesModel(0));
 		statesTable.setEnabled(false);
 		statesTable.setFillsViewportHeight(true);
@@ -168,18 +172,71 @@ public class MessageStatusPanel extends JPanel implements TableModelListener, Do
 		GridBagConstraints gbc_statesList = new GridBagConstraints();
 		gbc_statesList.weightx = 1.0;
 		gbc_statesList.weighty = 4.0;
+		gbc_statesList.gridwidth = 3;
 		gbc_statesList.anchor = GridBagConstraints.NORTHEAST;
 		gbc_statesList.fill = GridBagConstraints.BOTH;
 		gbc_statesList.gridx = 1;
 		gbc_statesList.gridy = 2;
 		resultPanel.add(statesList, gbc_statesList);
-		
+
+		redeliverButton = new JButton("Redeliver");
+		redeliverButton.setEnabled(false);
+		GridBagConstraints gbc_redeliverButton = new GridBagConstraints();
+		gbc_redeliverButton.anchor = GridBagConstraints.NORTHWEST;
+		gbc_redeliverButton.gridx = 1;
+		resultPanel.add(redeliverButton, gbc_redeliverButton);
+		redeliverButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+				controller.redeliverMessage(controller.getMessageUnitStatus()
+														.getMessageUnit(msgUnitsTable.getSelectedRow()).getCoreId());
+				setCursor(null);
+			}
+		});
+
+		resendButton = new JButton("Resend");
+		resendButton.setEnabled(false);
+		GridBagConstraints gbc_resendButton = new GridBagConstraints();
+		gbc_resendButton.anchor = GridBagConstraints.NORTHWEST;
+		gbc_resendButton.gridx = 2;
+		resultPanel.add(resendButton, gbc_resendButton);
+		resendButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+				controller.resendUserMessage(controller.getMessageUnitStatus()
+														.getMessageUnit(msgUnitsTable.getSelectedRow()).getCoreId());
+				setCursor(null);
+			}
+		});
+
+		resumeButton = new JButton("Resume");
+		resumeButton.setEnabled(false);
+		GridBagConstraints gbc_resumeButton = new GridBagConstraints();
+		gbc_resumeButton.anchor = GridBagConstraints.NORTHWEST;
+		gbc_resumeButton.gridx = 3;
+		resultPanel.add(resumeButton, gbc_resumeButton);
+		resumeButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+				controller.resumeProcessing(controller.getMessageUnitStatus()
+														.getMessageUnit(msgUnitsTable.getSelectedRow()).getCoreId());
+				setCursor(null);
+			}
+		});
+
 		msgUnitsTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 			@Override
 			public void valueChanged(ListSelectionEvent event) {
 				if (event.getValueIsAdjusting())
 					return;
-				statesTable.setModel(controller.getMessageUnitStatus().getStatesModel(msgUnitsTable.getSelectedRow()));
+				int row = msgUnitsTable.getSelectedRow();
+				statesTable.setModel(controller.getMessageUnitStatus().getStatesModel(row));
+				redeliverButton.setEnabled(controller.getMessageUnitStatus().canRedeliver(row));
+				resendButton.setEnabled(controller.getMessageUnitStatus().canResend(row));
+				resumeButton.setEnabled(controller.getMessageUnitStatus().canResume(row));
 				ViewUtils.setColumnAndTableSize(statesTable);
 			}
 		});
@@ -188,18 +245,19 @@ public class MessageStatusPanel extends JPanel implements TableModelListener, Do
 	@Override
 	public void tableChanged(TableModelEvent e) {
 		MessageUnitStatesData result = controller.getMessageUnitStatus();
-		
+
 		// Clear the states table
 		statesTable.setModel(result.getStatesModel(-1));
 		if (result.getRowCount() == 0) {
 			// No message unit found with the given id, show only message
 			resultLbl.setText(NO_RESULTS);
 			resultLbl.setBackground(Color.ORANGE);
-		} else {			
-			if (result.getRowCount() == 1) {			
+		} else {
+			if (result.getRowCount() == 1) {
 				// Single result, direct display list of statuses
 				resultLbl.setText("");
-				statesTable.setModel(result.getStatesModel(0));
+				msgUnitsTable.setRowSelectionInterval(0, 0);
+//				statesTable.setModel(result.getStatesModel(0));
 			} else {
 				// Multiple result, enable selection of a message unit
 				resultLbl.setText(MULTI_RESULTS);
@@ -209,7 +267,7 @@ public class MessageStatusPanel extends JPanel implements TableModelListener, Do
 			ViewUtils.setColumnAndTableSize(statesTable);
 		}
 	}
-	
+
 	@Override
 	public void insertUpdate(DocumentEvent e) {
 		checkMessageIdAvailable();
