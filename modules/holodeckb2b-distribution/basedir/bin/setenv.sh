@@ -13,7 +13,7 @@
 
 # if JAVA_HOME is not set we're not happy
 if [ -z "$JAVA_HOME" ]; then
-  echo "You must set the JAVA_HOME variable before starting the Holodeck B2B Server."
+  echo "You must set the JAVA_HOME variable before starting the Holodeck B2B Server." >&2
   exit 1
 fi
 
