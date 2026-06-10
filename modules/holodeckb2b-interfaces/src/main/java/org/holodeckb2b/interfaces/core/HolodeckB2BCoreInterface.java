@@ -277,6 +277,26 @@ public class HolodeckB2BCoreInterface {
     }
 
     /**
+     * Sends the given User Message once more even if the send process has already been completed and the message unit
+     * is already in a final processing state.
+     * <p>
+     * Note that when calling this method the User Message is just send once to the receiving MSH but will not be
+     * retried if sending failes even if retries are specified as part of the Reception Awareness Feature.<br/>
+     * Effect of resending the User Message will also be that the resulting Receipt or Error Message will be notified to
+     * the back-end application [if notification is configured in the P-Mode].
+     *
+     * @param userMessage	to be resend
+     * @throws StorageException		when an error occurs updating the processing state of the message unit
+     * @throws IllegalArgumentException when the given User Message is an incoming User Message or is not in a final
+     * 									processing state
+     * @since 9.0.0
+     */
+    public static void resend(IUserMessageEntity userMessage) throws StorageException, IllegalArgumentException {
+    	assertInitialized();
+    	coreImplementation.resend(userMessage);
+    }
+
+    /**
      * Gets the active <i>Delivery Manager</i> of this Holodeck B2B instance.
      *
      * @return the active {@link IDeliveryManager} implementation

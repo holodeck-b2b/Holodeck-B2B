@@ -23,7 +23,7 @@ package org.holodeckb2b.interfaces.processingmodel;
  * @since  3.0.0
  */
 public enum ProcessingState {
-	
+
     /**
      * Is the first processing state of message units that are submitted to the Holodeck B2B Core for sending. Therefore
      * only applies to <i>User Message</i> and <i>Pull Request</i> message units as only these can be submitted to the
@@ -112,6 +112,15 @@ public enum ProcessingState {
 	 * @since 7.1.0
 	 */
 	INTERRUPTED(false),
+
+	/**
+	 * This state is used to indicate that the send process of the User Message has been restarted after it has
+	 * previously been completed. A restarted send process will only try once to deliver the User Message again to the
+	 * receiver even if the retry function of the Reception Awareness feature is used.
+	 *
+	 * @since 9.0.0
+	 */
+	RESENT(false),
 
     /**
      * This final state indicates that a <i>User Message</i> message unit is successfully delivered either to the other

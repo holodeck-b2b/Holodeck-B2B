@@ -132,6 +132,11 @@ public interface IHolodeckB2BCore {
     void resumeProcessing(IUserMessageEntity userMessage) throws StorageException, IllegalArgumentException;
 
 	/**
+	 * See {@link HolodeckB2BCoreInterface#resend(IUserMessageEntity)}
+	 */
+    void resend(IUserMessageEntity userMessage) throws StorageException, IllegalArgumentException;
+
+	/**
 	 * See {@link HolodeckB2BCoreInterface#getDeliveryManager()}
 	 */
     IDeliveryManager getDeliveryManager();
