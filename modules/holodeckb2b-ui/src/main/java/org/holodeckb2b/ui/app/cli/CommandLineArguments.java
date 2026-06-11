@@ -33,43 +33,44 @@ public class CommandLineArguments {
 	 * whether the option is required (not really an option then ;-) ) and a short description used when printing help
 	 * instruction.
 	 */
-	static class Option {
+	enum Option {
+		PORT("-p", false, "The RMI port used by the Holodeck B2B instance"),
+		PMODE_ID("-id", true , "The identifier of the P-Mode to print"),
+		FORMAT("-format", false , "The level of details that should be included (simple [default] or detailed)"),
+		CERT_ALIAS("-alias", true , "The alias of the certificate to print"),
+		CERT_TYPE("-type", true , "The type of the certificate to print (private, partner or trusted)"),
+		MESSAGE_ID("-messageId", true , "The MessageId of the message unit"),
+		FROM("-from", false, "The time stamp from which to start listing the message units. Default current time"),
+		MAX("-max", false, "Max number of message units to list. Default 10"),
+		// Since 9.0.0
+		CORE_ID("-coredId", true, "The CoreId of the message unit");
+
 		String flag, description;
 		boolean isRequired;
 
-		Option(String f, boolean r, String d) {
-			this.flag = f;
-			this.isRequired = r;
-			this.description = d;
+		Option(String flag, boolean required, String description) {
+			this.flag = flag;
+			this.isRequired = required;
+			this.description = description;
 		}
 	}
-
-	final static Option PORT_OPTION = new Option("-p", false, "The RMI port used by the Holodeck B2B instance");
-
-	final static Option PRT_PMODE_ID = new Option("-id", true , "The identifier of the P-Mode to print");
-
-	final static Option FORMAT = new Option("-format", false , "The level of details that should be included (simple [default] or detailed)");
-
-	final static Option CERT_ALIAS = new Option("-alias", true , "The alias of the certificate to print");
-	final static Option CERT_TYPE = new Option("-type", true , "The type of the certificate to print (private, partner or trusted)");
-
-	final static Option MESSAGE_ID = new Option("-messageId", true , "The MessageId of the message unit");
-
-	final static Option FROM = new Option("-from", false, "The time stamp from which to start listing the message units. Default current time");
-	final static Option MAX = new Option("-max", false, "Max number of message units to list. Default 10");
 
 	/**
 	 * Enumeration of all actions that can be used as argument when invoking the app. Each command contains the name
 	 * of the command, the list of available options and a short description used for printing a help instruction.
 	 */
 	enum Action {
-		LIST_PMODES("listPModes", new Option[] { PORT_OPTION }, "Lists all loaded P-Modes"),
-		PRINT_PMODE("printPMode", new Option[] { PORT_OPTION, PRT_PMODE_ID } , "Prints the details of P-Mode with specified id"),
-		LIST_CERTS("listCerts", new Option[] { PORT_OPTION, CERT_TYPE, FORMAT }, "Lists all certificates of a specific type"),
-		PRINT_CERT("printCert", new Option[] { PORT_OPTION, CERT_ALIAS, CERT_TYPE } , "Prints the details of  a certificate"),
-		MSG_STATUS("msgStatus", new Option[] { PORT_OPTION, MESSAGE_ID } , "Gets the current processing state of a message unit"),
-		STATUS_LIST("statusList", new Option[] { PORT_OPTION, MESSAGE_ID } , "Lists of processing states a message unit was and is in"),
-		HISTORY("history", new Option[] { PORT_OPTION, FROM, MAX } , "Provides overview of message units in descending order of latest proc state's start time");
+		LIST_PMODES("listPModes", new Option[] { Option.PORT}, "Lists all loaded P-Modes"),
+		PRINT_PMODE("printPMode", new Option[] { Option.PORT, Option.PMODE_ID } , "Prints the details of P-Mode with specified id"),
+		LIST_CERTS("listCerts", new Option[] { Option.PORT, Option.CERT_TYPE, Option.FORMAT }, "Lists all certificates of a specific type"),
+		PRINT_CERT("printCert", new Option[] { Option.PORT, Option.CERT_ALIAS, Option.CERT_TYPE } , "Prints the details of  a certificate"),
+		MSG_STATUS("msgStatus", new Option[] { Option.PORT, Option.MESSAGE_ID } , "Gets the current processing state of a message unit"),
+		STATUS_LIST("statusList", new Option[] { Option.PORT, Option.MESSAGE_ID } , "Lists of processing states a message unit was and is in"),
+		HISTORY("history", new Option[] { Option.PORT, Option.FROM, Option.MAX } , "Provides overview of message units in descending order of latest proc state's start time"),
+		// Since 9.0.0
+		RESUME("resume", new Option[] { Option.PORT, Option.CORE_ID } , "Resume processing of a suspended outgoing User Message"),
+		RESEND("resend", new Option[] { Option.PORT, Option.CORE_ID } , "Resend a User Message"),
+		REDELIVER("redeliver", new Option[] { Option.PORT, Option.CORE_ID } , "Redeliver a receiver message unit to the back-end");
 
 		String   name;
 		Option[] options;
@@ -87,7 +88,7 @@ public class CommandLineArguments {
 	 * The requested action to execute and its parameter
 	 */
 	private Action				 curAction;
-	private Map<String, String>  parameters;
+	private Map<Option, String>  parameters;
 
 	/**
 	 * Parses the arguments provided to the current invocation of the application.
@@ -115,12 +116,12 @@ public class CommandLineArguments {
 					// Found a valid option of this command
 					o = curAction.options[j];
 			if (o != null)
-				parameters.put(o.flag, clArgs[++i]);
+				parameters.put(o, clArgs[++i]);
 		}
 		// Now check that all required options were provided
 		boolean arp = true;
 		for (int i = 0; i < curAction.options.length && arp; i++)
-			arp &= !curAction.options[i].isRequired || parameters.containsKey(curAction.options[i].flag);
+			arp &= !curAction.options[i].isRequired || parameters.containsKey(curAction.options[i]);
 		if (!arp)
 			throw new IllegalArgumentException("Not all required options for action " + curAction.name + "provided!");
 	}
@@ -141,7 +142,7 @@ public class CommandLineArguments {
 	 * @return The value for the action's parameter
 	 */
 	public String getParameter(final Option opt) {
-		return parameters.get(opt.flag);
+		return parameters.get(opt);
 	}
 
 	/**
