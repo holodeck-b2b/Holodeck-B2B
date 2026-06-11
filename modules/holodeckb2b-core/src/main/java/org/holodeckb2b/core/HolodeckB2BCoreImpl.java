@@ -567,20 +567,56 @@ public class HolodeckB2BCoreImpl implements IHolodeckB2BCore {
     		return;
     	}
 
-    	ProcessingState newState = PModeUtils.doesHolodeckB2BTrigger(PModeUtils.getLeg(userMessage)) ?
-    									ProcessingState.READY_TO_PUSH : ProcessingState.AWAITING_PULL;
-    	log.trace("Resume processing of User Message [msgId={}], set proc state to {}", userMessage.getMessageId(),
-    				newState.name());
-    	boolean resumed;
-    	try {
-    		resumed = getStorageManager().setProcessingState(userMessage, newState);
-    	} catch (AlreadyChangedException changed) {
-    		resumed = false;
-    	}
-    	if (resumed)
+    	if (restart(userMessage))
     		log.info("Processing of User Message [msgId={}] resumed", userMessage.getMessageId());
     	else
-    		log.info("Processing of User Message [msgId={}] already changed.", userMessage.getMessageId());
+    		log.info("Processing state of User Message [msgId={}] already changed.", userMessage.getMessageId());
+    }
+
+	/**
+	 * {@inheritDoc}
+	 * @since 9.0.0
+	 */
+    @Override
+    public void resend(IUserMessageEntity userMessage) throws StorageException, IllegalArgumentException {
+    	if (userMessage.getDirection() == Direction.IN) {
+    		log.warn("Illegal request to resume processing of received message unit [msgId={}]",
+    					userMessage.getMessageId());
+    		throw new IllegalArgumentException("Incoming message unit cannot be resend");
+    	}
+    	if (!userMessage.getCurrentProcessingState().getState().isFinal()) {
+    		log.warn("Resend not allowed as processing of User Message [msgId={}] has not yet finished (Current State = {})",
+					userMessage.getMessageId(), userMessage.getCurrentProcessingState().getState());
+    		throw new IllegalArgumentException("Resend not allowed as processing of User Message has not yet finished");
+    	}
+
+		if (restart(userMessage))
+			log.info("Resend of User Message [msgId={}] started", userMessage.getMessageId());
+		else
+    		log.info("Processing state of User Message [msgId={}] already changed.", userMessage.getMessageId());
+    }
+
+    /**
+     * Helper method to restart the send process of a User Message. This simply sets the processing state of the
+	 * User Message to <code>ProcessingState.READY_TO_PUSH</code> or <code>ProcessingState.AWAITING_PULL</code>
+	 * depending on the message exchange pattern used.
+     *
+     * @param userMessage	the User Message to be restarted
+     * @return	<code>true</code> if the send process for the User Message has been restarted,
+     * 			<code>false</code> if the processing state of the User Message has already been changed
+     * @throws StorageException
+     * @since 9.0.0
+     */
+    private boolean restart(IUserMessageEntity userMessage) throws StorageException {
+    	ProcessingState newState = PModeUtils.doesHolodeckB2BTrigger(PModeUtils.getLeg(userMessage)) ?
+														ProcessingState.READY_TO_PUSH : ProcessingState.AWAITING_PULL;
+    	log.trace("Restarting send process of User Message [msgId={}]. Set proc state to {}",
+    				userMessage.getMessageId(), newState.name());
+    	try {
+    		return getStorageManager().setProcessingState(userMessage, newState);
+    	} catch (AlreadyChangedException changed) {
+    		return false;
+    	}
     }
 
     /**
