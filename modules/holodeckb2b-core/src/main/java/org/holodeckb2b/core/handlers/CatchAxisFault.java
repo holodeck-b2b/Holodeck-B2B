@@ -16,6 +16,8 @@
  */
 package org.holodeckb2b.core.handlers;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintWriter;
 import java.util.Collection;
 
 import org.apache.axis2.AxisFault;
@@ -66,8 +68,21 @@ public class CatchAxisFault extends AbstractBaseHandler {
         // This handler only needs to act when there was a failure
         if (msgContext.getFailureReason() != null) {
         	final Exception cause = msgContext.getFailureReason();
-            log.error("An error occurred while processing messages! Error stack=\n {}",
-                        Utils.getExceptionTrace(cause, true));
+        	if (log.isTraceEnabled()) {
+        		try (ByteArrayOutputStream stackTrace = new ByteArrayOutputStream();
+					 PrintWriter writer = new PrintWriter(stackTrace)) {
+        			cause.printStackTrace(writer);
+        			writer.flush();
+					log.trace("An error occurred while processing messages! Error stack=\n {}",
+								stackTrace.toString());
+        		} catch (Exception ste) {
+        			// Fall back to simpler exception trace
+					log.error("An error occurred while processing messages! Error stack=\n {}",
+							Utils.getExceptionTrace(cause, true));
+        		}
+			} else
+				log.error("An error occurred while processing messages! Error stack=\n {}",
+                        	Utils.getExceptionTrace(cause, true));
             // As we don't know the exact cause of the error the processing state of all message units that are being
             // currently processed should be set to failed if there processing is not completed yet
             Collection<IMessageUnitEntity>  msgUnitsInProcess = null;

@@ -22,6 +22,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   processing context can be copied to the response message context
 * `shutdown()` method to `IMessageProcessingEventHandlerFactory` to release any held resources
 * Functional tests for security and trust components (thanks to @ckaaber)
+* Detailed logging of unexpected exceptions when processing messages
 
 ### Changed
 * Configuration of revocation checks which can be specified to be _mandatory_, _optional_ or _never_. Default is now
