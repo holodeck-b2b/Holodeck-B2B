@@ -5,6 +5,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## 9.0.0
 #####
 ### Added
+* Function to _resend_ a User Message even if the send process has already been completed and the message unit is 
+  already in a final processing state.
+* Possibility to trigger redelivery, resending and resume processing of message units from both the local UI and 
+  command line interface
 * Support for automatic downloading of CRLs from the CRL distribution point indicated in the certificate
 * Support for the _X25519 key agreement algorithm_ as specified in [RFC 7748](https://tools.ietf.org/html/rfc7748)
 * Support for the _HMAC-based Extract-and-Expand Key Derivation Function_ (HKDF) as specified in [RFC 5869](https://tools.ietf.org/html/rfc5869)
