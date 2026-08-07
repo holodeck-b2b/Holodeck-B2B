@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<example-document>
+    <content>
+        This is just a very simple XML document to show transport of XML payloads in the SOAP body
+    </content>
+</example-document>

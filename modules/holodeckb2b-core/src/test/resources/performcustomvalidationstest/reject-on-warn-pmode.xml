@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2014 The Holodeck B2B Team, Sander Fieten
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+<PMode xmlns="http://holodeck-b2b.org/schemas/2014/10/pmode"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://holodeck-b2b.org/schemas/2014/10/pmode ../../../../../../../../main/resources/xsd/pmode.xsd">
+    <id include="true">pm-reject-on-warn</id>
+    <mep>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/oneWay</mep>
+    <mepBinding>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/push</mepBinding>
+    <Leg label="REQUEST">
+        <Receipt>
+            <ReplyPattern>RESPONSE</ReplyPattern>
+        </Receipt>
+        <ReceptionAwareness>
+            <UseDuplicateElimination>true</UseDuplicateElimination>
+        </ReceptionAwareness>
+        <UserMessageFlow>
+            <CustomValidation>
+                <StopValidationOn>WARN</StopValidationOn>
+                <RejectMessageOn>WARN</RejectMessageOn>
+                <Validator>
+                    <id>custom_validator_id</id>
+                    <ValidatorFactoryClass>org.holodeckb2b.customvalidation.helpers.CustomValidator$Factory</ValidatorFactoryClass>
+                </Validator>
+            </CustomValidation>
+        </UserMessageFlow>
+    </Leg>
+</PMode>
