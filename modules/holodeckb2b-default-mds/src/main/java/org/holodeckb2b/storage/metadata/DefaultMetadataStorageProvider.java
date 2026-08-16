@@ -268,7 +268,7 @@ public class DefaultMetadataStorageProvider implements IMetadataStorageProvider 
 						                + "FROM " + JPAObjectHelper.getJPAClass(type).getSimpleName() + " mu "
 						                + "JOIN mu.states s1 "
 						                + "WHERE mu.PMODE_ID IN :pmodeIds "
-						                + "AND s1.PROC_STATE_NUM = (SELECT MAX(s2.PROC_STATE_NUM) FROM mu.states s2) "
+						                + "AND NOT EXISTS (SELECT 1 FROM mu.states s2 WHERE s2.PROC_STATE_NUM > s1.PROC_STATE_NUM) "
 						                + "AND s1.STATE = :state "
 						                + "ORDER BY s1.START", JPAObjectHelper.getJPAClass(type))
 								      .setParameter("pmodeIds", pmodeIds)
@@ -284,7 +284,7 @@ public class DefaultMetadataStorageProvider implements IMetadataStorageProvider 
 				                + "FROM " + JPAObjectHelper.getJPAClass(type).getSimpleName() + " mu "
 		                		+ "JOIN mu.states s1 "
 				                + "WHERE mu.DIRECTION = :direction "
-				                + "AND s1.PROC_STATE_NUM = (SELECT MAX(s2.PROC_STATE_NUM) FROM mu.states s2) "
+				                + "AND NOT EXISTS (SELECT 1 FROM mu.states s2 WHERE s2.PROC_STATE_NUM > s1.PROC_STATE_NUM) "
 				                + "AND s1.STATE IN :states "
 				                + "ORDER BY mu.MU_TIMESTAMP", JPAObjectHelper.getJPAClass(type))
                                 .setParameter("direction", direction)
@@ -320,7 +320,7 @@ public class DefaultMetadataStorageProvider implements IMetadataStorageProvider 
 								"SELECT mu "
 				                + "FROM MessageUnit mu "
 				                + "JOIN mu.states s1 "
-				                + "WHERE s1.PROC_STATE_NUM = (SELECT MAX(s2.PROC_STATE_NUM) FROM mu.states s2) "
+				                + "WHERE NOT EXISTS (SELECT 1 FROM mu.states s2 WHERE s2.PROC_STATE_NUM > s1.PROC_STATE_NUM) "
 				                + "AND   s1.START <= :beforeDate", MessageUnit.class)
 								.setParameter("beforeDate", maxLastChangeDate, TemporalType.TIMESTAMP));
 	}
@@ -393,7 +393,7 @@ public class DefaultMetadataStorageProvider implements IMetadataStorageProvider 
                            + "JOIN um.states s1 "
                            + "WHERE um.DIRECTION = org.holodeckb2b.interfaces.messagemodel.Direction.IN "
                            + "AND um.MESSAGE_ID = :msgId "
-                           + "AND s1.PROC_STATE_NUM = (SELECT MAX(s2.PROC_STATE_NUM) FROM um.states s2) "
+                           + "AND NOT EXISTS (SELECT 1 FROM um.states s2 WHERE s2.PROC_STATE_NUM > s1.PROC_STATE_NUM) "
                            + "AND s1.STATE IN ( org.holodeckb2b.interfaces.processingmodel.ProcessingState.DELIVERED, "
                            + 			"org.holodeckb2b.interfaces.processingmodel.ProcessingState.OUT_FOR_DELIVERY, "
         				   + 			"org.holodeckb2b.interfaces.processingmodel.ProcessingState.FAILURE)";
@@ -449,7 +449,7 @@ public class DefaultMetadataStorageProvider implements IMetadataStorageProvider 
 						"SELECT mu "
 		                + "FROM MessageUnit mu "
 		                + "JOIN mu.states s1 "
-		                + "WHERE s1.PROC_STATE_NUM = (SELECT MAX(s2.PROC_STATE_NUM) FROM mu.states s2) "
+		                + "WHERE NOT EXISTS (SELECT 1 FROM mu.states s2 WHERE s2.PROC_STATE_NUM > s1.PROC_STATE_NUM) "
 		                + "AND   s1.START <= :beforeDate "
 		                + "ORDER BY s1.START DESC", MessageUnit.class)
 						.setParameter("beforeDate", upto, TemporalType.TIMESTAMP)
