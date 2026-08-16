@@ -23,6 +23,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * `shutdown()` method to `IMessageProcessingEventHandlerFactory` to release any held resources
 * Functional tests for security and trust components (thanks to @ckaaber)
 * Detailed logging of unexpected exceptions when processing messages
+* Indexes on the `MESSAGE_ID` and `CORE_ID` columns of the `MSG_UNIT` table of the default _Metadata Storage Provider_.
+  These are the columns message units are looked up by, so every lookup previously required a full table scan
 
 ### Changed
 * Configuration of revocation checks which can be specified to be _mandatory_, _optional_ or _never_. Default is now
@@ -37,6 +39,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Moved `getFromMessageContext()` from `org.holodeckb2b.core.MessageProcessingContext` to 
   `org.holodeckb2b.interfaces.core.IMessageProcessingContext`
 * Moved `TLSCertificateTrustManager` from `org.holodeckb2b.core.axis2` to `org.holodeckb2b.interfaces.security.trust` package
+* The default _Metadata Storage Provider_ now selects the current processing state of a message unit with a `NOT EXISTS`
+  anti-join instead of a correlated `MAX` sub-query. This mainly benefits `getMessageUnitsWithLastStateChangedBefore()`,
+  used by the _PurgeOldMessagesWorker_, where indexes cannot help
 
 ### Fixed
 * HTTP 500 instead of 400 returned when request contains invalid MIME multi-part Content-Type header
