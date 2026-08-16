@@ -27,6 +27,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
@@ -53,7 +54,17 @@ import org.holodeckb2b.interfaces.storage.IMessageUnitEntity;
  * @since  3.0.0
  */
 @Entity
-@Table(name = "MSG_UNIT")
+@Table(name = "MSG_UNIT", indexes = {
+		/*
+		 * MESSAGE_ID and CORE_ID are the two columns the provider looks message units up by, but
+		 * neither is indexed, so every lookup is a full scan of MSG_UNIT. They are used by
+		 * getMessageUnitsWithId(), getMessageUnitWithCoreId(), isAlreadyProcessed(),
+		 * getNumberOfTransmissions() and the duplicate check in storeMessageUnit(), i.e. on the
+		 * path of every single message that is processed.
+		 */
+		@Index(name = "IDX_MSG_UNIT_MESSAGE_ID", columnList = "MESSAGE_ID"),
+		@Index(name = "IDX_MSG_UNIT_CORE_ID", columnList = "CORE_ID")
+})
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class MessageUnit implements JPAEntityObject {
 	private static final long serialVersionUID = 7831718632775664604L;
